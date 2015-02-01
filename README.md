@@ -1,4 +1,4 @@
-# template-python
+# VoiceConversionToolkit
 
 A Python project template for [cookiecutter][cookiecutter].
 
@@ -37,3 +37,7 @@ Cookiecutter will ask you for some basic info (your name, project name, python p
 [travis]: https://travis-ci.org/
 [coveralls]: https://coveralls.io/
 [scrutinizer]: https://scrutinizer-ci.com/
+
+## 注意事項
+
+- gomi.txt というファイル名は付けない。ファイル名はわかりやすくする。
