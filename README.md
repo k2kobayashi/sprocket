@@ -1,42 +1,104 @@
-# VoiceConversionToolkit
+vctk
+======
 
-A Python project template for [cookiecutter][cookiecutter].
+Voice conversion toolkit
 
-[![Build Status](http://img.shields.io/travis/jacebrowning/template-python/master.svg)](https://travis-ci.org/jacebrowning/template-python)
+[![Build Status](http://img.shields.io/travis/{{cookiecutter.github_username}}/{{cookiecutter.github_repo}}/master.svg)](https://travis-ci.org/{{cookiecutter.github_username}}/{{cookiecutter.github_repo}})
+[![Coverage Status](http://img.shields.io/coveralls/{{cookiecutter.github_username}}/{{cookiecutter.github_repo}}/master.svg)](https://coveralls.io/r/{{cookiecutter.github_username}}/{{cookiecutter.github_repo}})
+[![Scrutinizer Code Quality](http://img.shields.io/scrutinizer/g/{{cookiecutter.github_username}}/{{cookiecutter.github_repo}}.svg)](https://scrutinizer-ci.com/g/{{cookiecutter.github_username}}/{{cookiecutter.github_repo}}/?branch=master)
+[![PyPI Version](http://img.shields.io/pypi/v/{{vctk}}.svg)](https://pypi.python.org/pypi/{{vctk}})
+[![PyPI Downloads](http://img.shields.io/pypi/dm/{{vctk}}.svg)](https://pypi.python.org/pypi/{{vctk}})
 
-This is a template for a typical Python library following modern packaging conventions. It utilizes popular libraries alongside Make, Pandoc, and Graphviz to fully automate all development and deployment tasks.
 
-A live demo of this template: [jacebrowning/template-python-demo](https://github.com/jacebrowning/template-python-demo)
+Getting Started
+===============
 
-And a few sample projects based on this template:
+Requirements
+------------
 
-* [flask-restful/flask-restful](https://github.com/flask-restful/flask-restful)
-* [jacebrowning/doorstop](https://github.com/jacebrowning/doorstop)
-* [theovoss/BoggleSolver](https://github.com/theovoss/BoggleSolver)
-* [MichiganLabs/flask-gcm](https://github.com/MichiganLabs/flask-gcm)
+* Python 2.7+ or Python 3.3+
 
-## Get Started
+Installation
+------------
 
-    $ pip install cookiecutter>=0.9.1
-    $ cookiecutter gh:jacebrowning/template-python
+vctk can be installed with pip:
 
-Cookiecutter will ask you for some basic info (your name, project name, python package name, etc.) and generate a base Python project for you.
+```
+$ pip install vctk
+```
 
-## Features
+or directly from the source code:
 
-* Preconfigured setup for [Travis-CI][travis], [Coveralls][coveralls], and [Scrutinizer][scrutinizer]
-* `Makefile` for automating common development tasks:
-    - Setting up a `virtualenv`
-    - Installing dependencies using `pip`
-    - Running tests
-    - Running style checkers (`pep8`/`pep257`) and linters (`pylint`)
-    - Building documentation
-    - Creating and releasing distributions to PyPI
+```
+$ git clone https://github.com/{{cookiecutter.github_username}}/{{cookiecutter.github_repo}}.git
+$ cd {{cookiecutter.github_repo}}
+$ python setup.py install
+```
 
-[cookiecutter]: https://github.com/audreyr/cookiecutter
-[travis]: https://travis-ci.org/
-[coveralls]: https://coveralls.io/
-[scrutinizer]: https://scrutinizer-ci.com/
+Basic Usage
+===========
+
+After installation, abstract base classes can be imported from the package:
+
+```
+$ python
+>>> import {{cookiecutter.package_name}}
+>>> {{cookiecutter.package_name}}.__version__
+```
+
+vctk doesn't do anything, it's a template.
+
+For Contributors
+================
+
+Requirements
+------------
+
+* Make:
+    * Windows: http://cygwin.com/install.html
+    * Mac: https://developer.apple.com/xcode
+    * Linux: http://www.gnu.org/software/make (likely already installed)
+* virtualenv: https://pypi.python.org/pypi/virtualenv#installation
+* Pandoc: http://johnmacfarlane.net/pandoc/installing.html
+* Graphviz: http://www.graphviz.org/Download.php
+
+Installation
+------------
+
+Create a virtualenv:
+
+```
+$ make env
+```
+
+Run the tests:
+
+```
+$ make test
+$ make tests  # includes integration tests
+```
+
+Build the documentation:
+
+```
+$ make doc
+```
+
+Run static analysis:
+
+```
+$ make pep8
+$ make pep257
+$ make pylint
+$ make check  # includes all checks
+```
+
+Prepare a release:
+
+```
+$ make dist  # dry run
+$ make upload
+```
 
 ## 注意事項
 
