@@ -1,40 +1,23 @@
 #!/usr/bin/env python
 
-"""Setup script for {{cookiecutter.project_name}}."""
-
-import setuptools
-
-from {{cookiecutter.package_name}} import __project__, __version__
+from setuptools import setup, find_packages
 
 import os
-if os.path.exists('README.rst'):
-    README = open('README.rst').read()
+if os.path.exists('README.md'):
+    README = open('README.md').read()
 else:
     README = ""  # a placeholder, readme is generated on release
 CHANGES = open('CHANGES.md').read()
 
+setup(
+    name="vctk",
+    version="0.0.0",
 
-setuptools.setup(
-    name=__project__,
-    version=__version__,
-
-    description="{{cookiecutter.project_name}} is a Python 3 package template.",
-    url='https://github.com/{{cookiecutter.github_username}}/{{cookiecutter.github_repo}}',
-    author='{{cookiecutter.full_name}}',
-    author_email='{{cookiecutter.email}}',
-
-    packages=setuptools.find_packages(),
-
-    entry_points={'console_scripts': []},
-
+    description="TODO",
+    url='TODO',
+    author='TODO',
+    packages=find_packages(),
     long_description=(README + '\n' + CHANGES),
     license='MIT',
-    classifiers=[
-        'Development Status :: 1 - Planning',
-        'Natural Language :: English',
-        'Operating System :: OS Independent',
-        'Programming Language :: Python :: 3.3',
-    ],
-
     install_requires=open('requirements.txt').readlines(),
 )
