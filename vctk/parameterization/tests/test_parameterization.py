@@ -1,7 +1,7 @@
 import numpy as np
 import os
 from world import pyDioOption, dio, stonemask, cheaptrick
-from vctk.parametrization import sp2mc, mc2sp, spgram2mcgram, mcgram2spgram
+from vctk.parameterization import sp2mc, mc2sp, spgram2mcgram, mcgram2spgram
 
 import unittest
 
@@ -19,7 +19,7 @@ f0 = stonemask(x, fs, period, time_axis, f0)
 spectrogram = cheaptrick(x, fs, period, time_axis, f0)
 
 
-class SpectrumEnevelopeParametrizationTest(unittest.TestCase):
+class SpectrumEnevelopeParameterizationTest(unittest.TestCase):
 
     def test_sp2mc(self):
         spec = spectrogram[29]
