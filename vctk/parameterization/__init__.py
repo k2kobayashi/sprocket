@@ -27,6 +27,22 @@ class TransparentParameterizer(Parameterizer):
         return raw
 
 
+class LogarithmicParameterizer(Parameterizer):
+
+    def __init__(self):
+        pass
+
+    def forward(self, raw):
+        y = np.copy(raw)
+        y[y > 0] = np.log(y[y > 0])
+        return y
+
+    def backward(self, param):
+        x = np.copy(param)
+        x[x > 0] = np.exp(x[x > 0])
+        return x
+
+
 class MelCepstrumParameterizer(SpectrumEnvelopeParameterizer):
 
     """

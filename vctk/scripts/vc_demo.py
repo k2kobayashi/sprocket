@@ -17,7 +17,9 @@ clb -> slt です
 from vctk import VoiceConverter
 from vctk.backend import WORLD
 from vctk.parameterization import MelCepstrumParameterizer
-from vctk.conversion import GMMMap
+from vctk.parameterization import LogarithmicParameterizer
+from vctk.parameterization import TransparentParameterizer
+from vctk.conversion import GMMMap, Multiplier
 
 import numpy as np
 from sklearn.externals import joblib
@@ -39,20 +41,27 @@ if __name__ == "__main__":
     # 学習条件は、clb_and_slt.yml に置いておいた
     gmm = joblib.load("gmm_clb_and_slt.pkl")
 
-    # この例だと、スペクトル包絡だけ変換する
-    vc = VoiceConverter(f0_parameterizer=None,
-                        f0_converter=None,
-                        # メルケプストラムにしてからGMM特徴量変換に渡す
-                        # paramterizerは、特徴量からスペクトル包絡に戻す役割も持つ
-                        spectrum_envelope_parameterizer=MelCepstrumParameterizer(
-                            40, 0.41, 1024),
-                        # GMMベースの変換器を設定する
-                        spectrum_envelope_converter=GMMMap(gmm=gmm),
-                        aperiodicity_parameterizer=None,
-                        aperiodicity_converter=None,
-                        analyzer=engine,
-                        synthesizer=engine
-                        )
+    # この例だと、
+    # 1. F0を線形倍する（対数スケールで行いたい場合は、
+    #    LogarithmicParameterizer使えばOK
+    # 2. スペクトル包絡をGMMに基づいて変換する
+    # 3. 非周期性指標はターゲット音声のをそのまま使う
+    vc = VoiceConverter(
+        # TrasparentParameterizerは、何もしない
+        f0_parameterizer=TransparentParameterizer(),
+        f0_converter=Multiplier(coef=1.2),
+        # メルケプストラムにしてからGMM特徴量変換に渡す
+        # paramterizerは、特徴量からスペクトル包絡に戻す役割も持つ
+        spectrum_envelope_parameterizer=MelCepstrumParameterizer(
+            order=40, alpha=0.41, fftlen=1024),
+        # GMMベースの変換器を設定する
+        spectrum_envelope_converter=GMMMap(gmm=gmm),
+        aperiodicity_parameterizer=None,
+        aperiodicity_converter=None,
+        # 分析、合成エンジン
+        analyzer=engine,
+        synthesizer=engine
+    )
 
     # これだけ実行すればおｋ
     vc.analyze(x)
