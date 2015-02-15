@@ -4,10 +4,55 @@ import numpy as np
 import numpy.fft
 import sptk
 
+from vctk import Parameterizer, SpectrumEnvelopeParameterizer
 
 """
 Speech paramterization
 """
+
+
+class TransparentParameterizer(Parameterizer):
+
+    """
+    Do nothing on raw parameters. Just pass the input to output.
+    """
+
+    def __init__(self):
+        pass
+
+    def forward(self, raw):
+        return raw
+
+    def backward(self, param):
+        return paarm
+
+
+class MelCepstrumParameterizer(SpectrumEnvelopeParameterizer):
+
+    """
+    Mel-cepstrum paraemterization
+    """
+
+    def __init__(self,
+                 order=40,
+                 alpha=0.41,
+                 fftlen=1024
+                 ):
+        self.order = order
+        self.alpha = alpha
+        self.fftlen = fftlen
+
+    def forward(self, spectrum_envelope):
+        """
+        Spectrum envelope -> Mel-cepstrum
+        """
+        return spgram2mcgram(spectrum_envelope, self.order, self.alpha)
+
+    def backward(self, mc):
+        """
+        Mel-cepstrum -> Spectrum envelope
+        """
+        return mcgram2spgram(mc, self.alpha, self.fftlen)
 
 
 def sp2mc(spec, order, alpha):
