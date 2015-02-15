@@ -15,6 +15,7 @@ Voice conversion toolkit
 
 - numpy
 - scipy
+- scikit-learn
 - world
 - sptk
 
