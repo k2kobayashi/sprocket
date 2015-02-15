@@ -23,8 +23,8 @@ class TransparentParameterizer(Parameterizer):
     def forward(self, raw):
         return raw
 
-    def backward(self, param):
-        return paarm
+    def backward(self, raw):
+        return raw
 
 
 class MelCepstrumParameterizer(SpectrumEnvelopeParameterizer):
