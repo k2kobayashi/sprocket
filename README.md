@@ -9,95 +9,57 @@ Voice conversion toolkit
 [![PyPI Version](http://img.shields.io/pypi/v/{{vctk}}.svg)](https://pypi.python.org/pypi/{{vctk}})
 [![PyPI Downloads](http://img.shields.io/pypi/dm/{{vctk}}.svg)](https://pypi.python.org/pypi/{{vctk}})
 
+## Requirements
 
-Getting Started
-===============
+適宜追加していく
 
-Requirements
-------------
+- numpy
+- scipy
+- scikit-learn
+- world
+- sptk
 
-* Python 2.7+ or Python 3.3+
+## Installation
 
-Installation
-------------
+とりあえず、うちわ向けに、特記すべきことを書いておきます。
 
-vctk can be installed with pip:
+### WORLDのインストール
 
-```
-$ pip install vctk
-```
+音声分析合成系を一から書くのは死ぬので、WORLDを使います。WORLDはBSDライセンスで、ライセンスとしてはかなり緩い。
 
-or directly from the source code:
+- STRAIGHTと違って特許の問題がない
+- STRAIGHTに劣らない性能（morise先生曰く）
+- STRAIGHTと同じ非周期性指標をサポートしている
 
-```
-$ git clone https://github.com/{{cookiecutter.github_username}}/{{cookiecutter.github_repo}}.git
-$ cd {{cookiecutter.github_repo}}
-$ python setup.py install
-```
+といいことづくしです。
 
-Basic Usage
-===========
+以下、WORLDとそのpythonラッパーのインストール手順
 
-After installation, abstract base classes can be imported from the package:
+- https://github.com/r9y9/world.py をcloneして、devブランチにチェックアウトする
+- `bash build_world.sh` として、WORLDをコンパイルする
+- `lib/world`ディレクトリに移動して、`sudo ./waf install` としてWORLDを`/usr/local/lib` にインストールする（※必須ではないが、こうしておくと楽）
+- `python setup.py devlop` で WORLDのpython wrapperインストール完了
+- pythonから`import world` として、エラーがでなければOK
 
-```
-$ python
->>> import {{cookiecutter.package_name}}
->>> {{cookiecutter.package_name}}.__version__
-```
+### SPTK のインストール
 
-vctk doesn't do anything, it's a template.
+SPTKを一から書き直すのは（以下略
 
-For Contributors
-================
+SPTKのpythonラッパーの手順は以下
 
-Requirements
-------------
+- https://github.com/r9y9/SPTK をcloneして、READMEに書いてあるように、python wrapperをenableにしてインストール
+- pythonから `import sptk` としてエラーが出なければOK
 
-* Make:
-    * Windows: http://cygwin.com/install.html
-    * Mac: https://developer.apple.com/xcode
-    * Linux: http://www.gnu.org/software/make (likely already installed)
-* virtualenv: https://pypi.python.org/pypi/virtualenv#installation
-* Pandoc: http://johnmacfarlane.net/pandoc/installing.html
-* Graphviz: http://www.graphviz.org/Download.php
-
-Installation
-------------
-
-Create a virtualenv:
+### vctk（仮）のインストール
 
 ```
-$ make env
+python setup.py develop
 ```
 
-Run the tests:
+## Tests
 
 ```
-$ make test
-$ make tests  # includes integration tests
-```
-
-Build the documentation:
-
-```
-$ make doc
-```
-
-Run static analysis:
-
-```
-$ make pep8
-$ make pep257
-$ make pylint
-$ make check  # includes all checks
-```
-
-Prepare a release:
-
-```
-$ make dist  # dry run
-$ make upload
+nosetests  -s -v
 ```
 
 ## 注意事項
