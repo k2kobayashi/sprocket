@@ -53,7 +53,7 @@ class VoiceConverter(object):
         self.aperiodicity_parameterizer = aperiodicity_parameterizer
 
         if analyzer == None or synthesizer == None:
-            raise "backend must be specified explicitly!"
+            raise RuntimeError("backend must be specified explicitly!")
 
         self.analyzer = analyzer
         self.synthesizer = synthesizer
@@ -72,7 +72,7 @@ class VoiceConverter(object):
         Perform speech parameter conversion
         """
         if self.params == None:
-            raise "`analyze` must be called before `convert`"
+            raise RuntimeError("`analyze` must be called before `convert`")
 
         if self.f0_converter != None:
             self.params.f0 = self.f0_parameterizer.backward(
@@ -104,6 +104,6 @@ class VoiceConverter(object):
         Synthesize speech waveform
         """
         if self.params == None:
-            raise "`analyze` must be called before `synthesis`"
+            raise RuntimeError("`analyze` must be called before `synthesis`")
 
         return self.synthesizer.synthesis(self.params)

@@ -52,7 +52,7 @@ class WORLD(Analyzer, Synthesizer):
         TODO
         """
         if not isinstance(params, SpeechParameters):
-            raise "Not supoprted"
+            raise RuntimeError("Not supoprted")
 
         y = world.synthesis_from_aperiodicity(self.fs, self.period,
                                               params.f0,

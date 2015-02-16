@@ -33,11 +33,17 @@ class LogarithmicParameterizer(Parameterizer):
         pass
 
     def forward(self, raw):
+        """
+        x -> log(x)
+        """
         y = np.copy(raw)
         y[y > 0] = np.log(y[y > 0])
         return y
 
     def backward(self, param):
+        """
+        log(x) -> x
+        """
         x = np.copy(param)
         x[x > 0] = np.exp(x[x > 0])
         return x

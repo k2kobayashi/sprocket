@@ -24,7 +24,7 @@ class Analyzer(object):
         x: array, shape (`time samples`)
           monoural speech signal in time domain
         """
-        raise "Not implemented"
+        raise NotImplementedError("")
 
 
 class Synthesizer(object):
@@ -45,7 +45,7 @@ class Synthesizer(object):
         param: tuple
           speech parameters (f0, spectrum envelop, aperiodicity)
         """
-        raise "Not implemented"
+        raise NotImplementedError("")
 
 
 class Parameterizer(object):
@@ -60,10 +60,11 @@ class Parameterizer(object):
         pass
 
     def forward(self, raw):
-        raise "You must provide a forward parameterization"
+        raise NotImplementedError("You must provide a forward parameterization")
 
     def backward(self, param):
-        raise "You must provide s backward parameterization"
+        raise NotImplementedError(
+            "You must provide s backward parameterization")
 
 
 class SpectrumEnvelopeParameterizer(Parameterizer):
@@ -90,7 +91,7 @@ class Converter(object):
         pass
 
     def convert(self, feature):
-        raise "Not implemented"
+        raise NotImplementedError("")
 
 
 class VectorToVectorConverter(Converter):
@@ -108,13 +109,13 @@ class VectorToVectorConverter(Converter):
         """
         this should return input feature dimention
         """
-        raise "Not implemented"
+        raise NotImplementedError("")
 
     def get_output_shape(self):
         """
         this should return converted feature dimention
         """
-        raise "Not implemented"
+        raise NotImplementedError("")
 
 
 class FrameByFrameVectorConverter(VectorToVectorConverter):
@@ -160,10 +161,10 @@ class MatrixToMatrixConverter(Converter):
         """
         this should return input feature dimention
         """
-        raise "Not implemented"
+        raise NotImplementedError("")
 
     def get_output_shape(self):
         """
         this should return converted feature dimention
         """
-        raise "Not implemented"
+        raise NotImplementedError("")
