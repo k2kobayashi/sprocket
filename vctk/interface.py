@@ -93,28 +93,34 @@ class Converter(object):
         raise "Not implemented"
 
 
-class SpectrumEnvelopeConverter(Converter):
+class VectorToVectorConverter(Converter):
 
     """
-    Interface of spectrum envelope converter
+    Interface of vector-to-vector converter
 
-    All of spectrum envelope converter must implement this class
+    All of vector-to-vector converter must implement this class
     """
 
     def __init__(self):
         pass
 
-    def get_shape(self):
+    def get_input_shape(self):
         """
-        this should return feature dimention
+        this should return input feature dimention
+        """
+        raise "Not implemented"
+
+    def get_output_shape(self):
+        """
+        this should return converted feature dimention
         """
         raise "Not implemented"
 
 
-class FrameByFrameSpectrumEnvelopeConverter(SpectrumEnvelopeConverter):
+class FrameByFrameVectorConverter(VectorToVectorConverter):
 
     """
-    Interface of frame-by-frame spectrum envelope converter
+    Interface of frame-by-frame vector converter
     """
 
     def __init__(self):
@@ -125,10 +131,13 @@ class FrameByFrameSpectrumEnvelopeConverter(SpectrumEnvelopeConverter):
 
     def convert(self, feature_matrix):
         """
-        FrameByFrame converters perform conversion for each time frame
+        Frame-by-frame converters perform conversion for each time frame
         """
         T = len(feature_matrix)
-        converted = np.zeros((T, self.get_shape()))
+        if self.get_input_shape() != len(feature_matrix[0]):
+            raise Exception("Dimention mismatch")
+
+        converted = np.zeros((T, self.get_output_shape()))
 
         for t in range(T):
             converted[t] = self.convert_one_frame(feature_matrix[t])
@@ -136,11 +145,25 @@ class FrameByFrameSpectrumEnvelopeConverter(SpectrumEnvelopeConverter):
         return converted
 
 
-class TrajectorySpectrumEnvelopeConverter(SpectrumEnvelopeConverter):
+class MatrixToMatrixConverter(Converter):
 
     """
-    TODO
+    Interface of matrix-to-matrix converter
+
+    All of matrix-to-matrix converter must implement this class
     """
 
     def __init__(self):
         pass
+
+    def get_input_shape(self):
+        """
+        this should return input feature dimention
+        """
+        raise "Not implemented"
+
+    def get_output_shape(self):
+        """
+        this should return converted feature dimention
+        """
+        raise "Not implemented"

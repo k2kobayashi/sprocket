@@ -19,7 +19,7 @@ from vctk.backend import WORLD
 from vctk.parameterization import MelCepstrumParameterizer
 from vctk.parameterization import LogarithmicParameterizer
 from vctk.parameterization import TransparentParameterizer
-from vctk.conversion import GMMMap, Multiplier
+from vctk.conversion import JointGMMConverter, Multiplier
 
 import numpy as np
 from sklearn.externals import joblib
@@ -55,7 +55,7 @@ if __name__ == "__main__":
         spectrum_envelope_parameterizer=MelCepstrumParameterizer(
             order=40, alpha=0.41, fftlen=1024),
         # GMMベースの変換器を設定する
-        spectrum_envelope_converter=GMMMap(gmm=gmm),
+        spectrum_envelope_converter=JointGMMConverter(gmm=gmm),
         aperiodicity_parameterizer=None,
         aperiodicity_converter=None,
         # 分析、合成エンジン

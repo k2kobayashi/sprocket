@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # coding: utf-8
 
-from vctk import FrameByFrameSpectrumEnvelopeConverter
+from vctk import FrameByFrameVectorConverter
 
 import numpy as np
 from numpy import linalg
@@ -11,12 +11,12 @@ import scipy.sparse
 import scipy.sparse.linalg
 
 
-class GMMMap(FrameByFrameSpectrumEnvelopeConverter):
+class JointGMMConverter(FrameByFrameVectorConverter):
 
     """GMM-based frame-by-frame speech parameter mapping.
 
-    GMMMap represents a class to transform spectral features of a source
-    speaker to that of a target speaker based on Gaussian Mixture Models
+    JointGMMConverter represents a class to transform spectral features of a
+    source speaker to that of a target speaker based on Gaussian Mixture Models
     of source and target joint spectral features.
 
     Notation
@@ -121,11 +121,14 @@ class GMMMap(FrameByFrameSpectrumEnvelopeConverter):
         self.px.covars_ = self.covarXX
         self.px.weights_ = self.weights
 
-    def get_shape(self):
+    def get_input_shape(self):
         if self.ignore_0th:
             return self.tgt_means.shape[1] + 1
 
         return self.tgt_means.shape[1]
+
+    def get_output_shape(self):
+        return self.get_input_shape()
 
     def convert_one_frame(self, src):
         """
@@ -142,7 +145,7 @@ class GMMMap(FrameByFrameSpectrumEnvelopeConverter):
         ------
         converted spectral feature
         """
-        if len(src) != self.get_shape():
+        if len(src) != self.get_input_shape():
             raise Exception("Dimention mismatch")
 
         if self.ignore_0th:
