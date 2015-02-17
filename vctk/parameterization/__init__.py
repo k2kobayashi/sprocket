@@ -4,14 +4,14 @@ import numpy as np
 import numpy.fft
 import sptk
 
-from vctk import Parameterizer, SpectrumEnvelopeParameterizer
+from vctk import BidirectParameterizer
 
 """
 Speech paramterization
 """
 
 
-class TransparentParameterizer(Parameterizer):
+class TransparentParameterizer(BidirectParameterizer):
 
     """
     Do nothing on raw parameters. Just pass the input to output.
@@ -27,7 +27,11 @@ class TransparentParameterizer(Parameterizer):
         return raw
 
 
-class LogarithmicParameterizer(Parameterizer):
+class LogarithmicParameterizer(BidirectParameterizer):
+
+    """
+    Just take logarithm. Could be used in F0 parameterization.
+    """
 
     def __init__(self):
         pass
@@ -49,7 +53,33 @@ class LogarithmicParameterizer(Parameterizer):
         return x
 
 
-class MelCepstrumParameterizer(SpectrumEnvelopeParameterizer):
+class CepstrumParameterizer(BidirectParameterizer):
+
+    """
+    Cepstrum paraemterization
+    """
+
+    def __init__(self,
+                 order=40,
+                 fftlen=1024
+                 ):
+        self.order = order
+        self.fftlen = fftlen
+
+    def forward(self, spectrum_envelope):
+        """
+        Spectrum envelope -> Cepstrum
+        """
+        return spgram2mcgram(spectrum_envelope, self.order, 0.0)
+
+    def backward(self, mc):
+        """
+        Cepstrum -> Spectrum envelope
+        """
+        return mcgram2spgram(mc, 0.0, self.fftlen)
+
+
+class MelCepstrumParameterizer(BidirectParameterizer):
 
     """
     Mel-cepstrum paraemterization

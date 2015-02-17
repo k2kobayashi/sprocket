@@ -2,14 +2,32 @@
 
 from interface import *
 
+from vctk.parameterization import TransparentParameterizer
+
 
 class SpeechParameters(object):
 
     """
     Speech parameters
+
+    TODO:
+    how to handle other paramters?
+
+    Attributes
+    ----------
+
+    f0: array, shape (`T`)
+      fundamental frequency
+    spectrum_envelope: array, shape (`T`, `fftlen/2+1`)
+      spectrum envelope
+    aperiodicity: array, shape  (`T`, `fftlen/2+1`)
+      aperiodicity spectrum
+
     """
 
     def __init__(self, f0, spectrum_envelope, aperiodicity):
+        assert len(f0) == len(spectrum_envelope) == len(aperiodicity)
+
         self.f0 = f0
         self.spectrum_envelope = spectrum_envelope
         self.aperiodicity = aperiodicity
@@ -18,10 +36,10 @@ class SpeechParameters(object):
 class VoiceConverter(object):
 
     """
-    Voice conversion
+    A generic voice converter
 
     This class assumes:
-      - *_parameterizer implements `Parameterizer`
+      - *_parameterizer implements `BidirectParameterizer`
       - *_converter implements `Converter`
       - analyzer implements `Analyzer`
       - synthesizer implments `Synthesizer`
@@ -31,16 +49,34 @@ class VoiceConverter(object):
     *_parameterizer and *_converter can be None.
 
     TODO:
-    parameterizerは、デフォでTrasparentParameterizer
-    （つまり特徴量をそのままパスするだけのparamterizer）にする？
+    rename (VocoderBasedVoiceConverter?)
+
+    Attributes
+    ---------
+    f0_parameterizer: `BidirectParameterizer`
+      parameterizer for fundamental frequency (e.g. LogarithmicParameterizer)
+    f0_converter: `Converter`
+      converter for f0
+    spectrum_envelope_parameterizer: `BidirectParameterizer`
+      parameterizer for spectrum envelope (e.g. MelCepstrumParameterizer)
+    spectrum_envelope_converter: `Converter`
+      converter for spectrum enveloep (e.g. JointGMMConverter)
+    aperiodicity_parameterizer: `BidirectParameterizer`
+      parameterizer for aperiodicity (e.g. TODO)
+    aperiodicity_converter: `Converter`
+      converter for aperiodicity (e.g. TODO)
+    analyzer: `Analyzer`
+      speech analyze engine
+    synthesizer: `Synthesizer`
+      speech synthesis engine
     """
 
     def __init__(self,
-                 f0_parameterizer=None,
+                 f0_parameterizer=TransparentParameterizer(),
                  f0_converter=None,
-                 spectrum_envelope_parameterizer=None,
+                 spectrum_envelope_parameterizer=TransparentParameterizer(),
                  spectrum_envelope_converter=None,
-                 aperiodicity_parameterizer=None,
+                 aperiodicity_parameterizer=TransparentParameterizer(),
                  aperiodicity_converter=None,
                  analyzer=None,
                  synthesizer=None
@@ -82,7 +118,7 @@ class VoiceConverter(object):
             )
 
         if self.spectrum_envelope_converter != None:
-            self.params.spectrum_envelop = \
+            self.params.spectrum_envelope = \
                 self.spectrum_envelope_parameterizer.backward(
                     self.spectrum_envelope_converter.convert(
                         self.spectrum_envelope_parameterizer.forward(
