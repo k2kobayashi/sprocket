@@ -11,6 +11,23 @@ class WORLD(Analyzer, Synthesizer):
 
     TODO:
     support platinum
+
+    Attributes
+    ----------
+    period: float
+      frame period (default: 5.0)
+    fs: int
+      sampling frequency (default: 44100)
+    f0_floor: float
+      floor in f0 estimation
+    f0_ceil: float
+      ceil in f0 estimation
+    channels_in_octave: int
+      number of F0 search candidates for each octave
+    speed: int
+      re-sampling parameter (see WORLD for details)
+    time_len: int
+      time length for analyzed speech signal
     """
 
     def __init__(self,
@@ -21,6 +38,8 @@ class WORLD(Analyzer, Synthesizer):
                  channels_in_octave=2,
                  speed=4
                  ):
+        super(WORLD, self).__init__()
+
         self.period = period
         self.fs = fs
         self.f0_floor = f0_floor
@@ -30,7 +49,15 @@ class WORLD(Analyzer, Synthesizer):
 
     def analyze(self, x):
         """
-        TODO
+        analyze decomposes a speech signal into three parameters:
+          1. Fundamental frequency
+          2. Spectrum envelope
+          3. Aperiodicity ratio
+
+        Paramters
+        ---------
+        x: array, shape (`time samples`)
+          monoural speech signal in time domain
         """
         opt = world.pyDioOption(self.f0_floor, self.f0_ceil,
                                 self.channels_in_octave,
@@ -49,7 +76,16 @@ class WORLD(Analyzer, Synthesizer):
 
     def synthesis(self, params):
         """
-        TODO
+        synthesis re-synthesizes a speech waveform from:
+          1. Fundamental frequency
+          2. Spectrum envelope
+          3. Aperiodicity ratio
+
+        Parameters
+        ----------
+        params: SpeechParamaeters
+          a set of speech parameters
+
         """
         if not isinstance(params, SpeechParameters):
             raise RuntimeError("Not supoprted")

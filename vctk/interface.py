@@ -9,9 +9,11 @@ Interfaces
 class Analyzer(object):
 
     """
-    Speech analyzer interface
+    Speech analyzer interface. `Analyzer` should convert a time-domain speech
+    signal into a set of speech parameters (F0, spectrum envelope and
+    aperiodicity, etc).
 
-    All of analyzer must implement this interface.
+    All analyzer must implement this interface.
     """
 
     def __init__(self):
@@ -19,6 +21,9 @@ class Analyzer(object):
 
     def analyze(self, x):
         """
+        analyze decomposes a speech signal `x` (in time-domain) into
+        a set of speech parameters:
+
         Paramters
         ---------
         x: array, shape (`time samples`)
@@ -30,9 +35,10 @@ class Analyzer(object):
 class Synthesizer(object):
 
     """
-    Speech synthesizer interface
+    Speech synthesizer interface. `Synthesizer` should generate speech `waveform`
+    from a set of speech parameters.
 
-    All of synthesizer must implement this interface.
+    All synthesizer must implement this interface.
     """
 
     def __init__(self):
@@ -40,6 +46,8 @@ class Synthesizer(object):
 
     def synthesis(self, params):
         """
+        sythesis re-synthesizes a speech waveform from speech paramters.
+
         Paramters
         ---------
         param: tuple
@@ -48,58 +56,73 @@ class Synthesizer(object):
         raise NotImplementedError("")
 
 
-class Parameterizer(object):
+class ForwardParameterizer(object):
 
     """
-    Parameterizer interface.
+    Forward parameterizer interface.
 
-    All parameterizer must implement this interface.
+    All bi-direct parameterizer must implement this interface.
     """
 
     def __init__(self):
         pass
 
     def forward(self, raw):
+        """
+        forward converts raw speech feature to (lower-dimentional) speech feature
+
+        e.g. spectrum envelope -> mel-cepstrum
+
+        Parameters
+        ----------
+        raw:
+          raw speech feature
+        """
         raise NotImplementedError("You must provide a forward parameterization")
 
+
+class BackwardParameterizer(object):
+
+    def __init__(self):
+        pass
+
     def backward(self, param):
+        """
+        backward reconstructs raw speech feature (that can be used directly in
+        speech waveform synthesis) from parameterized speech feature.
+
+        e.g. mel-cepstrum -> spectrum envelope
+
+        Parameters
+        ----------
+        param:
+          parameterized speech feature
+        """
         raise NotImplementedError(
             "You must provide s backward parameterization")
 
 
-class SpectrumEnvelopeParameterizer(Parameterizer):
+class BidirectParameterizer(ForwardParameterizer, BackwardParameterizer):
 
     """
-    Spectrum envelope parameterizer interface
+    Bi-directional parameterizer interface. `BidirectParameterizer` should
+    provide bi-directional conversion between raw speech parameters (such as
+    spectrum envelope) and low-dimentional speech features (such as
+    mel-cesptrum).
 
-    All spectrum envelope parameterizer must implement this interface.
+    All bi-directional parameterizer must implement this interface.
     """
 
     def __init__(self):
-        pass
+        super(BidirectParameterizer, self).__init__()
 
 
 class Converter(object):
 
     """
-    Abstract Feature Converter
+    Abstract Converter.
 
-    All feature converter must implment this interface.
-    """
-
-    def __init__(self):
-        pass
-
-    def convert(self, feature):
-        raise NotImplementedError("")
-
-
-class VectorToVectorConverter(Converter):
-
-    """
-    Interface of vector-to-vector converter
-
-    All of vector-to-vector converter must implement this class
+    All converter must implment this interface.
     """
 
     def __init__(self):
@@ -107,18 +130,30 @@ class VectorToVectorConverter(Converter):
 
     def get_input_shape(self):
         """
-        this should return input feature dimention
+        this should return input feature dimension
         """
         raise NotImplementedError("")
 
     def get_output_shape(self):
         """
-        this should return converted feature dimention
+        this should return converted feature dimension
+        """
+        raise NotImplementedError("")
+
+    def convert(self, feature):
+        """
+        convert input feature
+
+
+        Parameters
+        ----------
+        feature:
+          input feature to be converted
         """
         raise NotImplementedError("")
 
 
-class FrameByFrameVectorConverter(VectorToVectorConverter):
+class FrameByFrameVectorConverter(Converter):
 
     """
     Interface of frame-by-frame vector converter
@@ -128,11 +163,25 @@ class FrameByFrameVectorConverter(VectorToVectorConverter):
         pass
 
     def convert_one_frame(self, feature_vector):
-        raise "converters must provide conversion for each time frame"
+        """
+        convert input feature vector
+
+        Paramters
+        ---------
+        feature_vector: array
+
+        """
+        raise NotImplementedError(
+            "converters must provide conversion for each time frame")
 
     def convert(self, feature_matrix):
         """
         Frame-by-frame converters perform conversion for each time frame
+
+        Parameters
+        ----------
+        feature_matrix: array
+
         """
         T = len(feature_matrix)
         if self.get_input_shape() != len(feature_matrix[0]):
@@ -144,27 +193,3 @@ class FrameByFrameVectorConverter(VectorToVectorConverter):
             converted[t] = self.convert_one_frame(feature_matrix[t])
 
         return converted
-
-
-class MatrixToMatrixConverter(Converter):
-
-    """
-    Interface of matrix-to-matrix converter
-
-    All of matrix-to-matrix converter must implement this class
-    """
-
-    def __init__(self):
-        pass
-
-    def get_input_shape(self):
-        """
-        this should return input feature dimention
-        """
-        raise NotImplementedError("")
-
-    def get_output_shape(self):
-        """
-        this should return converted feature dimention
-        """
-        raise NotImplementedError("")
