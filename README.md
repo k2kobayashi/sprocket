@@ -15,7 +15,6 @@ Voice conversion toolkit
 
 - numpy
 - scipy
-- scikit-learn
 - world
 - sptk
 
@@ -25,25 +24,15 @@ Voice conversion toolkit
 
 ### WORLDのインストール
 
-音声分析合成系を一から書くのは死ぬので、WORLDを使います。WORLDはBSDライセンスで、ライセンスとしてはかなり緩い。
+WORLDとそのpythonラッパーのインストール手順
 
-- STRAIGHTと違って特許の問題がない
-- STRAIGHTに劣らない性能（morise先生曰く）
-- STRAIGHTと同じ非周期性指標をサポートしている
-
-といいことづくしです。
-
-以下、WORLDとそのpythonラッパーのインストール手順
-
-- https://github.com/r9y9/world.py をcloneして、devブランチにチェックアウトする
+- https://github.com/jimsotelo/world.py をcloneする
 - `bash build_world.sh` として、WORLDをコンパイルする
 - `lib/world`ディレクトリに移動して、`sudo ./waf install` としてWORLDを`/usr/local/lib` にインストールする（※必須ではないが、こうしておくと楽）
 - `python setup.py devlop` で WORLDのpython wrapperインストール完了
 - pythonから`import world` として、エラーがでなければOK
 
 ### SPTK のインストール
-
-SPTKを一から書き直すのは（以下略
 
 SPTKのpythonラッパーの手順は以下
 
@@ -52,13 +41,13 @@ SPTKのpythonラッパーの手順は以下
 
 ### vctk（仮）のインストール
 
-```
+```bash
 python setup.py develop
 ```
 
 ## Tests
 
-```
+```bash
 nosetests  -s -v
 ```
 
