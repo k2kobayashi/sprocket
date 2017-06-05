@@ -17,8 +17,8 @@ src_dir=./src
 nproc=3
 
 # Initialization
-python $src_dir/init_spkr.py -m $nproc $org ./data/wav/$org ./configure
-python $src_dir/init_spkr.py -m $nproc $tar ./data/wav/$tar ./configure
+# python $src_dir/init_spkr.py -m $nproc $org ./data/wav/$org ./configure
+# python $src_dir/init_spkr.py -m $nproc $tar ./data/wav/$tar ./configure
 python $src_dir/init_pair.py $org $tar
 
 # # Feature extraction
