@@ -1,7 +1,7 @@
-vctk
+sprocket (vctk)
 ======
 
-Voice conversion toolkit - Voice conversion (VC) is a technique to convert a speaker individuality of a source speaker into that of a target speaker. In this framework, it enables us to develop a time-a joint feature vector between source and target speakers, which is aligned based on dynamic time warping (DTW) and model some kinds of statistical conversion models such as Gaussian mixture model (GMM), differential GMM (DIFFGMM), and deep neural networks (DNN).
+Voice conversion toolkit - Voice conversion (VC) is a technique to convert a speaker identity of a source speaker into that of a target speaker. In this framework, it enables us to develop a joint feature vector between source and target speech samples aligned using dynamic time warping (DTW) and model it based on statistical conversion models such as Gaussian mixture model (GMM), differential GMM (DIFFGMM), and deep neural networks (DNN).
 
 [![Build Status](http://img.shields.io/travis/{{cookiecutter.github_username}}/{{cookiecutter.github_repo}}/master.svg)](https://travis-ci.org/{{cookiecutter.github_username}}/{{cookiecutter.github_repo}})
 [![Coverage Status](http://img.shields.io/coveralls/{{cookiecutter.github_username}}/{{cookiecutter.github_repo}}/master.svg)](https://coveralls.io/r/{{cookiecutter.github_username}}/{{cookiecutter.github_repo}})
@@ -43,6 +43,13 @@ pip install pysptk
 python setup.py develop
 ```
 
+## Run demonstration script
+
+```
+cd scripts
+python vc_demo.py
+```
+
 ## Tests
 
 ```bash
@@ -63,7 +70,7 @@ https://github.com/k2kobayashi/sprocket/issues
 
 ## COPYRIGHT
 
-Copyright  2017 Kazuhiro KOBAYASHI
+Copyright  2017 
 
 Released under the MIT license
 
