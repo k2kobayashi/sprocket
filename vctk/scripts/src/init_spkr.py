@@ -39,11 +39,16 @@ def world_f0_analysis(flbl):
 def create_f0_histgram(f0s, histfile):
     # flatten two dimensional list into one dimensional list
     f0 = [f0val for i in f0s for f0val in i]
+
+    # plot histgram
     plt.hist(f0, bins=200, range=(40, 700), normed=True, histtype="stepfilled")
     plt.xlabel("Fundamental frequency")
     plt.ylabel("Probability")
-    print(histfile)
     plt.savefig(histfile)
+
+
+def create_configure(spkr):
+    pass
 
 
 def main():
@@ -73,6 +78,9 @@ def main():
     histfile = args.conf_dir + '/' + args.spkr + '_f0hist.pdf'
     create_f0_histgram(f0s, histfile)
 
+    # create configure file for the speaker ("/configure/spkr.yml")
+    conffile = args.conf_dir + '/' + args.spkr + '.conf'
+    create_configure(args.spkr)
 
 if __name__ == '__main__':
     main()
