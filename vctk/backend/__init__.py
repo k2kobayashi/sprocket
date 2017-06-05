@@ -57,7 +57,7 @@ class WORLD(Analyzer, Synthesizer):
         Paramters
         ---------
         x: array, shape (`time samples`)
-          monoural speech signal in time domain
+          monoral speech signal in time domain
         """
         opt = world.pyDioOption(self.f0_floor, self.f0_ceil,
                                 self.channels_in_octave,
@@ -73,6 +73,26 @@ class WORLD(Analyzer, Synthesizer):
         self.time_len = len(x)
 
         return SpeechParameters(f0, spectrum_envelope, aperiodicity)
+
+    def analyze_f0(self, x):
+        """
+        analyze decomposes a speech signal into three parameters:
+          1. Fundamental frequency
+
+        Paramters
+        ---------
+        x: array, shape (`time samples`)
+          monoral speech signal in time domain
+        """
+        opt = world.pyDioOption(self.f0_floor, self.f0_ceil,
+                                self.channels_in_octave,
+                                self.period, self.speed)
+
+        f0, time_axis = world.dio(x, self.fs, self.period, opt)
+        f0 = world.stonemask(x, self.fs, self.period, time_axis, f0)
+
+        return SpeechParameters(f0, None, None)
+
 
     def synthesis(self, params):
         """
