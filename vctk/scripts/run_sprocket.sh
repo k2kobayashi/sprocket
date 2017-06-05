@@ -6,19 +6,24 @@
 # Distributed under terms of the MIT license.
 #
 
-org=$1
-tar=$2
+# arguments setting
+org=clb
+tar=slt
 
+# directory setting
 src_dir=./src
 
+# parameter setting
+nproc=3
+
 # Initialization
-python $src_dir/init_spkr.py $org
-python $src_dir/init_spkr.py $tar
+python $src_dir/init_spkr.py -m $nproc $org ./data/wav/$org ./configure
+python $src_dir/init_spkr.py -m $nproc $tar ./data/wav/$tar ./configure
 python $src_dir/init_pair.py $org $tar
 
-# Feature extraction
-python $src_dir/feature_extraction.py $org
-python $src_dir/feature_extraction.py $tar
+# # Feature extraction
+# python $src_dir/feature_extraction.py $org
+# python $src_dir/feature_extraction.py $tar
 
 # Joint feature extraction
 

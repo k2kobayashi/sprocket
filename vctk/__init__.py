@@ -26,7 +26,8 @@ class SpeechParameters(object):
     """
 
     def __init__(self, f0, spectrum_envelope, aperiodicity):
-        assert len(f0) == len(spectrum_envelope) == len(aperiodicity)
+        if spectrum_envelope is not None and aperiodicity is not None:
+            assert len(f0) == len(spectrum_envelope) == len(aperiodicity)
 
         self.f0 = f0
         self.spectrum_envelope = spectrum_envelope
