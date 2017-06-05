@@ -1,8 +1,7 @@
 # coding: utf-8
 
 import numpy as np
-import numpy.fft
-import sptk
+import pysptk
 
 from vctk import BidirectParameterizer
 
@@ -137,7 +136,7 @@ def sp2mc(spec, order, alpha):
     c[0] /= 2.0
 
     # c(m) -> cₐ(m)
-    return sptk.freqt(np.ascontiguousarray(c), order, alpha)
+    return pysptk.freqt(np.ascontiguousarray(c), order, alpha)
 
 
 def mc2sp(mc, alpha, fftlen):
@@ -164,7 +163,7 @@ def mc2sp(mc, alpha, fftlen):
     """
 
     # cₐ(m) -> c(m)
-    c = sptk.freqt(np.ascontiguousarray(mc), fftlen >> 1, -alpha)
+    c = pysptk.freqt(np.ascontiguousarray(mc), fftlen >> 1, -alpha)
     c[0] *= 2.0
 
     symc = np.resize(c, fftlen)
