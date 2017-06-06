@@ -31,6 +31,11 @@ from vctk.parameterization import spgram2mcgram
 
 class FeatureExtractor(object):
 
+    """
+    wavに紐付いた特徴量を分析し，h5に圧縮して保存するクラス
+    - f0, spc, ap, mcep, npow, and more in future (e.g., LPC, cep, some type of mcep, MFCC)
+    ToDo: vctkの中に入れる． npowの計算を実装する
+    """
     def __init__(self, yml):
         with open(yml) as rf:
             conf = yaml.safe_load(rf)
