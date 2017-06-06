@@ -11,18 +11,19 @@ Voice conversion toolkit - Voice conversion (VC) is a technique to convert a spe
 
 ## Requirements
 
+- world
 - numpy
 - scipy
-- world
 - pysptk
 - h5py
 
 ## Installation
 
-### Install WORLD speech analysis framework for python
+### Install WORLD for python
 
 ``` 
 git clone https://github.com/jimsotelo/world.py
+cd world.py
 bash build_world.sh
 python setup.py develop
 ```
@@ -32,10 +33,10 @@ python setup.py develop
 
 - pythonから`import world` として、エラーがでなければOK
 
-### Install Speech Signal Processing Toolkit (SPTK) for python
+### Other packages
 
 ```
-pip install pysptk
+pip install -r requirements.txt
 ```
 
 ### Install vctk
