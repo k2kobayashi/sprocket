@@ -76,8 +76,7 @@ class WORLD(Analyzer, Synthesizer):
 
     def analyze_f0(self, x):
         """
-        analyze decomposes a speech signal into three parameters:
-          1. Fundamental frequency
+        analyze decomposes a speech signal into F0:
 
         Paramters
         ---------

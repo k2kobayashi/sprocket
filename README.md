@@ -15,6 +15,7 @@ Voice conversion toolkit - Voice conversion (VC) is a technique to convert a spe
 - scipy
 - world
 - pysptk
+- h5py
 
 ## Installation
 
