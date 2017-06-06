@@ -15,9 +15,10 @@ create speaker-dependent configure file (spkr.yml)
 
 """
 
-import glob
+import os
 import argparse
 import numpy as np
+import glob
 from scipy.io import wavfile
 from multiprocessing import Pool
 import matplotlib.pyplot as plt
@@ -47,16 +48,10 @@ def create_f0_histgram(f0s, histfile):
     plt.savefig(histfile)
 
 
-def create_configure(spkr):
-    pass
-
-
 def main():
     # Options for python
     description = 'create speaker-dependent configure file (spkr.yml)'
     parser = argparse.ArgumentParser(description=description)
-    parser.add_argument('-nmsg', '--nmsg', default=True, action='store_false',
-                        help='print no message')
     parser.add_argument('-m', '--multicore', type=int, default=1,
                         help='# of cores for multi-processing')
     parser.add_argument('spkr', type=str,
@@ -68,19 +63,18 @@ def main():
     args = parser.parse_args()
 
     # grab .wav files in data directory
-    files = glob.glob(args.wav_dir + '/*.wav')
+    files = glob.glob(args.wav_dir + '/' + args.spkr + '/*.wav')
 
     # F0 extraction with WORLD.dio on multi processing
     p = Pool(args.multicore)
     f0s = p.map(world_f0_analysis, files)
 
     # create F0 histgram
-    histfile = args.conf_dir + '/' + args.spkr + '_f0hist.pdf'
+    hist_dir = args.conf_dir + '/f0histgram/'
+    if not os.path.exists(hist_dir):
+        os.makedirs(hist_dir)
+    histfile = hist_dir + args.spkr + '.pdf'
     create_f0_histgram(f0s, histfile)
-
-    # create configure file for the speaker ("/configure/spkr.yml")
-    conffile = args.conf_dir + '/' + args.spkr + '.conf'
-    create_configure(args.spkr)
 
 if __name__ == '__main__':
     main()

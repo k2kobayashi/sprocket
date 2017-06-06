@@ -12,18 +12,41 @@ tar=slt
 
 # directory setting
 src_dir=./src
+data_dir=./data
+conf_dir=./configure
+wav_dir=$data_dir/speaker/wav
 
 # parameter setting
 nproc=3
 
-# Initialization
-# python $src_dir/init_spkr.py -m $nproc $org ./data/wav/$org ./configure
-# python $src_dir/init_spkr.py -m $nproc $tar ./data/wav/$tar ./configure
-python $src_dir/init_pair.py $org $tar
+cp $conf_dir/default/speaker_default.yml $conf_dir/$org.yml
+cp $conf_dir/default/speaker_default.yml $conf_dir/$tar.yml
+cp $conf_dir/default/pair_default.yml $conf_dir/$org-$tar.yml
 
-# # Feature extraction
-# python $src_dir/feature_extraction.py $org
+# # Initialization
+# for spkr in $org $tar; do
+#     python $src_dir/init_spkr.py \
+#         -m $nproc \
+#         $spkr \
+#         $wav_dir \
+#         $conf_dir
+# done
+
+# Feature extraction
+python $src_dir/feature_extraction.py \
+    -m $nproc \
+    $org \
+    $conf_dir/$org.yml \
+    $wav_dir
+
 # python $src_dir/feature_extraction.py $tar
+
+# # pair dependent feature
+# python $src_dir/init_pair.py \
+#     $org \
+#     $tar \
+#     $wav_dir \
+#     $conf_dir
 
 # Joint feature extraction
 
