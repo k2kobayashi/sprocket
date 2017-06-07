@@ -10,7 +10,7 @@ else:
 CHANGES = open('CHANGES.md').read()
 
 setup(
-    name="vctk",
+    name="sprocket",
     version="0.0.0",
 
     description="TODO",

@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # coding: utf-8
 
-from vctk import FrameByFrameVectorConverter
+from sprocket import FrameByFrameVectorConverter
 
 import numpy as np
 from numpy import linalg

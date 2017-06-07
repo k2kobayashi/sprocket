@@ -6,8 +6,8 @@ Voice conversion toolkit - Voice conversion (VC) is a technique to convert a spe
 [![Build Status](http://img.shields.io/travis/{{cookiecutter.github_username}}/{{cookiecutter.github_repo}}/master.svg)](https://travis-ci.org/{{cookiecutter.github_username}}/{{cookiecutter.github_repo}})
 [![Coverage Status](http://img.shields.io/coveralls/{{cookiecutter.github_username}}/{{cookiecutter.github_repo}}/master.svg)](https://coveralls.io/r/{{cookiecutter.github_username}}/{{cookiecutter.github_repo}})
 [![Scrutinizer Code Quality](http://img.shields.io/scrutinizer/g/{{cookiecutter.github_username}}/{{cookiecutter.github_repo}}.svg)](https://scrutinizer-ci.com/g/{{cookiecutter.github_username}}/{{cookiecutter.github_repo}}/?branch=master)
-[![PyPI Version](http://img.shields.io/pypi/v/{{vctk}}.svg)](https://pypi.python.org/pypi/{{vctk}})
-[![PyPI Downloads](http://img.shields.io/pypi/dm/{{vctk}}.svg)](https://pypi.python.org/pypi/{{vctk}})
+[![PyPI Version](http://img.shields.io/pypi/v/{{sprocket}}.svg)](https://pypi.python.org/pypi/{{sprocket}})
+[![PyPI Downloads](http://img.shields.io/pypi/dm/{{sproket}}.svg)](https://pypi.python.org/pypi/{{sprocket}})
 
 ## Requirements
 
@@ -21,7 +21,7 @@ Voice conversion toolkit - Voice conversion (VC) is a technique to convert a spe
 
 ### Install WORLD for python
 
-``` 
+```
 git clone https://github.com/jimsotelo/world.py
 cd world.py
 bash build_world.sh
@@ -39,7 +39,7 @@ python setup.py develop
 pip install -r requirements.txt
 ```
 
-### Install vctk
+### Install sprocket
 
 ```bash
 python setup.py develop
@@ -72,7 +72,7 @@ https://github.com/k2kobayashi/sprocket/issues
 
 ## COPYRIGHT
 
-Copyright  2017 
+Copyright  2017
 
 Released under the MIT license
 

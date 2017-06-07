@@ -1,7 +1,7 @@
 import numpy as np
 import os
 from world import pyDioOption, dio, stonemask, cheaptrick
-from vctk.parameterization import sp2mc, mc2sp, spgram2mcgram, mcgram2spgram
+from sprocket.parameterization import sp2mc, mc2sp, spgram2mcgram, mcgram2spgram
 
 import unittest
 
