@@ -17,20 +17,20 @@ conf_dir=./configure
 wav_dir=$data_dir/speaker/wav
 
 # parameter setting
-nproc=6
+nproc=1
 
 cp $conf_dir/default/speaker_default.yml $conf_dir/$org.yml
 cp $conf_dir/default/speaker_default.yml $conf_dir/$tar.yml
 cp $conf_dir/default/pair_default.yml $conf_dir/$org-$tar.yml
 
-# Initialization
-for spkr in $org $tar; do
-    python $src_dir/init_spkr.py \
-        -m $nproc \
-        $spkr \
-        $wav_dir \
-        $conf_dir
-done
+# # Initialization
+# for spkr in $org $tar; do
+#     python $src_dir/init_spkr.py \
+#         -m $nproc \
+#         $spkr \
+#         $wav_dir \
+#         $conf_dir
+# done
 
 # Feature extraction
 for spkr in $org $tar; do
@@ -41,12 +41,12 @@ for spkr in $org $tar; do
         $wav_dir
 done
 
-# pair dependent feature
-python $src_dir/init_pair.py \
-    $org \
-    $tar \
-    $wav_dir \
-    $conf_dir
+# # pair dependent feature
+# python $src_dir/init_pair.py \
+#     $org \
+#     $tar \
+#     $wav_dir \
+#     $conf_dir
 
 # Joint feature extraction
 

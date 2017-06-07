@@ -13,6 +13,8 @@ spectral:
 mcep:
   dim: 25
   alpha: 0.42
+power:
+  threshold: -20
 
 analyzer: world
 

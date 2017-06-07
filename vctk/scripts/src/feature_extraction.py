@@ -26,7 +26,7 @@ from multiprocessing import Pool
 
 
 from vctk.backend import WORLD
-from vctk.parameterization import spgram2mcgram
+from vctk.parameterization import spgram2mcgram, spgram2npow
 
 
 class FeatureExtractor(object):
@@ -36,6 +36,7 @@ class FeatureExtractor(object):
     - f0, spc, ap, mcep, npow, and more in future (e.g., LPC, cep, some type of mcep, MFCC)
     ToDo: vctkの中に入れる． npowの計算を実装する
     """
+
     def __init__(self, yml):
         with open(yml) as rf:
             conf = yaml.safe_load(rf)
@@ -61,12 +62,12 @@ class FeatureExtractor(object):
         _, x = wavfile.read(wavf)
         x = np.array(x, dtype=np.float)
 
-        # perform analysis
+        # analysis
         self.features = self.analyzer.analyze(x)
         self.mcep = spgram2mcgram(
             self.features.spectrum_envelope, self.dim, self.alpha)
-
-        return None
+        self.npow = spgram2npow(self.features.spectrum_envelope)
+        return
 
     def analyze_f0(self, wavf):
         # read wav file
@@ -101,6 +102,7 @@ class FeatureExtractor(object):
         h5.create_dataset(dirname + '/ap', data=self.features.aperiodicity)
         h5.create_dataset(dirname + '/f0', data=self.features.f0)
         h5.create_dataset(dirname + '/mcep', data=self.mcep)
+        h5.create_dataset(dirname + '/npow', data=self.npow)
         h5.flush()
         h5.close()
 
