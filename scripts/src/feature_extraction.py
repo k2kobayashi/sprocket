@@ -25,8 +25,8 @@ from scipy.io import wavfile
 from multiprocessing import Pool
 
 
-from vctk.backend import WORLD
-from vctk.parameterization import spgram2mcgram, spgram2npow
+from sprocket.backend import WORLD
+from sprocket.parameterization import spgram2mcgram, spgram2npow
 
 
 class FeatureExtractor(object):

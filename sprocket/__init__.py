@@ -2,7 +2,7 @@
 
 from interface import *
 
-from vctk.parameterization import TransparentParameterizer
+from sprocket.parameterization import TransparentParameterizer
 
 
 class SpeechParameters(object):

@@ -1,8 +1,8 @@
 # Created by https://www.gitignore.io
 
-/vctk/scripts/configure/*.list
-/vctk/scripts/configure/f0histgram/*.pdf
-/vctk/scripts/data/speaker/h5/*
+/scripts/configure/*.list
+/scripts/configure/f0histgram/*.pdf
+/scripts/data/speaker/h5/*
 
 ### OSX ###
 .DS_Store

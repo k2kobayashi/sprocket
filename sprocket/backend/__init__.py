@@ -1,6 +1,6 @@
 # coding: utf-8
 
-from vctk import Analyzer, Synthesizer, SpeechParameters
+from sprocket import Analyzer, Synthesizer, SpeechParameters
 import world
 
 

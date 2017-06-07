@@ -3,7 +3,7 @@
 import numpy as np
 import pysptk
 
-from vctk import BidirectParameterizer
+from sprocket import BidirectParameterizer
 
 """
 Speech paramterization

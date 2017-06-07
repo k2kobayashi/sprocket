@@ -23,7 +23,7 @@ from scipy.io import wavfile
 from multiprocessing import Pool
 import matplotlib.pyplot as plt
 
-from vctk.backend import WORLD
+from sprocket.backend import WORLD
 
 
 def world_f0_analysis(flbl):
