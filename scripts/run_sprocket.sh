@@ -67,7 +67,7 @@ fi
 
 # Joint feature extraction
 if [ 1 ] ; then
-    # calculate speaker-dependent statistics such as GV and MS
+    # estimate time-aligned joint feature vector of source and target
     python $src_dir/estimate_jnt.py \
         $org \
         $tar \
@@ -77,7 +77,7 @@ fi
 
 # GMM train
 if [ 0 ] ; then
-    # calculate speaker-dependent statistics such as GV and MS
+    # estimate GMM parameter from joint feature vector
     python $src_dir/train_GMM.py \
         $org \
         $tar \
@@ -87,7 +87,7 @@ fi
 
 # Conversion based on GMM
 if [ 0 ] ; then
-    # calculate speaker-dependent statistics such as GV and MS
+    # convertsion based on the trained GMM
     python $src_dir/gmmmap.py \
         $org \
         $tar \
