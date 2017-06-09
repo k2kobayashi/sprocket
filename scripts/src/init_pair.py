@@ -11,7 +11,7 @@
 #
 
 """
-create speaker pair-dependent configure file (org-tar.yml)
+create training and evaluation list files
 
 """
 
@@ -22,7 +22,7 @@ import argparse
 
 def main():
     # Options for python
-    description = 'create speaker-dependent configure file (spkr.yml)'
+    description = 'create training and evaluation list file (spkr.yml)'
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument('org', type=str,
                         help='original speaker label')
@@ -30,8 +30,8 @@ def main():
                         help='target speaker label')
     parser.add_argument('wav_dir', type=str,
                         help='wav file directory of the speaker')
-    parser.add_argument('conf_dir', type=str,
-                        help='configure directory of the speaker')
+    parser.add_argument('pair_dir', type=str,
+                        help='data directory for the speaker pair')
     args = parser.parse_args()
 
     # create list file for training and evaluation
@@ -40,9 +40,17 @@ def main():
     assert len(orgfiles) == len(tarfiles)
     assert len(orgfiles) != 0 or len(tarfiles) != 0
 
-    listfile = args.conf_dir + '/' + args.org + '-' + args.tar
-    tf = open(listfile + '_tr.list', 'w')
-    ef = open(listfile + '_ev.list', 'w')
+    listfile = args.pair_dir + '/' + args.org + '-' + args.tar
+    trlist = listfile + '_tr.list'
+    evlist = listfile + '_ev.list'
+
+    # existing training and eve file check
+    if os.path.exists(trlist) and os.path.exists(evlist):
+        raise("List files are already excisted.")
+
+    # open files and write wave file path
+    tf = open(trlist, 'w')
+    ef = open(evlist, 'w')
     for (owav, twav) in zip(orgfiles, tarfiles):
         olbl, _ = os.path.splitext(args.org + '/' + os.path.basename(owav))
         tlbl, _ = os.path.splitext(args.tar + '/' + os.path.basename(twav))
