@@ -6,9 +6,9 @@ import h5py
 import numpy as np
 from scipy.io import wavfile
 
-from sprocket.backend.world import WORLD
-from sprocket.backend.npow import spgram2npow
+from sprocket.backend.analyzer import WORLD
 from sprocket.backend.parameterizer import spgram2mcgram
+from sprocket.backend.npow import spgram2npow
 from sprocket.util.hdf5 import HDF5
 
 

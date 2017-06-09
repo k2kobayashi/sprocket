@@ -62,6 +62,10 @@ class WORLD(Analyzer, Synthesizer):
         self.channels_in_octave = channels_in_octave
         self.speed = speed
 
+        self.opt = world.pyDioOption(self.f0_floor, self.f0_ceil,
+                                     self.channels_in_octave,
+                                     self.period, self.speed)
+
     def analyze(self, x):
         """
         analyze decomposes a speech signal into three parameters:
@@ -74,11 +78,7 @@ class WORLD(Analyzer, Synthesizer):
         x: array, shape (`time samples`)
           monoral speech signal in time domain
         """
-        opt = world.pyDioOption(self.f0_floor, self.f0_ceil,
-                                self.channels_in_octave,
-                                self.period, self.speed)
-
-        f0, time_axis = world.dio(x, self.fs, self.period, opt)
+        f0, time_axis = world.dio(x, self.fs, self.period, self.opt)
         f0 = world.stonemask(x, self.fs, self.period, time_axis, f0)
         spectrum_envelope = world.cheaptrick(x, self.fs, self.period,
                                              time_axis, f0)
@@ -98,11 +98,7 @@ class WORLD(Analyzer, Synthesizer):
         x: array, shape (`time samples`)
           monoral speech signal in time domain
         """
-        opt = world.pyDioOption(self.f0_floor, self.f0_ceil,
-                                self.channels_in_octave,
-                                self.period, self.speed)
-
-        f0, time_axis = world.dio(x, self.fs, self.period, opt)
+        f0, time_axis = world.dio(x, self.fs, self.period, self.opt)
         f0 = world.stonemask(x, self.fs, self.period, time_axis, f0)
 
         return SpeechParameters(f0, None, None)
