@@ -21,8 +21,11 @@ nproc=1
 
 if [ 0 -eq 1 ] ; then
     echo "### Copy default files for original and target speakr ###"
-    cp $conf_dir/default/speaker_default.yml $conf_dir/$org.yml
-    cp $conf_dir/default/speaker_default.yml $conf_dir/$tar.yml
+    for spkr in $org $tar; do
+        if [ ! -e $conf_dir/$spkr.yml ]; then
+            cp $conf_dir/default/speaker_default.yml $conf_dir/$spkr.yml
+        fi
+    done
 fi
 
 if [ 0 -eq 1 ] ; then
