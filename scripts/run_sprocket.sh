@@ -19,13 +19,13 @@ wav_dir=$data_dir/speaker/wav
 # parameter setting
 nproc=1
 
-if [ 0 ] ; then
+if [ 0 -eq 1 ] ; then
     cp $conf_dir/default/speaker_default.yml $conf_dir/$org.yml
     cp $conf_dir/default/speaker_default.yml $conf_dir/$tar.yml
     cp $conf_dir/default/pair_default.yml $conf_dir/$org-$tar.yml
 fi
 
-if [ 0 ] ; then
+if [ 0 -eq 1 ] ; then
     # Initialization for speakers
     for spkr in $org $tar; do
         python $src_dir/init_spkr.py \
@@ -36,7 +36,7 @@ if [ 0 ] ; then
     done
 fi
 
-if [ 0 ] ; then
+if [ 1 -eq 1 ] ; then
     # Feature extraction
     for spkr in $org $tar; do
         python $src_dir/feature_extraction.py \
@@ -47,7 +47,7 @@ if [ 0 ] ; then
     done
 fi
 
-if [ 0 ] ; then
+if [ 0 -eq 1 ] ; then
     # Initilization for the speaker pair
     python $src_dir/init_pair.py \
         $org \
@@ -56,9 +56,9 @@ if [ 0 ] ; then
         $conf_dir
 fi
 
-if [ 0 ] ; then
-    # calculate speaker-dependent statistics such as GV and MS
-    python $src_dir/feature_stats.py \
+if [ 0 -eq 1 ] ; then
+    # calculate speaker-dependent statistics such as F0, GV and MS
+    python $src_dir/estimate_feature_stats.py \
         $org \
         $tar \
         $wav_dir \
@@ -66,7 +66,7 @@ if [ 0 ] ; then
 fi
 
 # Joint feature extraction
-if [ 1 ] ; then
+if [ 0 -eq 1 ] ; then
     # estimate time-aligned joint feature vector of source and target
     python $src_dir/estimate_jnt.py \
         $org \
@@ -76,7 +76,7 @@ if [ 1 ] ; then
 fi
 
 # GMM train
-if [ 0 ] ; then
+if [ 0 -eq 1 ] ; then
     # estimate GMM parameter from joint feature vector
     python $src_dir/train_GMM.py \
         $org \
@@ -86,7 +86,7 @@ if [ 0 ] ; then
 fi
 
 # Conversion based on GMM
-if [ 0 ] ; then
+if [ 0 -eq 1 ] ; then
     # convertsion based on the trained GMM
     python $src_dir/gmmmap.py \
         $org \
