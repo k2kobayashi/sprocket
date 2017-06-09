@@ -59,8 +59,9 @@ def main():
     wavs = glob.glob(args.wav_dir + '/' + args.spkr + '/*.wav')
 
     # feature extraction with WORLD on multi processing
-    p = Pool(args.multicore)
-    p.map(fa_wrapper, [(feat, w) for w in wavs])
+    feature_analysis(feat, wavs[0])
+    # p = Pool(args.multicore)
+    # p.map(fa_wrapper, [(feat, w) for w in wavs])
 
 
 if __name__ == '__main__':
