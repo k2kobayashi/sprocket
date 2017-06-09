@@ -19,9 +19,11 @@ wav_dir=$data_dir/speaker/wav
 # parameter setting
 nproc=1
 
-cp $conf_dir/default/speaker_default.yml $conf_dir/$org.yml
-cp $conf_dir/default/speaker_default.yml $conf_dir/$tar.yml
-cp $conf_dir/default/pair_default.yml $conf_dir/$org-$tar.yml
+if [ 1 ] ; then
+    cp $conf_dir/default/speaker_default.yml $conf_dir/$org.yml
+    cp $conf_dir/default/speaker_default.yml $conf_dir/$tar.yml
+    cp $conf_dir/default/pair_default.yml $conf_dir/$org-$tar.yml
+fi
 
 if [ 1 ] ; then
     # Initialization for speakers
