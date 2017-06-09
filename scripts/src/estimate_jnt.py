@@ -11,7 +11,7 @@
 #
 
 """
-
+estimate joint feature vector of the speaker pair using GMM
 
 """
 
@@ -26,10 +26,8 @@ def main():
                         help='original speaker label')
     parser.add_argument('tar', type=str,
                         help='target speaker label')
-    parser.add_argument('wav_dir', type=str,
-                        help='wav file directory of the speaker')
-    parser.add_argument('conf_dir', type=str,
-                        help='configure directory of the speaker')
+    parser.add_argument('pair_dir', type=str,
+                        help='data directory of the speaker pair')
     args = parser.parse_args()
 
     pass

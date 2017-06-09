@@ -3,6 +3,7 @@
 /scripts/configure/*.list
 /scripts/configure/f0histgram/*.pdf
 /scripts/data/speaker/h5/*
+/scripts/data/pair/
 
 ### OSX ###
 .DS_Store

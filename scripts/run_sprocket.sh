@@ -15,6 +15,7 @@ src_dir=./src
 data_dir=./data
 conf_dir=./configure
 wav_dir=$data_dir/speaker/wav
+pair_dir=$data_dir/pair/$org-$tar
 
 # parameter setting
 nproc=7
@@ -42,7 +43,7 @@ if [ 0 -eq 1 ] ; then
     done
 fi
 
-if [ 1 -eq 1 ] ; then
+if [ 0 -eq 1 ] ; then
     echo "##############################################################"
     echo "### Feature extcation for original and target speakers     ###"
     echo "##############################################################"
@@ -60,14 +61,14 @@ if [ 0 -eq 1 ] ; then
     echo "##############################################################"
     echo "### Initialization of the speaker pair                     ###"
     echo "##############################################################"
-    mkdir $data_dir/pair/$org-$tar
-    cp $conf_dir/default/pair_default.yml $data_dir/pair/$org-$tar.yml
+    mkdir -p $pair_dir
+    cp $conf_dir/default/pair_default.yml $pair_dir/$org-$tar.yml
     # Initilization of the speaker pair
     python $src_dir/init_pair.py \
         $org \
         $tar \
         $wav_dir \
-        $conf_dir
+        $pair_dir
 fi
 
 if [ 0 -eq 1 ] ; then
@@ -83,7 +84,7 @@ if [ 0 -eq 1 ] ; then
 fi
 
 # Joint feature extraction
-if [ 0 -eq 1 ] ; then
+if [ 1 -eq 1 ] ; then
     echo "##############################################################"
     echo "### Estimate joint feature vector using GMM                ###"
     echo "##############################################################"
@@ -91,32 +92,30 @@ if [ 0 -eq 1 ] ; then
     python $src_dir/estimate_jnt.py \
         $org \
         $tar \
-        $wav_dir \
-        $conf_dir
+        $pair_dir
 fi
 
 # GMM train
 if [ 0 -eq 1 ] ; then
     echo "##############################################################"
-    echo "### Train conversion model based on GMM                    ###"
+    echo "### Train conversion model                                 ###"
     echo "##############################################################"
     # estimate GMM parameter using the joint feature vector
-    python $src_dir/train_GMM.py \
+    python $src_dir/train.py \
         $org \
         $tar \
-        $wav_dir \
-        $conf_dir
+        $pair_dir
 fi
 
 # Conversion based on GMM
 if [ 0 -eq 1 ] ; then
     echo "##############################################################"
-    echo "### Conversion based on the trained GMM                    ###"
+    echo "### Conversion based on the trained models                 ###"
     echo "##############################################################"
     # convertsion based on the trained GMM
-    python $src_dir/gmmmap.py \
+    python $src_dir/convert.py \
         $org \
         $tar \
-        $wav_dir \
-        $conf_dir
+        $pair_dir \
+        $wav_dir
 fi
