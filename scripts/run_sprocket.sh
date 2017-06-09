@@ -17,7 +17,7 @@ conf_dir=./configure
 wav_dir=$data_dir/speaker/wav
 
 # parameter setting
-nproc=1
+nproc=7
 
 if [ 0 -eq 1 ] ; then
     echo "### Copy default files for original and target speakr ###"

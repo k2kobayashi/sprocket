@@ -1,8 +1,6 @@
 # coding: utf-8
 
-import os
 import yaml
-import h5py
 import numpy as np
 from scipy.io import wavfile
 
@@ -70,6 +68,8 @@ class FeatureExtractor(object):
         _, x = wavfile.read(wavf)
         self.x = np.array(x, dtype=np.float)
 
+        return
+
     def analyze_all(self):
         # analysis
         self.features = self.analyzer.analyze(self.x)
@@ -87,26 +87,24 @@ class FeatureExtractor(object):
 
     def save_hdf5(self, wavf):
         h5f = wavf.replace('wav', 'h5')
-        dirname, _ = os.path.split(h5f)
+        hdf = HDF5(h5f, mode="w")
+        hdf.save(self.features.f0, ext="f0")
+        hdf.save(self.features.spectrum_envelope, ext="spc")
+        hdf.save(self.features.aperiodicity, ext="ap")
+        hdf.save(self.mcep, ext="mcep")
+        hdf.close()
+        return
 
-        # check directory
-        if not os.path.exists(dirname):
-            os.makedirs(dirname)
+    def read_hdf5(self, wavf):
+        h5f = wavf.replace('wav', 'h5')
+        hdf = HDF5(h5f, mode="r")
+        spc = hdf.read(ext='spc')
+        hdf.close()
 
-        # check existing h5 file
-        if os.path.exists(h5f):
-            print("overwrite because HDF5 file already exists. ")
-
-        # write hdf5 file format
-        h5 = h5py.File(h5f, "w")
-        h5.create_group(dirname)
-        h5.create_dataset(
-            dirname + '/spc', data=self.features.spectrum_envelope)
-        h5.create_dataset(dirname + '/ap', data=self.features.aperiodicity)
-        h5.create_dataset(dirname + '/f0', data=self.features.f0)
-        h5.create_dataset(dirname + '/mcep', data=self.mcep)
-        h5.create_dataset(dirname + '/npow', data=self.npow)
-        h5.flush()
-        h5.close()
+        if self.features.spectrum_envelope[0,0] == spc[0,0]:
+            print ("True")
+        else:
+            print ("False")
+            print (self.features.spectrum_envelope[0,0], spc[0,0])
 
         return
