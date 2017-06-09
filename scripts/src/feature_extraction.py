@@ -26,7 +26,8 @@ from multiprocessing import Pool
 
 
 from sprocket.backend import WORLD
-from sprocket.parameterization import spgram2mcgram, spgram2npow
+from sprocket.parameterization import spgram2mcgram
+from sprocket.backend.npow import spgram2npow
 
 
 class FeatureExtractor(object):
