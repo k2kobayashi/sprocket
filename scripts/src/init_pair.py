@@ -24,8 +24,6 @@ def main():
     # Options for python
     description = 'create speaker-dependent configure file (spkr.yml)'
     parser = argparse.ArgumentParser(description=description)
-    parser.add_argument('-m', '--multicore', type=int, default=1,
-                        help='# of cores for multi-processing')
     parser.add_argument('org', type=str,
                         help='original speaker label')
     parser.add_argument('tar', type=str,
@@ -40,7 +38,7 @@ def main():
     orgfiles = glob.glob(args.wav_dir + '/' + args.org + '/*.wav')
     tarfiles = glob.glob(args.wav_dir + '/' + args.tar + '/*.wav')
     assert len(orgfiles) == len(tarfiles)
-    assert len(orgfiles) != 0 or len (tarfiles) != 0
+    assert len(orgfiles) != 0 or len(tarfiles) != 0
 
     listfile = args.conf_dir + '/' + args.org + '-' + args.tar
     tf = open(listfile + '_tr.list', 'w')
