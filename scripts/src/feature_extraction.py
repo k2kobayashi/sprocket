@@ -26,11 +26,14 @@ def feature_analysis(feat, wavf):
     # set wave file
     feat.set_wavf(wavf)
 
-    # extract all kinds of acoustic features
+    # extract acoustic features (i.e., F0, spc, ap, mcep, npow)
     feat.analyze_all()
 
     # save acoustic features as hdf5
-    feat.save_hdf5()
+    feat.save_hdf5(wavf)
+
+    # read hdf5 files for test
+    feat.read_hdf5(wavf)
     return
 
 
@@ -59,9 +62,9 @@ def main():
     wavs = glob.glob(args.wav_dir + '/' + args.spkr + '/*.wav')
 
     # feature extraction with WORLD on multi processing
-    feature_analysis(feat, wavs[0])
-    # p = Pool(args.multicore)
-    # p.map(fa_wrapper, [(feat, w) for w in wavs])
+    # feature_analysis(feat, wavs[0])
+    p = Pool(args.multicore)
+    p.map(fa_wrapper, [(feat, w) for w in wavs])
 
 
 if __name__ == '__main__':
