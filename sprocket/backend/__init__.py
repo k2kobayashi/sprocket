@@ -1,6 +1,5 @@
 # coding: utf-8
 
-import yaml
 import numpy as np
 from scipy.io import wavfile
 
@@ -40,18 +39,16 @@ class FeatureExtractor(object):
       kinds of speech feature analyzer
     """
 
-    def __init__(self, yml):
-        with open(yml) as yf:
-            conf = yaml.safe_load(yf)
-
-        # read parameters from yml file
-        self.fs = conf['wav']['fs']
-        self.shiftms = conf['wav']['shiftms']
-        self.minf0 = conf['f0']['minf0']
-        self.maxf0 = conf['f0']['maxf0']
-        self.dim = conf['mcep']['dim']
-        self.alpha = conf['mcep']['alpha']
-        self.analyzer = conf['analyzer']
+    def __init__(self, conf):
+        # read parameters from SpeakerYml class
+        # ToDo: read conf class as object in this class
+        self.fs = conf.fs
+        self.shiftms = conf.shiftms
+        self.minf0 = conf.minf0
+        self.maxf0 = conf.maxf0
+        self.dim = conf.dim
+        self.alpha = conf.alpha
+        self.analyzer = conf.analyzer
 
         # analyzer setting
         if self.analyzer == 'world':
@@ -101,10 +98,10 @@ class FeatureExtractor(object):
         spc = hdf.read(ext='spc')
         hdf.close()
 
-        if self.features.spectrum_envelope[0,0] == spc[0,0]:
+        if self.features.spectrum_envelope[0, 0] == spc[0, 0]:
             print ("True")
         else:
             print ("False")
-            print (self.features.spectrum_envelope[0,0], spc[0,0])
+            print (self.features.spectrum_envelope[0, 0], spc[0, 0])
 
         return

@@ -67,8 +67,7 @@ if [ 0 -eq 1 ] ; then
     python $src_dir/init_pair.py \
         $org \
         $tar \
-        $wav_dir \
-        $pair_dir
+        $wav_dir
 fi
 
 if [ 0 -eq 1 ] ; then
@@ -80,19 +79,19 @@ if [ 0 -eq 1 ] ; then
         $org \
         $tar \
         $wav_dir \
-        $conf_dir
+        $pair_dir/$org-$tar.yml
 fi
 
 # Joint feature extraction
 if [ 1 -eq 1 ] ; then
     echo "##############################################################"
-    echo "### Estimate joint feature vector using GMM                ###"
+    echo "### Estimate time warping function using GMM               ###"
     echo "##############################################################"
     # estimate a time-aligned joint feature vector of source and target
-    python $src_dir/estimate_jnt.py \
+    python $src_dir/estimate_twf.py \
         $org \
         $tar \
-        $pair_dir
+        $pair_dir/$org-$tar.yml
 fi
 
 # GMM train

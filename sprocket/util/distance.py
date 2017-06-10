@@ -11,7 +11,7 @@
 #
 
 """
-
+Calculate distance between acoustic features
 
 """
 
