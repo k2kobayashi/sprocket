@@ -1,7 +1,7 @@
 #! /usr/local/bin/python
 # -*- coding: utf-8 -*-
 #
-# mcd.py
+# melcd.py
 #   First ver.: 2017-06-07
 #
 #   Copyright 2017
@@ -14,6 +14,16 @@
 
 
 """
+
+import math
+
+
+def melcd(vec1, vec2):
+    if len(vec1) != len(vec2):
+        raise ("dimension of the vectors is different.")
+
+    return 10.0 * math.sqrt(2 * sum(pow(vec1 - vec2, 2))) / math.log(10)
+
 
 def main():
     pass
