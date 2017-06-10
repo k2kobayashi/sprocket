@@ -16,6 +16,7 @@ estimate joint feature vector of the speaker pair using GMM
 """
 
 import argparse
+from sprocket.util.yml import PairYML
 
 
 def main():
@@ -26,9 +27,24 @@ def main():
                         help='original speaker label')
     parser.add_argument('tar', type=str,
                         help='target speaker label')
-    parser.add_argument('pair_dir', type=str,
-                        help='data directory of the speaker pair')
+    parser.add_argument('pair_ymlf', type=str,
+                        help='yml file for the speaker pair')
     args = parser.parse_args()
+
+    conf = PairYML(args.pair_ymlf)
+
+    # read tr list
+    print(conf.trlist)
+
+    # mel-cd test
+
+    # calculate delta
+
+    # calculate extfrm
+
+    # calculate mel
+
+
 
     pass
 

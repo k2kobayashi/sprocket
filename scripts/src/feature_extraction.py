@@ -20,6 +20,7 @@ import argparse
 from multiprocessing import Pool
 
 from sprocket.backend import FeatureExtractor
+from sprocket.util.yml import SpeakerYML
 
 
 def feature_analysis(feat, wavf):
@@ -55,8 +56,11 @@ def main():
                         help='wav file directory of the speaker')
     args = parser.parse_args()
 
+    # read parameters from yml
+    conf = SpeakerYML(args.ymlf)
+
     # construct feature class
-    feat = FeatureExtractor(args.ymlf)
+    feat = FeatureExtractor(conf)
 
     # grab .wav files in data directory
     wavs = glob.glob(args.wav_dir + '/' + args.spkr + '/*.wav')
