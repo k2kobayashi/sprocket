@@ -17,17 +17,15 @@
 
 import numpy as np
 
-def extfrm(npow, mcep):
-    T = len(npow)
+
+def extfrm(npow, data):
     threshold = -20
-    for t in range (T):
-        if npow[t] < threshold:
-            # remove feature
-            pass
-        else:
-            pass
-            # concatenate
-    return extmcep
+    T = data.shape[0]
+    if len(npow) != T:
+        raise("Length of two vectors is different.")
+
+    index = np.where(npow > threshold)
+    return data[index]
 
 
 def main():

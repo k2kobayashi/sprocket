@@ -15,8 +15,13 @@
 
 """
 
-def print_test():
+from sprokcet.util.melcd import mcd
+
+
+def dtw(orgdata, tardata):
     print("hoge")
+    pass
+
 
 def main():
     pass
