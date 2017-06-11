@@ -21,7 +21,7 @@ import numpy as np
 def extfrm(npow, data):
     threshold = -20
     T = data.shape[0]
-    if len(npow) != T:
+    if T != len(npow):
         raise("Length of two vectors is different.")
 
     index = np.where(npow > threshold)

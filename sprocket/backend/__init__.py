@@ -89,6 +89,7 @@ class FeatureExtractor(object):
         hdf.save(self.features.spectrum_envelope, ext="spc")
         hdf.save(self.features.aperiodicity, ext="ap")
         hdf.save(self.mcep, ext="mcep")
+        hdf.save(self.npow, ext="npow")
         hdf.close()
         return
 
