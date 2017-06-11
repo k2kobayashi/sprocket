@@ -11,7 +11,7 @@ spectral:
   framel:
   shiftl:
 mcep:
-  dim: 25
+  dim: 24
   alpha: 0.42
 power:
   threshold: -20

@@ -23,10 +23,13 @@ def delta(data):
     win = [-0.5, 0, 0.5]
 
     delta = np.zeros((T, dim))
+
     delta[0] = 0.5 * data[1]
-    delta[T] = - 0.5 * data[T - 1]
+    delta[-1] = - 0.5 * data[-2]
     for t in range(1, T - 1):
-        delta[t] = np.dot(data[t - 1:t + 1], win)
+        # print(t - 1, t, t + 1, t + 2,
+        #       data[t - 1:t + 1].shape, data[t - 1:t + 2].shape)
+        delta[t] = np.dot(data[t - 1:t + 2].T, win)
 
     return delta
 
