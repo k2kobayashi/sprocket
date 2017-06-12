@@ -27,19 +27,27 @@ from sprocket.util.extfrm import extfrm
 import plotly
 import plotly.graph_objs as go
 
+from dtw import dtw
 
-def plottestfunc(mcdmatrix):
-    trace = go.Heatmap(
+
+def plottestfunc(mcdmatrix, path=None):
+    hm = dict(
         z=mcdmatrix,
         x=range(mcdmatrix.shape[0]),
         y=range(mcdmatrix.shape[1]),
         colorscale='Electric',
+        type='heatmap'
     )
-    layout = go.Layout(
-    )
-    data = [trace]
 
-    fig = go.Figure(data=data, layout=layout)
+    if path is not None:
+        pt = dict(
+            x = path[1],
+            y = path[0],
+        )
+
+    data = [hm, pt]
+
+    fig = go.Figure(data=data)
     plotly.offline.plot(fig, filename='mcdmatrix')
     return
 
@@ -77,17 +85,26 @@ def main():
     tarlen = tarmcep.shape[0]
 
     mcdmatrix = np.zeros((orglen, tarlen))
-    for ot in range(orglen):
-        for tt in range(tarlen):
-            mcdmatrix[ot, tt] = melcd(orgmcep[ot], tarmcep[tt])
-            if mcdmatrix[ot, tt] > 30:
-                mcdmatrix[ot, tt] = 30
+
+    # f = lambda x, y: melcd(x, y)
+    # for ot in range(orglen):
+    #     for tt in range(tarlen):
+    #         # mcdmatrix[ot, tt] = melcd(orgmcep[ot], tarmcep[tt])
+    #         mcdmatrix[ot, tt] = f(orgmcep[ot], tarmcep[tt])
+    #         if mcdmatrix[ot, tt] > 30:
+    #             mcdmatrix[ot, tt] = 30
+
+    dist, cost, _, path = dtw(orgmcep, tarmcep, dist=lambda x, y: melcd(x, y))
+
+    print(dist)
+    print(cost)
+    print(path)
 
     # plot test
-    plotfrag = False
+    plotfrag = True
     if plotfrag is True:
         print("out mcd heatmap")
-        plottestfunc(mcdmatrix)
+        plottestfunc(cost, path)
 
     # calculate delta
     orgsdmcep = np.c_[orgmcep, delta(orgmcep)]
