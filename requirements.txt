@@ -4,3 +4,4 @@ pysptk
 h5py
 dtw
 plotly
+scikit-learn

@@ -55,6 +55,7 @@ class PairYML(object):
 
         self.n_mix = conf['GMM']['n_mix']
         self.n_iter = conf['GMM']['n_iter']
+        self.covtype = conf['GMM']['covtype']
 
         self._read_training_list()
         self._read_evaluation_list()

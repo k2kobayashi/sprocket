@@ -25,6 +25,7 @@ from sprocket.util.hdf5 import HDF5
 from sprocket.util.distance import melcd
 from sprocket.util.delta import delta
 from sprocket.util.extfrm import extfrm
+from sprocket.model.GMM import GMMTrainer
 
 
 """
@@ -50,7 +51,7 @@ class JointFeatureExtractor(object):
             pass
 
         # open GMM for training and conversion
-        # self.gmm = GMMTrainer()
+        self.gmm = GMMTrainer(yml)
 
     # TODO: these functions for open and close hdf5 will be moved to hdf.py
     def open_h5files(self):
@@ -87,8 +88,8 @@ class JointFeatureExtractor(object):
         while (itnum < self.conf.n_iter):
             itnum += 1
             print(str(itnum) + '-th iteration start.')
-            # # train GMM with joint feature vectors
-            # self.gmm.train(jnt)
+            # train GMM with joint feature vectors
+            self.gmm.train(jnt)
 
             # dtw with converted feature if itnum > 1
             jnt = self._get_joint_feature_vector(itnum)

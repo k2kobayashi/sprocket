@@ -1,6 +1,7 @@
 GMM:
     n_mix: 128
     n_iter: 2
+    covtype : diag
 dir:
     h5: ./data/speaker/h5
     wav: ./data/speaker/wav

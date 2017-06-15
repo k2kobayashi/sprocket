@@ -1,6 +1,7 @@
 GMM:
   n_mix: 4
-  n_iter: 2
+  n_iter: 100
+  covtype: full
 dir:
     h5: ./data/speaker/h5
     wav: ./data/speaker/wav
