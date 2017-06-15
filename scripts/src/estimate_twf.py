@@ -16,18 +16,11 @@ estimate joint feature vector of the speaker pair using GMM
 """
 
 import argparse
-import numpy as np
 
-from sprocket.util.yml import PairYML
-from sprocket.util.hdf5 import HDF5
-from sprocket.util.distance import melcd
-from sprocket.util.delta import delta
-from sprocket.util.extfrm import extfrm
+from sprocket.util.jnt import JointFeatureExtractor
 
 import plotly
 import plotly.graph_objs as go
-
-from dtw import dtw
 
 
 def plottestfunc(mcdmatrix, path=None):
@@ -64,55 +57,9 @@ def main():
                         help='yml file for the speaker pair')
     args = parser.parse_args()
 
-    conf = PairYML(args.pair_ymlf)
-
-    # read tr list
-    print(conf.trlist)
-    with open(conf.trlist, 'r') as tr:
-        for line in tr:
-            line = line.rstrip().split(" ")
-            print(line[0], line[1])
-
-    # open mcep
-    orgh5 = HDF5('./data/speaker/h5/' + line[0] + '.h5', mode="r")
-    tarh5 = HDF5('./data/speaker/h5/' + line[1] + '.h5', mode="r")
-
-    orgmcep = orgh5.read('mcep')
-    tarmcep = tarh5.read('mcep')
-
-    # mel-cd test
-    orglen = orgmcep.shape[0]
-    tarlen = tarmcep.shape[0]
-
-    mcdmatrix = np.zeros((orglen, tarlen))
-
-    # f = lambda x, y: melcd(x, y)
-    # for ot in range(orglen):
-    #     for tt in range(tarlen):
-    #         # mcdmatrix[ot, tt] = melcd(orgmcep[ot], tarmcep[tt])
-    #         mcdmatrix[ot, tt] = f(orgmcep[ot], tarmcep[tt])
-    #         if mcdmatrix[ot, tt] > 30:
-    #             mcdmatrix[ot, tt] = 30
-
-    dist, cost, _, path = dtw(orgmcep, tarmcep, dist=lambda x, y: melcd(x, y))
-
-    print(dist)
-    print(cost)
-    print(path)
-
-    # plot test
-    plotfrag = True
-    if plotfrag is True:
-        print("out mcd heatmap")
-        plottestfunc(cost, path)
-
-    # calculate delta
-    orgsdmcep = np.c_[orgmcep, delta(orgmcep)]
-    tarsdmcep = np.c_[tarmcep, delta(tarmcep)]
-
-    # calculate extfrm
-    extorgmcep = extfrm(orgh5.read('npow'), orgsdmcep)
-    exttarmcep = extfrm(tarh5.read('npow'), tarsdmcep)
+    # joint feature extraction
+    jnt = JointFeatureExtractor(args.pair_ymlf)
+    jnt.estimate()
 
     # dtw to estimate twf
 

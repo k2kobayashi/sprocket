@@ -62,12 +62,18 @@ if [ 0 -eq 1 ] ; then
     echo "### Initialization of the speaker pair                     ###"
     echo "##############################################################"
     mkdir -p $pair_dir
-    cp $conf_dir/default/pair_default.yml $pair_dir/$org-$tar.yml
+    if [ ! -e $pair_dir/$org-$tar.yml ] ; then
+        cp $conf_dir/default/pair_default.yml $pair_dir/$org-$tar.yml
+        echo "list:" >> $pair_dir/$org-$tar.yml
+        echo "    trlist: $pair_dir/$org-${tar}_tr.list" >> $pair_dir/$org-$tar.yml
+        echo "    evlist: $pair_dir/$org-${tar}_ev.list" >> $pair_dir/$org-$tar.yml
+    fi
     # Initilization of the speaker pair
     python $src_dir/init_pair.py \
         $org \
         $tar \
-        $wav_dir
+        $wav_dir \
+        $pair_dir
 fi
 
 if [ 0 -eq 1 ] ; then
