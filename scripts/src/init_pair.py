@@ -16,13 +16,14 @@ create training and evaluation list files
 """
 
 import os
+import sys
 import glob
 import argparse
 
 
 def main():
     # Options for python
-    description = 'create training and evaluation list file (spkr.yml)'
+    description = 'create training and evaluation list file (pair.yml)'
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument('org', type=str,
                         help='original speaker label')
@@ -46,7 +47,8 @@ def main():
 
     # existing training and eve file check
     if os.path.exists(trlist) and os.path.exists(evlist):
-        raise("List files are already excisted.")
+        print ("List files are already excisted.")
+        sys.exit(0)
 
     # open files and write wave file path
     tf = open(trlist, 'w')

@@ -34,7 +34,7 @@ def feature_analysis(feat, wavf):
     feat.save_hdf5(wavf)
 
     # read hdf5 files for test
-    feat.read_hdf5(wavf)
+    # feat.read_hdf5(wavf)
     return
 
 
