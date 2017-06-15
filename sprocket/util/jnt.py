@@ -52,92 +52,93 @@ class JointFeatureExtractor(object):
         # open GMM for training and conversion
         # self.gmm = GMMTrainer()
 
-    def estimate(self):
-        itnum = 0
-        num_files = len(self.conf.trfiles)
-
-        jntlist = []
-        for i in range(num_files):
-            print(self.conf.h5dir + '/' + self.conf.trfiles[i][0])
-            # read acoustic features
+    # TODO: these functions for open and close hdf5 will be moved to hdf.py
+    def open_h5files(self):
+        # read h5 files
+        self.h5s = []
+        self.num_files = len(self.conf.trfiles)
+        for i in range(self.num_files):
+            # open acoustic features
             orgh5 = HDF5(
                 self.conf.h5dir + '/' + self.conf.trfiles[i][0] + '.h5', mode="r")
             tarh5 = HDF5(
                 self.conf.h5dir + '/' + self.conf.trfiles[i][1] + '.h5', mode="r")
+            self.h5s.append([orgh5, tarh5])
+        return
 
-            # extract joint feature vector
-            jntlist.append(self._get_joint_feature_vector(itnum, orgh5, tarh5))
+    def close_h5files(self):
+        # close hdf5 files
+        for i in range(self.num_files):
+            self.h5s[i][0].close()
+            self.h5s[i][1].close()
+        return
 
-            orgh5.close()
-            tarh5.close()
+    def estimate(self):
+        itnum = 0
+        print(str(itnum) + '-th iteration start.')
 
-        print (jntlist)
-        print (jntlist[i] for i in range(num_files))
+        # open h5list files
+        self.open_h5files()
 
-        jnt = np.r_[(jntlist[i] for i in range(num_files))]
-
-
-        # concatenate jnts
-        if i == 0:
-            jnt = jfeature
-        else:
-            jnt = np.c_[jnt, jfeature]
-
-
+        # create joint feature vector
+        jnt = self._get_joint_feature_vector(itnum)
 
         # iterative GMM training
-        while (itnum > self.conf.n_iter):
+        while (itnum < self.conf.n_iter):
             itnum += 1
+            print(str(itnum) + '-th iteration start.')
             # # train GMM with joint feature vectors
             # self.gmm.train(jnt)
 
-            jfeature = self._get_joint_feature_vector(itnum, orgh5, tarh5)
+            # dtw with converted feature if itnum > 1
+            jnt = self._get_joint_feature_vector(itnum)
 
-            # concatenate jfeatures
-            # jnt = np.c_[jfeature]
-            jnt = jfeature
-
-        # close HDF5 files
+        # close hdf5 files
+        self.close_h5files()
 
         return
 
-    def _get_joint_feature_vector(self,
-                                  itnum,
-                                  orgh5,
-                                  tarh5,
-                                  convdata=None,
-                                  ):
+    def _get_joint_feature_vector(self, itnum):
+        for i in range(self.num_files):
+            jdata = self._get_joint_feature_file(
+                itnum, self.h5s[i][0], self.h5s[i][1])
+            # create joint feature matrix
+            if i == 0:
+                jnt = jdata
+            else:
+                jnt = np.r_[jnt, jdata]
+        return jnt
+
+    def _get_joint_feature_file(self, itnum, orgh5, tarh5):
+        # get delta and extract silence frame
+        orgdata = calculate_extsddata(
+            orgh5.read('mcep'), orgh5.read('npow'))
+        tardata = calculate_extsddata(
+            tarh5.read('mcep'), tarh5.read('npow'))
+
         if itnum == 0:
-            # dtw with original and target feature vector
-            # get delta and extract silence frame
-            orgdata = calculate_extsddata(
-                orgh5.read('mcep'), orgh5.read('npow'))
-            tardata = calculate_extsddata(
-                tarh5.read('mcep'), tarh5.read('npow'))
-
             # estimate twf function
-            dist, _, _, path = self._estimate_twf(orgdata, tardata)
-            print('Distance is' + dist)
-
-            # create joint feature vector
-            jdata = twf
-
+            dist, _, _, twf = self._estimate_twf(orgdata, tardata)
         else:
-            # dtw with converted original and target feature vector
-
+            # TODO: convert acoustic feature of original
             # # conversion
             # conv = self.gmm.convert(orgdata)
-
-            # # get delta adn extract silence frame for converted
+            # # get delta and extract silence frame for converted
             # convdata = calculate_extsddata(conv, orgh5.read('npow'))
-
-            # copy org data for debug
+            # copy org data for debug (TODO: will be removed)
             convdata = orgdata
 
             # twf estimation between conv and tar
-            jfeature = self._estimate_twf(convdata, tardata)
+            dist, _, _, twf = self._estimate_twf(convdata, tardata)
 
-        return jfeature
+        # TODO: save twf file (label: itnum, filename)
+        print('distortion [dB]: ' + str(dist))
+        jdata = self.generate_joint_feature_from_twf(orgdata, tardata, twf)
+
+        return jdata
+
+    def generate_joint_feature_from_twf(self, orgdata, tardata, twf):
+        return np.c_[orgdata[twf[0]], tardata[twf[1]]]
 
     def _estimate_twf(self, orgdata, tardata):
         """
