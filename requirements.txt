@@ -2,3 +2,5 @@ numpy
 scipy
 pysptk
 h5py
+dtw
+plotly
