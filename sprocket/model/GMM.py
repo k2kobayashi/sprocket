@@ -43,7 +43,9 @@ class GMMTrainer(object):
         pass
 
     def train(self, jnt):
+        print('GMM modeling starts')
         self.param.fit(jnt)
+        print('GMM modeling has been done.')
 
         self.w = self.param.weights_
         self.jmu = self.param.means_
@@ -121,7 +123,7 @@ class GMMTrainer(object):
         # parameter for sequencial data
         T, sddim = sddata.shape
 
-        # estimate posterior sequence given X
+        # estimate posterior sequence
         wseq = self.pX.predict_proba(sddata)
 
         # estimate mixture sequence
@@ -155,8 +157,7 @@ class GMMTrainer(object):
 
     def mlpg(self, wseq, cseq, mseq, covseq):
         pass
-        # # TODO
-        # # parameter for sequencial data
+        # # TODO parameter for sequencial data
         # T, sddim = mseq.shape
 
         # # prepare W

@@ -18,11 +18,52 @@ handle hdf5 files
 import os
 import h5py
 
+from sprocket.util.yml import PairYML
+
+
+def open_h5files(yml, mode='tr'):
+    # read pair-dependent yml file
+    conf = PairYML(yml)
+
+    # read h5 files
+    h5list = []
+    if mode == 'tr':
+        num_files = len(conf.trfiles)
+        for i in range(num_files):
+            # open acoustic features
+            orgh5 = HDF5(
+                conf.h5dir + '/' + conf.trfiles[i][0] + '.h5', mode="r")
+            tarh5 = HDF5(
+                conf.h5dir + '/' + conf.trfiles[i][1] + '.h5', mode="r")
+            h5list.append([orgh5, tarh5])
+    elif mode == 'ev':
+        num_files = len(conf.evfiles)
+        for i in range(num_files):
+            # open acoustic features
+            orgh5 = HDF5(
+                conf.h5dir + '/' + conf.evfiles[i] + '.h5', mode="r")
+            h5list.append(orgh5)
+    else:
+        raise('other mode does not support')
+
+    return h5list
+
+
+def close_h5files(h5list, mode='tr'):
+    # close hdf5 files
+    for i in range(len(h5list)):
+        if mode == 'tr':
+            h5list[i][0].close()
+            h5list[i][1].close()
+        else:
+            h5list[i].close()
+    return
+
 
 class HDF5(object):
 
     """
-    Handle HDF5 format file
+    Handle HDF5 format file for a file
 
     TODO:
 
@@ -32,7 +73,8 @@ class HDF5(object):
 
     def __init__(self, fpath, mode=None):
         self.fpath = fpath
-        self.dirname, _ = os.path.split(self.fpath)
+        self.dirname, self.filename = os.path.split(self.fpath)
+        self.flbl, _ = os.path.splitext(self.filename)
 
         if mode == None:
             raise("Please specify the mode.")
