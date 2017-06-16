@@ -7,6 +7,7 @@
 # work files
 /scripts/data/pair/clb-slt/jnt
 /scripts/data/pair/clb-slt/twf
+/scripts/data/pair/clb-slt/GMM
 
 ### OSX ###
 .DS_Store
