@@ -52,6 +52,9 @@ class PairYML(object):
 
         self.h5dir = conf['dir']['h5']
         self.wavdir = conf['dir']['wav']
+        self.pairdir = conf['dir']['pair']
+
+        self.n_jntiter = conf['jnt']['n_iter']
 
         self.n_mix = conf['GMM']['n_mix']
         self.n_iter = conf['GMM']['n_iter']
@@ -59,7 +62,6 @@ class PairYML(object):
 
         self._read_training_list()
         self._read_evaluation_list()
-
 
     def _read_training_list(self):
         if not os.path.exists(self.trlist):

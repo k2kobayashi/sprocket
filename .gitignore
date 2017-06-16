@@ -3,7 +3,10 @@
 /scripts/configure/*.list
 /scripts/configure/f0histgram/*.pdf
 /scripts/data/speaker/h5/*
-# /scripts/data/pair/
+
+# work files
+/scripts/data/pair/clb-slt/jnt
+/scripts/data/pair/clb-slt/twf
 
 ### OSX ###
 .DS_Store
