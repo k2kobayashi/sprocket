@@ -74,8 +74,9 @@ class JointFeatureExtractor(object):
         while (itnum < self.conf.n_jntiter):
             itnum += 1
             print(str(itnum) + '-th joint feature extraction start.')
-            # train GMM with joint feature vectors
+            # train and GMM with joint feature vectors
             self.gmm.train(jnt)
+            self.save_gmm(itnum)
 
             # dtw with converted feature if itnum > 1
             jnt = self._get_joint_feature_vector(itnum)
@@ -152,6 +153,16 @@ class JointFeatureExtractor(object):
         fp.close()
 
         return
+
+    def save_gmm(self, itnum):
+        gmmdir = self.conf.pairdir + '/GMM'
+        if not os.path.exists(gmmdir):
+            os.makedirs(gmmdir)
+        gmmpath = gmmdir + '/it' + str(itnum) + '_GMM.pkl'
+        self.gmm.save(gmmpath)
+
+        return
+
 
     def generate_joint_feature_from_twf(self, orgdata, tardata, twf):
         return np.c_[orgdata[twf[0]], tardata[twf[1]]]

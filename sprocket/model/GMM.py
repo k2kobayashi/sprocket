@@ -19,6 +19,7 @@ import numpy as np
 import sklearn.mixture
 from sprocket.util.yml import PairYML
 
+from sklearn.externals import joblib
 from sklearn.mixture.gaussian_mixture import _compute_precision_cholesky
 
 
@@ -35,12 +36,12 @@ class GMMTrainer(object):
             max_iter=self.conf.n_iter)
 
     def open(self, fpath):
-        # read w, jmu, jcov
-        pass
+        # read model parameter file
+        self.param = joblib.load(fpath)
 
     def save(self, fpath):
-        # write as pkl file
-        pass
+        # save model parameter file
+        joblib.dump(self.param, fpath)
 
     def train(self, jnt):
         print('GMM modeling starts')
