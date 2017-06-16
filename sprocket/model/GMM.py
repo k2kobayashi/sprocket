@@ -19,6 +19,8 @@ import numpy as np
 import sklearn.mixture
 from sprocket.util.yml import PairYML
 
+from sklearn.mixture.gaussian_mixture import _compute_precision_cholesky
+
 
 class GMMTrainer(object):
 
@@ -60,8 +62,11 @@ class GMMTrainer(object):
         # estimate parameter sequence
         cseq, wseq, mseq, covseq = self.gmmmap(data)
 
-        # maximum likelihood parameter generation
-        odata = self.mlpg(cseq, wseq, mseq, covseq)
+        # minimum mean square error based parameter generation
+        odata = self.mmse(wseq, data)
+
+        # TODO # maximum likelihood parameter generation
+        # odata = self.mlpg(cseq, wseq, mseq, covseq)
 
         return odata
 
@@ -85,7 +90,7 @@ class GMMTrainer(object):
         # calculate A, b, conditional covariance
         self.A = np.zeros((self.conf.n_mix, sddim, sddim))
         self.b = np.zeros((self.conf.n_mix, sddim))
-        self.cond_cov = np.zeros((self.conf.n_mix, sddim, sddim))
+        self.cond_cov_inv = np.zeros((self.conf.n_mix, sddim, sddim))
         for m in range(self.conf.n_mix):
             # calculate A (i.e., A = yxcov_m * xxcov_m^-1)
             self.A[m] = np.dot(self.covYX[m], self.covXXinv[m])
@@ -93,51 +98,83 @@ class GMMTrainer(object):
             # calculate b (i.e., b = mu^Y - A * mu^X)
             self.b[m] = self.meanY[m] - np.dot(self.A[m], self.meanX[m])
 
-            # calculate conditional covariance (i.e., cov^(Y|X) = yycov - A *
-            # xxcov * A')
-            self.cond_cov[m] = self.covYY[
-                m] - np.dot(np.dot(self.A[m], self.covXX[m, :]), self.A[m].T)
+            # calculate conditional covariance
+            # (i.e., cov^(Y|X)^-1 = (yycov - A * xycov)^-1)
+            self.cond_cov_inv[m] = np.linalg.inv(self.covYY[
+                m] - np.dot(self.A[m], self.covXY[m]))
+
         return
 
     def set_pX(self):
         # probability density function for X
         self.pX = sklearn.mixture.GaussianMixture(
-            n_components=self.conf.n_mix, covariance_type="full")
+            n_components=self.conf.n_mix, covariance_type=self.conf.covtype)
         self.pX.weights_ = self.w
         self.pX.means_ = self.meanX
         self.pX.covariances_ = self.covXX
-        # TODO: need to estimate for calculate proba
-        self.pX.precisions_cholesky_ = self.pX._compute_precision_cholesky(
-           self.covXX, "full")
+        self.pX.precisions_cholesky_ = _compute_precision_cholesky(
+            self.covXX, self.conf.covtype)
 
-        None
         return
 
     def gmmmap(self, sddata):
         # parameter for sequencial data
         T, sddim = sddata.shape
 
-        assert T == sddata.shape[0]
-
-        # inference
-        for t in range(T):
-            print(self.pX.predict_proba(sddata[t]))
+        # estimate posterior sequence given X
+        wseq = self.pX.predict_proba(sddata)
 
         # estimate mixture sequence
-        cseq = np.argmax(wseq, axix=0)
+        cseq = np.argmax(wseq, axis=1)
 
-        # conditional mean vector sequence
-        mseq = np.dot(self.A, sddata) + self.b
-
-        # conditional covariance sequence
+        mseq = np.zeros((T, sddim))
         covseq = np.zeros((T, sddim, sddim))
         for t in range(T):
-            covseq[t] = self.cond_cov[cseq[t]]
+            m = cseq[t]
+            # conditional mean vector sequence
+            mseq[t] = self.meanY[m] + \
+                np.dot(self.A[m], sddata[t] - self.meanX[m])
 
-        return wseq, cseq, mseq, covseq
+            # conditional covariance sequence
+            covseq[t] = self.cond_cov_inv[cseq[t]]
 
-    def mlpg(self):
+        return cseq, wseq, mseq, covseq
+
+    def mmse(self, wseq, sddata):
+        # parameter for sequencial data
+        T, sddim = sddata.shape
+
+        odata = np.zeros((T, sddim))
+        for t in range(T):
+            for m in range(self.conf.n_mix):
+                odata[t] += wseq[t, m] * \
+                    (self.meanY[m] +
+                     np.dot(self.A[m], sddata[t] - self.meanX[m]))
+
+        return odata[:, :sddim / 2]
+
+    def mlpg(self, wseq, cseq, mseq, covseq):
         pass
+        # # TODO
+        # # parameter for sequencial data
+        # T, sddim = mseq.shape
+
+        # # prepare W
+
+        # # prepare U
+
+        # # estimate W'u
+
+        # # W'UW
+        # WUW =
+
+        # # W'Um
+        # WUm =
+
+        # # calculate (W'UW)^-1 * W'UM
+        # odata = np.dot(np.linalg.inv(WUW), WUm)
+
+        # return odata
 
 
 def main():
