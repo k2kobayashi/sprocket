@@ -122,12 +122,13 @@ class JointFeatureExtractor(object):
             dist, _, _, twf = self._estimate_twf(orgdata, tardata)
         else:
             # TODO: convert acoustic feature of original
-            # # conversion
-            # conv = self.gmm.convert(orgdata)
+            # conversion
+            self.gmm.set_conversion()
+            conv = self.gmm.convert(orgdata)
             # # get delta and extract silence frame for converted
-            # convdata = calculate_extsddata(conv, orgh5.read('npow'))
+            convdata = calculate_extsddata(conv, orgh5.read('npow'))
             # copy org data for debug (TODO: will be removed)
-            convdata = orgdata
+            # convdata = orgdata
 
             # twf estimation between conv and tar
             dist, _, _, twf = self._estimate_twf(convdata, tardata)
