@@ -8,6 +8,7 @@
 /scripts/data/pair/clb-slt/jnt
 /scripts/data/pair/clb-slt/twf
 /scripts/data/pair/clb-slt/GMM
+/scripts/data/pair/clb-slt/model
 
 ### OSX ###
 .DS_Store

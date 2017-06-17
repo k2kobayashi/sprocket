@@ -15,6 +15,7 @@
 
 """
 
+import os
 import numpy as np
 import sklearn.mixture
 from sprocket.util.yml import PairYML
@@ -36,10 +37,15 @@ class GMMTrainer(object):
             max_iter=self.conf.n_iter)
 
     def open(self, fpath):
+        if not os.path.exists(fpath):
+            raise('pkl for GMM does not exists.')
         # read model parameter file
         self.param = joblib.load(fpath)
 
     def save(self, fpath):
+        if not os.path.exists(fpath):
+            os.makedirs(os.path.dirname(fpath))
+
         # save model parameter file
         joblib.dump(self.param, fpath)
 

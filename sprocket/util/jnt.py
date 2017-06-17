@@ -22,7 +22,7 @@ import numpy as np
 from dtw import dtw
 
 from sprocket.util.yml import PairYML
-from sprocket.util.hdf5 import open_h5files, close_h5files
+from sprocket.util.hdf5 import HDF5, open_h5files, close_h5files
 from sprocket.util.distance import melcd
 from sprocket.util.delta import delta
 from sprocket.util.extfrm import extfrm
@@ -143,14 +143,27 @@ class JointFeatureExtractor(object):
 
         return
 
+    def read_jnt(self):
+        jntdir = self.conf.pairdir + '/jnt'
+        jntpath = jntdir + '/it' + str(self.conf.n_jntiter - 1) + '.h5'
+
+        if not os.path.exists(jntpath):
+            raise('joint feature files does not exists.')
+
+        h5 = HDF5(jntpath, mode='r')
+        jnt = h5.read(ext='mat')
+        h5.close()
+
+        return jnt
+
     def save_jnt(self, jnt, itnum):
         jntdir = self.conf.pairdir + '/jnt'
         if not os.path.exists(jntdir):
             os.makedirs(jntdir)
-        jntpath = jntdir + '/it' + str(itnum) + '.mat'
-        fp = open(jntpath, 'w')
-        fp.write(jnt)
-        fp.close()
+        jntpath = jntdir + '/it' + str(itnum) + '.h5'
+        h5 = HDF5(jntpath, mode='w')
+        h5.save(jnt, ext='mat')
+        h5.close()
 
         return
 
@@ -162,7 +175,6 @@ class JointFeatureExtractor(object):
         self.gmm.save(gmmpath)
 
         return
-
 
     def generate_joint_feature_from_twf(self, orgdata, tardata, twf):
         return np.c_[orgdata[twf[0]], tardata[twf[1]]]

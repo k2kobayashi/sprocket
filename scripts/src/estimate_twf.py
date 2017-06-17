@@ -36,8 +36,6 @@ def main():
     jnt = JointFeatureExtractor(args.pair_ymlf)
     jnt.estimate()
 
-    # dtw to estimate twf
-
     return
 
 if __name__ == '__main__':
