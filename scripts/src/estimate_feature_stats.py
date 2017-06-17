@@ -41,6 +41,8 @@ def main():
     F0stats = F0statistics(args.pair_ymlf)
     F0stats.estimate()
 
+    return
+
 
 if __name__ == '__main__':
     main()

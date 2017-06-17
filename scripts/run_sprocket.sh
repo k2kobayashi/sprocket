@@ -76,7 +76,7 @@ if [ 0 -eq 1 ] ; then
         $pair_dir
 fi
 
-if [ 1 -eq 1 ] ; then
+if [ 0 -eq 1 ] ; then
     echo "##############################################################"
     echo "### Estimate acoustic feature statistics                   ###"
     echo "##############################################################"
@@ -100,15 +100,15 @@ if [ 0 -eq 1 ] ; then
 fi
 
 # GMM train
-if [ 0 -eq 1 ] ; then
+if [ 1 -eq 1 ] ; then
     echo "##############################################################"
     echo "### Train conversion model                                 ###"
     echo "##############################################################"
     # estimate GMM parameter using the joint feature vector
-    python $src_dir/train.py \
+    python $src_dir/train_GMM.py \
         $org \
         $tar \
-        $pair_dir
+        $pair_dir/$org-$tar.yml
 fi
 
 # Conversion based on GMM
