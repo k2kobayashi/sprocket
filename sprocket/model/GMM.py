@@ -115,6 +115,7 @@ class GMMTrainer(object):
         self.pX.weights_ = self.w
         self.pX.means_ = self.meanX
         self.pX.covariances_ = self.covXX
+        # this function is required to estimate porsterior  P(X | \lambda^(X)))
         self.pX.precisions_cholesky_ = _compute_precision_cholesky(
             self.covXX, self.conf.covtype)
 
