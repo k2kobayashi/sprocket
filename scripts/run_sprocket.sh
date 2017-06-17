@@ -76,7 +76,7 @@ if [ 0 -eq 1 ] ; then
         $pair_dir
 fi
 
-if [ 0 -eq 1 ] ; then
+if [ 1 -eq 1 ] ; then
     echo "##############################################################"
     echo "### Estimate acoustic feature statistics                   ###"
     echo "##############################################################"
@@ -84,12 +84,11 @@ if [ 0 -eq 1 ] ; then
     python $src_dir/estimate_feature_stats.py \
         $org \
         $tar \
-        $wav_dir \
         $pair_dir/$org-$tar.yml
 fi
 
 # Joint feature extraction
-if [ 1 -eq 1 ] ; then
+if [ 0 -eq 1 ] ; then
     echo "##############################################################"
     echo "### Estimate time warping function using GMM               ###"
     echo "##############################################################"

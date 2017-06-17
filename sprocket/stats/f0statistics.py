@@ -11,7 +11,7 @@
 #
 
 """
-Calculate GV of several feature sequence
+Calculate log F0 mean and variance of several feature sequence
 
 """
 
@@ -22,7 +22,7 @@ from sprocket.util.yml import PairYML
 from sprocket.util.hdf5 import open_h5files, close_h5files
 
 
-class GV (object):
+class F0statistics (object):
 
     def __init__(self, yml):
         # read pair-dependent yml file
@@ -32,7 +32,7 @@ class GV (object):
         self.h5s = open_h5files(yml, mode='tr')
         self.num_files = len(self.h5s)
 
-    def estimate(self, feature='mcep'):
+    def estimate(self):
         otflags = [0, 1]
         for otflag in otflags:
             if otflag == 1:
@@ -40,33 +40,29 @@ class GV (object):
             else:
                 spkr = 'tar'
 
-            var = []
             for i in range(self.num_files):
-                mcep = self.h5s[i][otflag].read(feature)
-                var.append(np.var(mcep, axis=0))
+                nonzeroidx = np.nonzero(self.h5s[i][otflag].read('f0'))
+                f0 = self.h5s[i][otflag].read('f0')
+                if i == 0:
+                    f0s = np.log(f0[nonzeroidx])
+                else:
+                    f0s = np.r_[f0s, np.log(f0[nonzeroidx])]
 
-            # calculate vm and vv
-            vm = np.mean(np.array(var), axis=0)
-            vv = np.var(np.array(var), axis=0)
-            gv = np.c_[vm, vv].T
+            f0stats = np.array([np.mean(f0s), np.std(f0s)])
 
-            gvpath = self.conf.pairdir + '/stats/' + spkr + '.gv'
-            if not os.path.exists(os.path.dirname(gvpath)):
-                os.makedirs(os.path.dirname(gvpath))
-            fp = open(gvpath, 'w')
-            fp.write(gv)
+            f0statspath = self.conf.pairdir + '/stats/' + spkr + '.f0stats'
+            if not os.path.exists(os.path.dirname(f0statspath)):
+                os.makedirs(os.path.dirname(f0statspath))
+            fp = open(f0statspath, 'w')
+            fp.write(f0stats)
             fp.close()
 
-            print('GV estimation of ' + feature +
-                  ' for ' + spkr + ' has been done.')
+            print('F0 statistics estimation for ' + spkr + ' has been done.')
 
         # close h5class
         close_h5files(self.h5s)
 
         return
-
-    def gv_filter(self):
-        pass
 
 
 def main():

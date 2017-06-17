@@ -15,8 +15,31 @@
 
 """
 
+import argparse
+
+from sprocket.stats.gv import GV
+from sprocket.stats.f0statistics import F0statistics
+
+
 def main():
-    pass
+    # Options for python
+    description = 'estimate joint feature of source and target speakers'
+    parser = argparse.ArgumentParser(description=description)
+    parser.add_argument('org', type=str,
+                        help='original speaker label')
+    parser.add_argument('tar', type=str,
+                        help='target speaker label')
+    parser.add_argument('pair_ymlf', type=str,
+                        help='yml file for the speaker pair')
+    args = parser.parse_args()
+
+    # estimate and save GV of orginal and target speakers
+    gv = GV(args.pair_ymlf)
+    gv.estimate('mcep')
+
+    # estimate and save F0 statistics of original and target speakers
+    F0stats = F0statistics(args.pair_ymlf)
+    F0stats.estimate()
 
 
 if __name__ == '__main__':
