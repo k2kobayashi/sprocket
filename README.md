@@ -32,6 +32,7 @@ python setup.py develop
 
 
 - pythonから`import world` として、エラーがでなければOK
+- Memo（2017/06/19）: waf installをしても，world.pyディレクトリを削除するとimportでエラーが出る．
 
 ### Other packages
 
