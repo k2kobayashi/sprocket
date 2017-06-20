@@ -1,7 +1,7 @@
 wav:
   fs: 16000
   bit: 16
-  fftl: 1025
+  fftl: 1024
   framems: 25
   shiftms: 5
 f0:
@@ -15,6 +15,4 @@ mcep:
   alpha: 0.42
 power:
   threshold: -20
-
 analyzer: world
-

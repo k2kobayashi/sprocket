@@ -29,6 +29,7 @@ class SpeakerYML(object):
         # read parameter from yml file
         self.fs = conf['wav']['fs']
         self.shiftms = conf['wav']['shiftms']
+        self.fftl = conf['wav']['fftl']
         self.minf0 = conf['f0']['minf0']
         self.maxf0 = conf['f0']['maxf0']
         self.dim = conf['mcep']['dim']

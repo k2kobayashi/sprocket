@@ -1,7 +1,7 @@
 #! /usr/local/bin/python
 # -*- coding: utf-8 -*-
 #
-# world.py
+# analyzer.py
 #   First ver.: 2017-06-09
 #
 #   Copyright 2017
@@ -119,8 +119,7 @@ class WORLD(Analyzer, Synthesizer):
         if not isinstance(params, SpeechParameters):
             raise RuntimeError("Not supoprted")
 
-        y = world.synthesis_from_aperiodicity(self.fs, self.period,
-                                              params.f0,
-                                              params.spectrum_envelope,
-                                              params.aperiodicity, self.time_len)
+        y = world.synthesizey(params.f0,
+                              params.spectrum_envelope,
+                              params.aperiodicity, self.fs, 5)
         return y
