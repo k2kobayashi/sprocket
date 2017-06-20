@@ -30,11 +30,6 @@ from sprocket.model.GMM import GMMTrainer
 
 
 """
-Memo: delta, extfrm, dtwまではパラレルで動く様にする．
-jnt作成とGMMTrainはシングルの処理
-
-
-ほしいもの: it0, it1, it2のjntとtwf, とGMM
 
 """
 
@@ -64,37 +59,55 @@ class JointFeatureExtractor(object):
         self.h5s = open_h5files(self.yml, mode='tr')
         self.num_files = len(self.h5s)
 
-        # create joint feature vector
-        jnt = self._get_joint_feature_vector(itnum)
+        # create joint feature over utterances
+        jnt = self._get_joint_feature_matrix(itnum)
 
         # save jnt file (label: $pair_dir/jnt/itnum.mat)
-        self.save_jnt(jnt, itnum)
+        self._save_jnt(jnt, itnum)
 
-        # iterative GMM training
+        # iterative twf estimation
         while (itnum < self.conf.n_jntiter):
             itnum += 1
             print(str(itnum) + '-th joint feature extraction start.')
-            # train and GMM with joint feature vectors
+
+            # train and save GMM with joint feature vectors
             self.gmm.train(jnt)
-            self.save_gmm(itnum)
 
-            # dtw with converted feature if itnum > 1
-            jnt = self._get_joint_feature_vector(itnum)
+            # dtw with converted original and target
+            jnt = self._get_joint_feature_matrix(itnum)
 
-            # save jnt file (label: $pair_dir/jnt/itnum.mat)
-            self.save_jnt(jnt, itnum)
+            # save GMM and jnt file
+            self._save_gmm(itnum)
+            self._save_jnt(jnt, itnum)
 
         # close hdf5 files
         close_h5files(self.h5s)
 
         return
 
+    def read_jnt(self):
+        jntdir = self.conf.pairdir + '/jnt'
+        jntpath = jntdir + '/it' + str(self.conf.n_jntiter - 1) + '.h5'
+
+        if not os.path.exists(jntpath):
+            raise('joint feature files does not exists.')
+
+        h5 = HDF5(jntpath, mode='r')
+        jnt = h5.read(ext='mat')
+        h5.close()
+
+        return jnt
+
+    def generate_joint_feature_from_twf(self, orgdata, tardata, twf):
+        return np.c_[orgdata[twf[0]], tardata[twf[1]]]
+
     # TODO: will be modified to multiprocessing
-    def _get_joint_feature_vector(self, itnum):
+    def _get_joint_feature_matrix(self, itnum):
         for i in range(self.num_files):
             jdata = self._get_joint_feature_file(
                 itnum, self.h5s[i][0], self.h5s[i][1])
-            # create joint feature matrix
+
+            # concatenate joint feature data into joint feature matrix
             if i == 0:
                 jnt = jdata
             else:
@@ -113,7 +126,6 @@ class JointFeatureExtractor(object):
             dist, _, _, twf = self._estimate_twf(orgdata, tardata)
         else:
             # conversion
-            self.gmm.set_conversion()
             conv = self.gmm.convert(calculate_delta(orgh5.read('mcep')))
 
             # get delta and extract silence frame for converted
@@ -125,59 +137,13 @@ class JointFeatureExtractor(object):
         # print distortion
         print('distortion [dB]: ' + str(dist))
 
-        # save twf file (label: $pair_dir/twf/itnum/filename.twf)
-        self.save_twf(orgh5.flbl, twf, itnum)
+        # save twf file
+        self._save_twf(orgh5.flbl, twf, itnum)
 
         # generate joint feature vector of a phrase
         jdata = self.generate_joint_feature_from_twf(orgdata, tardata, twf)
 
         return jdata
-
-    def save_twf(self, flbl, twf, itnum):
-        twfdir = self.conf.pairdir + '/twf/it' + str(itnum)
-        if not os.path.exists(twfdir):
-            os.makedirs(twfdir)
-        twfpath = twfdir + '/' + flbl + '.twf'
-        natwf = np.array([twf[0], twf[1]])
-        np.savetxt(twfpath, (natwf.T), fmt='%d')
-
-        return
-
-    def read_jnt(self):
-        jntdir = self.conf.pairdir + '/jnt'
-        jntpath = jntdir + '/it' + str(self.conf.n_jntiter - 1) + '.h5'
-
-        if not os.path.exists(jntpath):
-            raise('joint feature files does not exists.')
-
-        h5 = HDF5(jntpath, mode='r')
-        jnt = h5.read(ext='mat')
-        h5.close()
-
-        return jnt
-
-    def save_jnt(self, jnt, itnum):
-        jntdir = self.conf.pairdir + '/jnt'
-        if not os.path.exists(jntdir):
-            os.makedirs(jntdir)
-        jntpath = jntdir + '/it' + str(itnum) + '.h5'
-        h5 = HDF5(jntpath, mode='w')
-        h5.save(jnt, ext='mat')
-        h5.close()
-
-        return
-
-    def save_gmm(self, itnum):
-        gmmdir = self.conf.pairdir + '/GMM'
-        if not os.path.exists(gmmdir):
-            os.makedirs(gmmdir)
-        gmmpath = gmmdir + '/it' + str(itnum) + '_GMM.pkl'
-        self.gmm.save(gmmpath)
-
-        return
-
-    def generate_joint_feature_from_twf(self, orgdata, tardata, twf):
-        return np.c_[orgdata[twf[0]], tardata[twf[1]]]
 
     def _estimate_twf(self, orgdata, tardata):
         """
@@ -191,9 +157,39 @@ class JointFeatureExtractor(object):
 
         return dtw(orgdata, tardata, dist=distance_func)
 
+    def _save_twf(self, flbl, twf, itnum):
+        twfdir = self.conf.pairdir + '/twf/it' + str(itnum)
+        if not os.path.exists(twfdir):
+            os.makedirs(twfdir)
+        twfpath = twfdir + '/' + flbl + '.twf'
+        natwf = np.array([twf[0], twf[1]])
+        np.savetxt(twfpath, (natwf.T), fmt='%d')
+
+        return
+
+    def _save_jnt(self, jnt, itnum):
+        jntdir = self.conf.pairdir + '/jnt'
+        if not os.path.exists(jntdir):
+            os.makedirs(jntdir)
+        jntpath = jntdir + '/it' + str(itnum) + '.h5'
+        h5 = HDF5(jntpath, mode='w')
+        h5.save(jnt, ext='mat')
+        h5.close()
+
+        return
+
+    def _save_gmm(self, itnum):
+        gmmdir = self.conf.pairdir + '/GMM'
+        if not os.path.exists(gmmdir):
+            os.makedirs(gmmdir)
+        gmmpath = gmmdir + '/it' + str(itnum) + '_GMM.pkl'
+        self.gmm.save(gmmpath)
+
+        return
+
 
 def gjfv_wrapper(args):
-    return JointFeatureExtractor._get_joint_feature_vector(*args)
+    return JointFeatureExtractor._get_joint_feature_matrix(*args)
 
 
 def calculate_extsddata(data, npow):

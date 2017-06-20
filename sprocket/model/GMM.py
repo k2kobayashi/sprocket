@@ -18,13 +18,31 @@
 import os
 import numpy as np
 import sklearn.mixture
-from sprocket.util.yml import PairYML
-
 from sklearn.externals import joblib
 from sklearn.mixture.gaussian_mixture import _compute_precision_cholesky
 
+from sprocket.util.yml import PairYML
+
 
 class GMMTrainer(object):
+
+    """
+    A GMM trainer
+
+    This class assumes:
+
+    TODO:
+    Training and converting acoustic feature
+
+    Attributes
+    ---------
+    conf: parameters read from speaker yml file
+    param: parameters of the GMM
+    w: weigh of the GMM
+    jmean: mean vector of the GMM
+    jcov: covariance matrix of the GMM
+
+    """
 
     def __init__(self, yml):
         # read pair-dependent yml file
@@ -37,12 +55,25 @@ class GMMTrainer(object):
             max_iter=self.conf.n_iter)
 
     def open(self, fpath):
+        # read GMM from pkl file
         if not os.path.exists(fpath):
-            raise('pkl for GMM does not exists.')
+            raise('pkl file of GMM does not exists.')
         # read model parameter file
         self.param = joblib.load(fpath)
 
+        # read joint model parameters
+        self.w = self.param.weights_
+        self.jmean = self.param.means_
+        self.jcov = self.param.covariances_
+
+        # estimate parameters for conversion
+        self._set_Ab()
+        self._set_pX()
+
+        return
+
     def save(self, fpath):
+        # save GMM intp pkl file
         if not os.path.exists(fpath):
             os.makedirs(os.path.dirname(fpath))
 
@@ -55,15 +86,12 @@ class GMMTrainer(object):
         print('GMM modeling has been done.')
 
         self.w = self.param.weights_
-        self.jmu = self.param.means_
+        self.jmean = self.param.means_
         self.jcov = self.param.covariances_
 
-        return
-
-    def set_conversion(self):
         # estimate parameters for conversion
-        self.set_Ab()
-        self.set_pX()
+        self._set_Ab()
+        self._set_pX()
 
         return
 
@@ -79,54 +107,6 @@ class GMMTrainer(object):
 
         return odata
 
-    def set_Ab(self):
-        # calculate A and b from self.jmu, self.jcov
-        sddim = self.jmu.shape[1] // 2
-
-        # devide GMM parameters into source and target parameters
-        self.meanX = self.jmu[:, 0:sddim]
-        self.meanY = self.jmu[:, sddim:]
-        self.covXX = self.jcov[:, :sddim, :sddim]
-        self.covXY = self.jcov[:, :sddim, sddim:]
-        self.covYX = self.jcov[:, sddim:, :sddim]
-        self.covYY = self.jcov[:, sddim:, sddim:]
-
-        # calculate inverse covariance for covariance XX
-        self.covXXinv = np.zeros((self.conf.n_mix, sddim, sddim))
-        for m in range(self.conf.n_mix):
-            self.covXXinv[m] = np.linalg.inv(self.covXX[m])
-
-        # calculate A, b, conditional covariance
-        self.A = np.zeros((self.conf.n_mix, sddim, sddim))
-        self.b = np.zeros((self.conf.n_mix, sddim))
-        self.cond_cov_inv = np.zeros((self.conf.n_mix, sddim, sddim))
-        for m in range(self.conf.n_mix):
-            # calculate A (i.e., A = yxcov_m * xxcov_m^-1)
-            self.A[m] = np.dot(self.covYX[m], self.covXXinv[m])
-
-            # calculate b (i.e., b = mu^Y - A * mu^X)
-            self.b[m] = self.meanY[m] - np.dot(self.A[m], self.meanX[m])
-
-            # calculate conditional covariance
-            # (i.e., cov^(Y|X)^-1 = (yycov - A * xycov)^-1)
-            self.cond_cov_inv[m] = np.linalg.inv(self.covYY[
-                m] - np.dot(self.A[m], self.covXY[m]))
-
-        return
-
-    def set_pX(self):
-        # probability density function for X
-        self.pX = sklearn.mixture.GaussianMixture(
-            n_components=self.conf.n_mix, covariance_type=self.conf.covtype)
-        self.pX.weights_ = self.w
-        self.pX.means_ = self.meanX
-        self.pX.covariances_ = self.covXX
-        # this function is required to estimate porsterior  P(X | \lambda^(X)))
-        self.pX.precisions_cholesky_ = _compute_precision_cholesky(
-            self.covXX, self.conf.covtype)
-
-        return
-
     def gmmmap(self, sddata):
         # parameter for sequencial data
         T, sddim = sddata.shape
@@ -140,13 +120,15 @@ class GMMTrainer(object):
         mseq = np.zeros((T, sddim))
         covseq = np.zeros((T, sddim, sddim))
         for t in range(T):
+            # read maximum likelihood mixture component in frame t
             m = cseq[t]
+
             # conditional mean vector sequence
             mseq[t] = self.meanY[m] + \
                 np.dot(self.A[m], sddata[t] - self.meanX[m])
 
             # conditional covariance sequence
-            covseq[t] = self.cond_cov_inv[cseq[t]]
+            covseq[t] = self.cond_cov_inv[m]
 
         return cseq, wseq, mseq, covseq
 
@@ -161,6 +143,7 @@ class GMMTrainer(object):
                     (self.meanY[m] +
                      np.dot(self.A[m], sddata[t] - self.meanX[m]))
 
+        # retern static and throw away delta component
         return odata[:, :sddim / 2]
 
     def mlpg(self, wseq, cseq, mseq, covseq):
@@ -184,6 +167,56 @@ class GMMTrainer(object):
         # odata = np.dot(np.linalg.inv(WUW), WUm)
 
         # return odata
+
+    def _set_Ab(self):
+        # calculate A and b from self.jmean, self.jcov
+        sddim = self.jmean.shape[1] // 2
+
+        # devide GMM parameters into source and target parameters
+        self.meanX = self.jmean[:, 0:sddim]
+        self.meanY = self.jmean[:, sddim:]
+        self.covXX = self.jcov[:, :sddim, :sddim]
+        self.covXY = self.jcov[:, :sddim, sddim:]
+        self.covYX = self.jcov[:, sddim:, :sddim]
+        self.covYY = self.jcov[:, sddim:, sddim:]
+
+        # calculate inverse covariance for covariance XX in each mixture
+        self.covXXinv = np.zeros((self.conf.n_mix, sddim, sddim))
+        for m in range(self.conf.n_mix):
+            self.covXXinv[m] = np.linalg.inv(self.covXX[m])
+
+        # calculate A, b, and conditional covariance given X
+        self.A = np.zeros((self.conf.n_mix, sddim, sddim))
+        self.b = np.zeros((self.conf.n_mix, sddim))
+        self.cond_cov_inv = np.zeros((self.conf.n_mix, sddim, sddim))
+        for m in range(self.conf.n_mix):
+            # calculate A (i.e., A = yxcov_m * xxcov_m^-1)
+            self.A[m] = np.dot(self.covYX[m], self.covXXinv[m])
+
+            # calculate b (i.e., b = mean^Y - A * mean^X)
+            self.b[m] = self.meanY[m] - np.dot(self.A[m], self.meanX[m])
+
+            # calculate conditional covariance
+            # (i.e., cov^(Y|X)^-1 = (yycov - A * xycov)^-1)
+            self.cond_cov_inv[m] = np.linalg.inv(self.covYY[
+                m] - np.dot(self.A[m], self.covXY[m]))
+
+        return
+
+    def _set_pX(self):
+        # probability density function of X
+        self.pX = sklearn.mixture.GaussianMixture(
+            n_components=self.conf.n_mix, covariance_type=self.conf.covtype)
+        self.pX.weights_ = self.w
+        self.pX.means_ = self.meanX
+        self.pX.covariances_ = self.covXX
+
+        # following function is required to estimate porsterior
+        # P(X | \lambda^(X)))
+        self.pX.precisions_cholesky_ = _compute_precision_cholesky(
+            self.covXX, self.conf.covtype)
+
+        return
 
 
 def main():

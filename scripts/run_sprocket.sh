@@ -100,7 +100,7 @@ if [ 0 -eq 1 ] ; then
 fi
 
 # GMM train
-if [ 1 -eq 1 ] ; then
+if [ 0 -eq 1 ] ; then
     echo "##############################################################"
     echo "### Train conversion model                                 ###"
     echo "##############################################################"
@@ -112,7 +112,7 @@ if [ 1 -eq 1 ] ; then
 fi
 
 # Conversion based on GMM
-if [ 0 -eq 1 ] ; then
+if [ 1 -eq 1 ] ; then
     echo "##############################################################"
     echo "### Conversion based on the trained models                 ###"
     echo "##############################################################"
@@ -120,6 +120,6 @@ if [ 0 -eq 1 ] ; then
     python $src_dir/convert.py \
         $org \
         $tar \
-        $pair_dir \
-        $wav_dir
+        $conf_dir/$tar.yml \
+        $pair_dir/$org-$tar.yml
 fi
