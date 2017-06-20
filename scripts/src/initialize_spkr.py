@@ -38,6 +38,7 @@ def world_f0_analysis(flbl):
 
 
 def create_f0_histgram(f0s, histfile):
+    # TODO: should be modified into plotly from matplotlib?
     # flatten two dimensional list into one dimensional list
     f0 = [f0val for i in f0s for f0val in i]
 
@@ -50,26 +51,26 @@ def create_f0_histgram(f0s, histfile):
 
 def main():
     # Options for python
-    description = 'create speaker-dependent configure file (spkr.yml)'
-    parser = argparse.ArgumentParser(description=description)
+    dcp = 'create speaker-dependent configure file (spkr.yml)'
+    parser = argparse.ArgumentParser(description=dcp)
     parser.add_argument('-m', '--multicore', type=int, default=1,
                         help='# of cores for multi-processing')
     parser.add_argument('spkr', type=str,
                         help='input speaker label')
-    parser.add_argument('wav_dir', type=str,
-                        help='wav file directory of the speaker')
     parser.add_argument('conf_dir', type=str,
                         help='configure directory of the speaker')
+    parser.add_argument('wav_dir', type=str,
+                        help='wav file directory of the speaker')
     args = parser.parse_args()
 
-    # grab .wav files in data directory
+    # grab .wav files in wav directory
     files = glob.glob(args.wav_dir + '/' + args.spkr + '/*.wav')
 
-    # F0 extraction with WORLD.dio on multi processing
+    # F0 extraction with WORLD on multi processing
     p = Pool(args.multicore)
     f0s = p.map(world_f0_analysis, files)
 
-    # create F0 histgram
+    # create figure to visualize F0 histgram
     hist_dir = args.conf_dir + '/f0histgram/'
     if not os.path.exists(hist_dir):
         os.makedirs(hist_dir)

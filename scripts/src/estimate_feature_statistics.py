@@ -17,6 +17,7 @@
 
 import argparse
 
+from sprocket.util.yml import PairYML
 from sprocket.stats.gv import GV
 from sprocket.stats.f0statistics import F0statistics
 
@@ -33,12 +34,15 @@ def main():
                         help='yml file for the speaker pair')
     args = parser.parse_args()
 
+    # read pair-dependent yml file
+    conf = PairYML(args.pair_ymlf)
+
     # estimate and save GV of orginal and target speakers
-    gv = GV(args.pair_ymlf)
+    gv = GV(conf)
     gv.estimate('mcep')
 
     # estimate and save F0 statistics of original and target speakers
-    F0stats = F0statistics(args.pair_ymlf)
+    F0stats = F0statistics(conf)
     F0stats.estimate()
 
     return

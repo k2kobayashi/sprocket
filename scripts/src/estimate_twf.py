@@ -17,6 +17,7 @@ estimate joint feature vector of the speaker pair using GMM
 
 import argparse
 
+from sprocket.util.yml import PairYML
 from sprocket.util.jnt import JointFeatureExtractor
 
 
@@ -24,6 +25,8 @@ def main():
     # Options for python
     description = 'estimate joint feature of source and target speakers'
     parser = argparse.ArgumentParser(description=description)
+    parser.add_argument('-m', '--multicore', type=int, default=1,
+                        help='# of cores for multi-processing')
     parser.add_argument('org', type=str,
                         help='original speaker label')
     parser.add_argument('tar', type=str,
@@ -32,8 +35,11 @@ def main():
                         help='yml file for the speaker pair')
     args = parser.parse_args()
 
+    # read pair-dependent yml file
+    conf = PairYML(args.pair_ymlf)
+
     # joint feature extraction
-    jnt = JointFeatureExtractor(args.pair_ymlf)
+    jnt = JointFeatureExtractor(conf, mnum=args.multicore)
     jnt.estimate()
 
     return

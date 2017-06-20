@@ -17,7 +17,7 @@
 
 import argparse
 
-from sprocket.util.yml import PairYML
+from sprocket.util.yml import SpeakerYML, PairYML
 from sprocket.util.hdf5 import open_h5files, close_h5files
 from sprocket.model.GMM import GMMTrainer
 from sprocket.stats.gv import GV
@@ -40,42 +40,55 @@ def main():
                         help='yml file for the speaker pair')
     args = parser.parse_args()
 
+    # read speaker-and pair-dependent yml file
+    sconf = SpeakerYML(args.spkr_ymlf)
+    pconf = PairYML(args.pair_ymlf)
+
     # open eval files
-    evh5s = open_h5files(args.pair_ymlf, mode='ev')
+    evh5s = open_h5files(pconf, mode='ev')
 
     # read F0 transfomer
-    f0trans = F0statistics(args.pair_ymlf)
+    f0trans = F0statistics(pconf)
 
     # read GMM for mcep
-    mcepgmm = GMMTrainer(args.pair_ymlf)
-    mcepgmm.open('./data/pair/clb-slt/model/GMM.pkl')
-    mcepgmm.set_conversion()
+    mcepgmmpath = pconf.pairdir + '/model/GMM.pkl'
+    mcepgmm = GMMTrainer(pconf)
+    mcepgmm.open(mcepgmmpath)
 
-    # TODO: read GMM for bndap
+    # TODO: read GMM for bap
 
-    # TODO: GV postfilter class
+    # TODO: GV postfilter for mcep
     # gv = GV(args.pair_ymlf, mode='mcep')
 
     # open synthesizer
-    synthesizer = Synthesizer(args.spkr_ymlf)
+    synthesizer = Synthesizer(sconf)
 
     # file loop
     for h5 in evh5s:
+        print(h5.flbl + ' converts.')
+
         # get F0 feature
         f0 = h5.read('f0')
         mcep = h5.read('mcep')
         apperiodicity = h5.read('ap')
 
-        # convert
+        # TODO: convert F0
         # cvf0 = f0trans.convert(f0)
+
+        # convert mel-cepstrum
         cvmcep = mcepgmm.convert(calculate_delta(mcep))
         # cvmcep_wGV = gv.postfilter(cvmcep)
 
+        # TODO: convert band-aperiodicity
+        # cvbap = bapgmm.convert(calculate_delta(bap))
+
         # synethesis
+        # TODO: need to be bugfix it takes too slow
         wav = synthesizer.synthesis(f0, cvmcep, apperiodicity)
         # wav_wGV = synthesizer.synthesis(cvf0, cvmcep, apperiodicity)
 
-        # file save as wavform
+        print 'hogehoge'
+        # save as wav file
 
     # close h5 files
     close_h5files(evh5s)

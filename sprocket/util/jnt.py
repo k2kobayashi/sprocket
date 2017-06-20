@@ -11,7 +11,7 @@
 #
 
 """
-
+twf and joint feature extraction
 
 """
 
@@ -21,7 +21,6 @@ import numpy as np
 
 from dtw import dtw
 
-from sprocket.util.yml import PairYML
 from sprocket.util.hdf5 import HDF5, open_h5files, close_h5files
 from sprocket.util.distance import melcd
 from sprocket.util.delta import delta
@@ -29,18 +28,13 @@ from sprocket.util.extfrm import extfrm
 from sprocket.model.GMM import GMMTrainer
 
 
-"""
-
-"""
-
-
 class JointFeatureExtractor(object):
 
-    def __init__(self, yml, feature='mcep', mnum=1):
+    def __init__(self, conf, feature='mcep', mnum=1):
 
-        # read pair-dependent yml file
-        self.yml = yml
-        self.conf = PairYML(yml)
+        # copy parameters
+        self.conf = conf
+        self.mnum = mnum
 
         # distance setting
         if feature == 'mcep':
@@ -49,14 +43,14 @@ class JointFeatureExtractor(object):
             raise('distance metrics does not support.')
 
         # open GMM for training and conversion
-        self.gmm = GMMTrainer(yml)
+        self.gmm = GMMTrainer(conf)
 
     def estimate(self):
         itnum = 0
         print(str(itnum) + '-th joint feature extraction starts.')
 
         # open h5list files
-        self.h5s = open_h5files(self.yml, mode='tr')
+        self.h5s = open_h5files(self.conf, mode='tr')
         self.num_files = len(self.h5s)
 
         # create joint feature over utterances
@@ -135,7 +129,7 @@ class JointFeatureExtractor(object):
             dist, _, _, twf = self._estimate_twf(convdata, tardata)
 
         # print distortion
-        print('distortion [dB]: ' + str(dist))
+        print('distortion [dB] for ' + orgh5.flbl + ': ' + str(dist))
 
         # save twf file
         self._save_twf(orgh5.flbl, twf, itnum)

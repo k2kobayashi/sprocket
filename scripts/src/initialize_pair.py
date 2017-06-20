@@ -30,7 +30,7 @@ def main():
     parser.add_argument('tar', type=str,
                         help='target speaker label')
     parser.add_argument('wav_dir', type=str,
-                        help='wav file directory of the speaker')
+                        help='wav file directory')
     parser.add_argument('pair_dir', type=str,
                         help='data directory for the speaker pair')
     args = parser.parse_args()
