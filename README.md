@@ -50,7 +50,7 @@ python setup.py develop
 
 ```
 cd scripts
-python vc_demo.py
+bash run_sprocket.sh
 ```
 
 ## Tests
