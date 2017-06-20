@@ -17,6 +17,7 @@
 
 import argparse
 
+from sprocket.util.yml import PairYML
 from sprocket.util.jnt import JointFeatureExtractor
 from sprocket.model.GMM import GMMTrainer
 
@@ -33,13 +34,16 @@ def main():
                         help='yml file for the speaker pair')
     args = parser.parse_args()
 
-    # joint feature extraction
-    jnt = JointFeatureExtractor(args.pair_ymlf)
+    # read pair-dependent yml file
+    conf = PairYML(args.pair_ymlf)
+
+    # read joint feature vector
+    jnt = JointFeatureExtractor(conf)
     jntdata = jnt.read_jnt()
 
     # train GMM using joint feature vector
-    GMMpath = './data/pair/clb-slt/model/GMM.pkl'
-    gmm = GMMTrainer(args.pair_ymlf)
+    GMMpath = conf.pairdir + '/model/GMM.pkl'
+    gmm = GMMTrainer(conf)
     gmm.train(jntdata)
     gmm.save(GMMpath)
 

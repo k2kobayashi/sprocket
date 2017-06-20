@@ -5,10 +5,7 @@
 /scripts/data/speaker/h5/*
 
 # work files
-/scripts/data/pair/clb-slt/jnt
-/scripts/data/pair/clb-slt/twf
-/scripts/data/pair/clb-slt/GMM
-/scripts/data/pair/clb-slt/model
+/scripts/data/pair/clb-slt
 
 ### OSX ###
 .DS_Store

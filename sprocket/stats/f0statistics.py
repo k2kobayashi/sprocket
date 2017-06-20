@@ -18,18 +18,17 @@ Calculate log F0 mean and variance of several feature sequence
 import os
 import numpy as np
 
-from sprocket.util.yml import PairYML
 from sprocket.util.hdf5 import open_h5files, close_h5files
 
 
 class F0statistics (object):
 
-    def __init__(self, yml):
+    def __init__(self, conf):
         # read pair-dependent yml file
-        self.conf = PairYML(yml)
+        self.conf = conf
 
         # open h5list files
-        self.h5s = open_h5files(yml, mode='tr')
+        self.h5s = open_h5files(conf, mode='tr')
         self.num_files = len(self.h5s)
 
     def estimate(self):

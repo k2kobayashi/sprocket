@@ -21,8 +21,6 @@ import sklearn.mixture
 from sklearn.externals import joblib
 from sklearn.mixture.gaussian_mixture import _compute_precision_cholesky
 
-from sprocket.util.yml import PairYML
-
 
 class GMMTrainer(object):
 
@@ -44,9 +42,9 @@ class GMMTrainer(object):
 
     """
 
-    def __init__(self, yml):
-        # read pair-dependent yml file
-        self.conf = PairYML(yml)
+    def __init__(self, conf):
+        # copy parameters
+        self.conf = conf
 
         # parameter definition
         self.param = sklearn.mixture.GaussianMixture(
@@ -70,12 +68,14 @@ class GMMTrainer(object):
         self._set_Ab()
         self._set_pX()
 
+        print ('open GMM has been done.')
         return
 
     def save(self, fpath):
         # save GMM intp pkl file
-        if not os.path.exists(fpath):
-            os.makedirs(os.path.dirname(fpath))
+        dirname = os.path.dirname(fpath)
+        if not os.path.exists(dirname):
+            os.makedirs(dirname)
 
         # save model parameter file
         joblib.dump(self.param, fpath)

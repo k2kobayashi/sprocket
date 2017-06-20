@@ -36,9 +36,9 @@ class Synthesizer(object):
 
     """
 
-    def __init__(self, spkrymlf):
+    def __init__(self, conf):
         # read yml file for the speaker
-        self.conf = SpeakerYML(spkrymlf)
+        self.conf = conf
         return
 
     def synthesis(self, f0, mcep, aperiodicity):
@@ -64,13 +64,13 @@ class Synthesizer(object):
         spc = mcgram2spgram(mcep, self.conf.alpha, self.conf.fftl)
 
         # generate waveform using world vocoder with f0, spc, ap
-        tmpflen = 10000
-        wav = world.synthesis_from_aperiodicity(f0,
+        x_len = 5 * len(f0) * self.conf.fs
+        wav = world.synthesis_from_aperiodicity(self.conf.fs,
                                                 5,
+                                                f0,
                                                 spc,
                                                 aperiodicity,
-                                                self.conf.fs,
-                                                tmpflen)
+                                                x_len)
 
         return wav
 

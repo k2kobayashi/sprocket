@@ -18,10 +18,12 @@ wav_dir=$data_dir/speaker/wav
 pair_dir=$data_dir/pair/$org-$tar
 
 # parameter setting
-nproc=7
+nproc=3 # # of multi-proceccing cores
 
 if [ 0 -eq 1 ] ; then
-    echo "### Copy default files for original and target speakr ###"
+    echo "##############################################################"
+    echo "### Copy default files for original and target speakr      ###"
+    echo "##############################################################"
     for spkr in $org $tar; do
         if [ ! -e $conf_dir/$spkr.yml ]; then
             cp $conf_dir/default/speaker_default.yml $conf_dir/$spkr.yml
@@ -35,21 +37,21 @@ if [ 0 -eq 1 ] ; then
     echo "##############################################################"
     # Initialization for speakers
     for spkr in $org $tar; do
-        python $src_dir/init_spkr.py \
+        python $src_dir/initialize_spkr.py \
             -m $nproc \
             $spkr \
-            $wav_dir \
-            $conf_dir
+            $conf_dir \
+            $wav_dir
     done
 fi
 
 if [ 0 -eq 1 ] ; then
     echo "##############################################################"
-    echo "### Feature extcation for original and target speakers     ###"
+    echo "### Extract features of original and target speakers       ###"
     echo "##############################################################"
     # Feature extraction
     for spkr in $org $tar; do
-        python $src_dir/feature_extraction.py \
+        python $src_dir/extract_features.py \
             -m $nproc \
             $spkr \
             $conf_dir/$spkr.yml \
@@ -64,12 +66,13 @@ if [ 0 -eq 1 ] ; then
     mkdir -p $pair_dir
     if [ ! -e $pair_dir/$org-$tar.yml ] ; then
         cp $conf_dir/default/pair_default.yml $pair_dir/$org-$tar.yml
+        echo "    pair: $pair_dir " >> $pair_dir/$org-$tar.yml
         echo "list:" >> $pair_dir/$org-$tar.yml
         echo "    trlist: $pair_dir/$org-${tar}_tr.list" >> $pair_dir/$org-$tar.yml
         echo "    evlist: $pair_dir/$org-${tar}_ev.list" >> $pair_dir/$org-$tar.yml
     fi
     # Initilization of the speaker pair
-    python $src_dir/init_pair.py \
+    python $src_dir/initialize_pair.py \
         $org \
         $tar \
         $wav_dir \
@@ -80,8 +83,8 @@ if [ 0 -eq 1 ] ; then
     echo "##############################################################"
     echo "### Estimate acoustic feature statistics                   ###"
     echo "##############################################################"
-    # calculate speaker-dependent statistics such as F0, GV and MS
-    python $src_dir/estimate_feature_stats.py \
+    # calculate speaker-dependent statistics for F0 and mcep
+    python $src_dir/estimate_feature_statistics.py \
         $org \
         $tar \
         $pair_dir/$org-$tar.yml
@@ -94,6 +97,7 @@ if [ 0 -eq 1 ] ; then
     echo "##############################################################"
     # estimate a time-aligned joint feature vector of source and target
     python $src_dir/estimate_twf.py \
+        -m $nproc \
         $org \
         $tar \
         $pair_dir/$org-$tar.yml

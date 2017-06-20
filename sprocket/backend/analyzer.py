@@ -16,10 +16,9 @@ WORLD-based speech analyzer & synthesizer
 """
 
 import world
-from sprocket import Analyzer, Synthesizer, SpeechParameters
 
 
-class WORLD(Analyzer, Synthesizer):
+class WORLD(object):
 
     """
     WORLD-based speech analyzer & synthesizer
@@ -87,7 +86,7 @@ class WORLD(Analyzer, Synthesizer):
         # TODO
         self.time_len = len(x)
 
-        return SpeechParameters(f0, spectrum_envelope, aperiodicity)
+        return f0, spectrum_envelope, aperiodicity
 
     def analyze_f0(self, x):
         """
@@ -101,9 +100,9 @@ class WORLD(Analyzer, Synthesizer):
         f0, time_axis = world.dio(x, self.fs, self.period, self.opt)
         f0 = world.stonemask(x, self.fs, self.period, time_axis, f0)
 
-        return SpeechParameters(f0, None, None)
+        return f0, None, None
 
-    def synthesis(self, params):
+    def synthesis(self, f0, spc, ap):
         """
         synthesis re-synthesizes a speech waveform from:
           1. Fundamental frequency
@@ -116,10 +115,5 @@ class WORLD(Analyzer, Synthesizer):
           a set of speech parameters
 
         """
-        if not isinstance(params, SpeechParameters):
-            raise RuntimeError("Not supoprted")
-
-        y = world.synthesizey(params.f0,
-                              params.spectrum_envelope,
-                              params.aperiodicity, self.fs, 5)
+        y = world.synthesizey(f0, spc, ap, self.fs, 5)
         return y

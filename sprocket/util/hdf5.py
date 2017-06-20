@@ -21,10 +21,7 @@ import h5py
 from sprocket.util.yml import PairYML
 
 
-def open_h5files(yml, mode='tr'):
-    # read pair-dependent yml file
-    conf = PairYML(yml)
-
+def open_h5files(conf, mode='tr'):
     # read h5 files
     h5list = []
     if mode == 'tr':
@@ -87,7 +84,7 @@ class HDF5(object):
                 os.makedirs(self.dirname)
             # file check
             if os.path.exists(self.fpath):
-                print("overwrite because HDF5 file already exists.")
+                print("overwrite: " + self.fpath)
         elif self.mode == "r":
             if not os.path.exists(self.fpath):
                 raise("h5 does not exist.")

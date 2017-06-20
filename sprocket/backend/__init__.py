@@ -17,9 +17,7 @@ class FeatureExtractor(object):
     - future support?: LPC, cep, MFCC
 
     known issue:
-    - Unsupported SPTK
-    - hard writing to save some acoustic features (save_hdf5)
-    - write more attributes
+    - write all attributes
 
     Attributes
     ----------
@@ -40,8 +38,7 @@ class FeatureExtractor(object):
     """
 
     def __init__(self, conf):
-        # read parameters from SpeakerYml class
-        # ToDo: read conf class as object in this class
+        # read parameters from speaker configure
         self.fs = conf.fs
         self.shiftms = conf.shiftms
         self.minf0 = conf.minf0
@@ -52,57 +49,51 @@ class FeatureExtractor(object):
 
         # analyzer setting
         if self.analyzer == 'world':
-            self.analyzer = WORLD(
-                period=self.shiftms, fs=self.fs, f0_floor=self.minf0, f0_ceil=self.maxf0)
-        elif self.analyzer == 'SPTK':
-            raise('SPTK does not support yet, please use "world" instead.')
+            self.analyzer = WORLD(period=self.shiftms,
+                                  fs=self.fs,
+                                  f0_floor=self.minf0,
+                                  f0_ceil=self.maxf0)
         else:
-            raise(
-                'other analyzer does not support, please use "world" instead')
+            raise('No other analyzer supports, please use "world" instead')
 
     def set_wavf(self, wavf):
         # read wav file
-        _, x = wavfile.read(wavf)
+        wavfs, x = wavfile.read(wavf)
         self.x = np.array(x, dtype=np.float)
+        self.waveform_length = len(x)
+        assert self.fs == wavfs
 
         return
 
     def analyze_all(self):
         # analysis
-        self.features = self.analyzer.analyze(self.x)
-        self.mcep = spgram2mcgram(
-            self.features.spectrum_envelope, self.dim, self.alpha)
-        self.npow = spgram2npow(self.features.spectrum_envelope)
+        self.f0, self.spc, self.ap = self.analyzer.analyze(self.x)
+        self.mcep = spgram2mcgram(self.spc, self.dim, self.alpha)
+        self.npow = spgram2npow(self.spc)
         return
 
     def analyze_f0(self):
         return self.analyzer.analyze_f0(self.x).f0
 
     def analyze_mcep(self):
-        features = self.analyzer.analyze(self.x)
-        return spgram2mcgram(features.spectrum_envelope, self.dim, self.alpha)
+        _, spc, _ = self.analyzer.analyze(self.x)
+        return spgram2mcgram(spc, self.dim, self.alpha)
 
     def save_hdf5(self, wavf):
         h5f = wavf.replace('wav', 'h5')
         hdf = HDF5(h5f, mode="w")
-        hdf.save(self.features.f0, ext="f0")
-        hdf.save(self.features.spectrum_envelope, ext="spc")
-        hdf.save(self.features.aperiodicity, ext="ap")
+        hdf.save(self.f0, ext="f0")
+        hdf.save(self.spc, ext="spc")
+        hdf.save(self.ap, ext="ap")
         hdf.save(self.mcep, ext="mcep")
         hdf.save(self.npow, ext="npow")
+        hdf.save(self.waveform_length, ext="waveform_length")
         hdf.close()
         return
 
     def read_hdf5(self, wavf):
         h5f = wavf.replace('wav', 'h5')
         hdf = HDF5(h5f, mode="r")
-        spc = hdf.read(ext='spc')
         hdf.close()
-
-        if self.features.spectrum_envelope[0, 0] == spc[0, 0]:
-            print ("True")
-        else:
-            print ("False")
-            print (self.features.spectrum_envelope[0, 0], spc[0, 0])
 
         return
