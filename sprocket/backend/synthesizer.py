@@ -64,7 +64,7 @@ class Synthesizer(object):
         spc = mcgram2spgram(mcep, self.conf.alpha, self.conf.fftl)
 
         # generate waveform using world vocoder with f0, spc, ap
-        x_len = 5 * len(f0) * self.conf.fs
+        x_len = 5 * len(f0) * self.conf.fs / 1000
         wav = world.synthesis_from_aperiodicity(self.conf.fs,
                                                 5,
                                                 f0,
