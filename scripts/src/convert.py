@@ -15,7 +15,10 @@
 
 """
 
+import os
 import argparse
+import numpy as np
+from scipy.io import wavfile
 
 from sprocket.util.yml import SpeakerYML, PairYML
 from sprocket.util.hdf5 import open_h5files, close_h5files
@@ -63,6 +66,11 @@ def main():
     # open synthesizer
     synthesizer = Synthesizer(sconf)
 
+    # test directory
+    testdir = pconf.pairdir + '/test'
+    if not os.path.exists(testdir):
+        os.makedirs(testdir)
+
     # file loop
     for h5 in evh5s:
         print(h5.flbl + ' converts.')
@@ -87,11 +95,12 @@ def main():
         wav = synthesizer.synthesis(f0, cvmcep, apperiodicity)
         # wav_wGV = synthesizer.synthesis(cvf0, cvmcep, apperiodicity)
 
-        print 'hogehoge'
         # save as wav file
+        wavpath = testdir + '/' + h5.flbl + '_cv.wav'
+        wavfile.write(wavpath, sconf.fs, np.array(wav, dtype=np.int16))
 
     # close h5 files
-    close_h5files(evh5s)
+    close_h5files(evh5s, 'ev')
 
 
 if __name__ == '__main__':
