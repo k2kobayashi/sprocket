@@ -1,6 +1,7 @@
 numpy
 scipy
 pysptk
+pyworld
 h5py
 dtw
 scikit-learn
