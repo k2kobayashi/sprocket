@@ -45,8 +45,6 @@ if [ 1 -eq 1 ] ; then
     done
 fi
 
-exit
-
 if [ 1 -eq 1 ] ; then
     echo "##############################################################"
     echo "### Extract features of original and target speakers       ###"
