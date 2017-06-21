@@ -78,14 +78,17 @@ def main():
         # get F0 feature
         f0 = h5.read('f0')
         mcep = h5.read('mcep')
+        mcep_0th = mcep[:, 0]
         apperiodicity = h5.read('ap')
 
         # TODO: convert F0
         # cvf0 = f0trans.convert(f0)
 
         # convert mel-cepstrum
-        cvmcep = mcepgmm.convert(calculate_delta(mcep))
+        cvmcep_wopow = mcepgmm.convert(calculate_delta(mcep[:, 1:]))
+
         # cvmcep_wGV = gv.postfilter(cvmcep)
+        cvmcep = np.c_[mcep_0th, cvmcep_wopow]
 
         # TODO: convert band-aperiodicity
         # cvbap = bapgmm.convert(calculate_delta(bap))

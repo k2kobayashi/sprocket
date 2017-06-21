@@ -60,7 +60,7 @@ def close_h5files(h5list, mode='tr'):
 class HDF5(object):
 
     """
-    Handle HDF5 format file for a file
+    Handle HDF5 file for a file
 
     TODO:
 
@@ -98,6 +98,7 @@ class HDF5(object):
 
         if self.mode != "r":
             raise("mode should be 'r'")
+
         return self.h5[ext].value
 
     def save(self, data, ext=None):
