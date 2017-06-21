@@ -18,7 +18,7 @@ wav_dir=$data_dir/speaker/wav
 pair_dir=$data_dir/pair/$org-$tar
 
 # parameter setting
-nproc=3 # # of multi-proceccing cores
+nproc=7 # # of multi-proceccing cores
 
 if [ 0 -eq 1 ] ; then
     echo "##############################################################"

@@ -39,7 +39,7 @@ def main():
     conf = PairYML(args.pair_ymlf)
 
     # joint feature extraction
-    jnt = JointFeatureExtractor(conf, mnum=args.multicore)
+    jnt = JointFeatureExtractor(conf)
     jnt.estimate()
 
     return
