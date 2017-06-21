@@ -100,7 +100,7 @@ class WORLD(object):
         f0, time_axis = world.dio(x, self.fs, self.period, self.opt)
         f0 = world.stonemask(x, self.fs, self.period, time_axis, f0)
 
-        return f0, None, None
+        return f0
 
     def synthesis(self, f0, spc, ap):
         """

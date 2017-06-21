@@ -33,14 +33,15 @@ def world_f0_analysis(flbl):
 
     # feature extraction for min and max f0 range definition
     world = WORLD(period=5.0, fs=fs, f0_floor=40.0, f0_ceil=700.0)
-    speechparameter = world.analyze_f0(x)
-    return speechparameter.f0
+    return world.analyze_f0(x)
 
 
 def create_f0_histgram(f0s, histfile):
     # TODO: should be modified into plotly from matplotlib?
     # flatten two dimensional list into one dimensional list
     f0 = [f0val for i in f0s for f0val in i]
+
+    print len(f0)
 
     # plot histgram
     plt.hist(f0, bins=200, range=(40, 700), normed=True, histtype="stepfilled")
@@ -69,6 +70,8 @@ def main():
     # F0 extraction with WORLD on multi processing
     p = Pool(args.multicore)
     f0s = p.map(world_f0_analysis, files)
+
+    print f0s[0]
 
     # create figure to visualize F0 histgram
     hist_dir = args.conf_dir + '/f0histgram/'
