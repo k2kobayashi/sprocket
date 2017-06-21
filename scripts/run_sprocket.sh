@@ -18,9 +18,9 @@ wav_dir=$data_dir/speaker/wav
 pair_dir=$data_dir/pair/$org-$tar
 
 # parameter setting
-nproc=7 # # of multi-proceccing cores
+nproc=2 # # of multi-proceccing cores
 
-if [ 0 -eq 1 ] ; then
+if [ 1 -eq 1 ] ; then
     echo "##############################################################"
     echo "### Copy default files for original and target speakr      ###"
     echo "##############################################################"
@@ -31,7 +31,7 @@ if [ 0 -eq 1 ] ; then
     done
 fi
 
-if [ 0 -eq 1 ] ; then
+if [ 1 -eq 1 ] ; then
     echo "##############################################################"
     echo "### Initialization of original and target speakers         ###"
     echo "##############################################################"
@@ -45,7 +45,9 @@ if [ 0 -eq 1 ] ; then
     done
 fi
 
-if [ 0 -eq 1 ] ; then
+exit
+
+if [ 1 -eq 1 ] ; then
     echo "##############################################################"
     echo "### Extract features of original and target speakers       ###"
     echo "##############################################################"
@@ -59,7 +61,7 @@ if [ 0 -eq 1 ] ; then
     done
 fi
 
-if [ 0 -eq 1 ] ; then
+if [ 1 -eq 1 ] ; then
     echo "##############################################################"
     echo "### Initialization of the speaker pair                     ###"
     echo "##############################################################"
@@ -79,7 +81,7 @@ if [ 0 -eq 1 ] ; then
         $pair_dir
 fi
 
-if [ 0 -eq 1 ] ; then
+if [ 1 -eq 1 ] ; then
     echo "##############################################################"
     echo "### Estimate acoustic feature statistics                   ###"
     echo "##############################################################"
@@ -91,7 +93,7 @@ if [ 0 -eq 1 ] ; then
 fi
 
 # Joint feature extraction
-if [ 0 -eq 1 ] ; then
+if [ 1 -eq 1 ] ; then
     echo "##############################################################"
     echo "### Estimate time warping function using GMM               ###"
     echo "##############################################################"
@@ -104,7 +106,7 @@ if [ 0 -eq 1 ] ; then
 fi
 
 # GMM train
-if [ 0 -eq 1 ] ; then
+if [ 1 -eq 1 ] ; then
     echo "##############################################################"
     echo "### Train conversion model                                 ###"
     echo "##############################################################"
