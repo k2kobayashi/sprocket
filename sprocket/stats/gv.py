@@ -75,6 +75,7 @@ class GV (object):
     def gv_postfilter(self, data, sd=1):
         # get length and dimension
         T, dim = data.shape
+        assert self.gv is not None
         assert dim + sd == self.gv.shape[1]
 
         # calculate statics of input data
