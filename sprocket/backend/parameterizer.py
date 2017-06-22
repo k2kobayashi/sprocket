@@ -199,7 +199,7 @@ def spgram2mcgram(spectrogram, order, alpha):
     T = spectrogram.shape[0]
     mcgram = np.zeros((T, order + 1))
     for t in range(T):
-        mcgram[t] = sp2mc(spectrogram[t], order, alpha)
+        mcgram[t] = pysptk.sp2mc(spectrogram[t], order, alpha)
     return mcgram
 
 
@@ -226,6 +226,5 @@ def mcgram2spgram(mcgram, alpha, fftlen):
     T = mcgram.shape[0]
     spectrogram = np.zeros((T, (fftlen >> 1) + 1))
     for t in range(T):
-        spectrogram[t] = mc2sp(mcgram[t], alpha, fftlen)
+        spectrogram[t] = pysptk.mc2sp(mcgram[t], alpha, fftlen)
     return spectrogram
-
