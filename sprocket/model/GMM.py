@@ -42,9 +42,10 @@ class GMMTrainer(object):
 
     """
 
-    def __init__(self, conf):
+    def __init__(self, conf, diff=False):
         # copy parameters
         self.conf = conf
+        self.diff = diff
 
         # parameter definition
         self.param = sklearn.mixture.GaussianMixture(
@@ -68,7 +69,7 @@ class GMMTrainer(object):
         self._set_Ab()
         self._set_pX()
 
-        print ('open GMM has been done.')
+        print('open GMM has been done.')
         return
 
     def save(self, fpath):
@@ -179,6 +180,18 @@ class GMMTrainer(object):
         self.covXY = self.jcov[:, :sddim, sddim:]
         self.covYX = self.jcov[:, sddim:, :sddim]
         self.covYY = self.jcov[:, sddim:, sddim:]
+
+        # Convert to Diff-GMM
+        if self.diff:
+            self.meanX = self.meanX
+            self.meanY = self.meanY - self.meanX
+            covXY = self.covXY.copy()
+            covYX = self.covYX.copy()
+            covYY = self.covYY.copy()
+            self.covXX = self.covXX
+            self.covYY = self.covXX + covYY - covXY - covYX
+            self.covXY = covXY - self.covXX
+            self.covYX = self.covXY.transpose(0, 2, 1)
 
         # calculate inverse covariance for covariance XX in each mixture
         self.covXXinv = np.zeros((self.conf.n_mix, sddim, sddim))
