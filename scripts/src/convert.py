@@ -58,10 +58,12 @@ def main():
     mcepgmm = GMMTrainer(pconf)
     mcepgmm.open(mcepgmmpath)
 
-    # TODO: read GMM for bap
+    # GV postfilter for mcep
+    mcepgvpath = pconf.pairdir + '/stats/tar.gv'
+    mcepgv = GV(pconf)
+    mcepgv.read_statistics(mcepgvpath)
 
-    # TODO: GV postfilter for mcep
-    # gv = GV(args.pair_ymlf, mode='mcep')
+    # TODO: read GMM for bap
 
     # open synthesizer
     synthesizer = Synthesizer(sconf)
@@ -84,23 +86,22 @@ def main():
         # TODO: convert F0
         # cvf0 = f0trans.convert(f0)
 
-        # convert mel-cepstrum
-        cvmcep_wopow = mcepgmm.convert(calculate_delta(mcep[:, 1:]))
-
-        # cvmcep_wGV = gv.postfilter(cvmcep)
-        cvmcep = np.c_[mcep_0th, cvmcep_wopow]
-
         # TODO: convert band-aperiodicity
         # cvbap = bapgmm.convert(calculate_delta(bap))
 
-        # synethesis
-        # TODO: need to be bugfix it takes too slow
+        # conversion w/o GV
+        cvmcep_wopow = mcepgmm.convert(calculate_delta(mcep[:, 1:]))
+        cvmcep = np.c_[mcep_0th, cvmcep_wopow]
         wav = synthesizer.synthesis(f0, cvmcep, apperiodicity)
-        # wav_wGV = synthesizer.synthesis(cvf0, cvmcep, apperiodicity)
-
-        # save as wav file
         wavpath = testdir + '/' + h5.flbl + '_cv.wav'
         wavfile.write(wavpath, sconf.fs, np.array(wav, dtype=np.int16))
+
+        # conversion w/ GV
+        cvmcep_wopow_wGV = mcepgv.gv_postfilter(cvmcep_wopow, sd=1)
+        cvmcep_wGV = np.c_[mcep_0th, cvmcep_wopow_wGV]
+        wav_wGV = synthesizer.synthesis(f0, cvmcep_wGV, apperiodicity)
+        wav_wGVpath = testdir + '/' + h5.flbl + '_cv_wGV.wav'
+        wavfile.write(wav_wGVpath, sconf.fs, np.array(wav_wGV, dtype=np.int16))
 
     # close h5 files
     close_h5files(evh5s, 'ev')

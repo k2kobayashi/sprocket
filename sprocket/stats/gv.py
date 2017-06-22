@@ -27,14 +27,14 @@ class GV (object):
         # read pair-dependent yml file
         self.conf = conf
 
+    def estimate(self, feature='mcep'):
         # open h5list files
-        self.h5s = open_h5files(conf, mode='tr')
+        self.h5s = open_h5files(self.conf, mode='tr')
         self.num_files = len(self.h5s)
 
-    def estimate(self, feature='mcep'):
         otflags = [0, 1]
         for otflag in otflags:
-            if otflag == 1:
+            if otflag == 0:
                 spkr = 'org'
             else:
                 spkr = 'tar'
@@ -47,7 +47,8 @@ class GV (object):
             # calculate vm and vv
             vm = np.mean(np.array(var), axis=0)
             vv = np.var(np.array(var), axis=0)
-            gv = np.c_[vm, vv].T
+            gv = np.r_[vm, vv]
+            gv = gv.reshape(2, len(vm))
 
             gvpath = self.conf.pairdir + '/stats/' + spkr + '.gv'
             if not os.path.exists(os.path.dirname(gvpath)):
@@ -64,8 +65,30 @@ class GV (object):
 
         return
 
-    def gv_postfilter(self):
-        pass
+    def read_statistics(self, fpath):
+        # read gv from binary
+        gv = np.fromfile(fpath, dtype='d')
+        dim = len(gv) / 2
+        self.gv = gv.reshape(2, dim)
+        return
+
+    def gv_postfilter(self, data, sd=1):
+        # get length and dimension
+        T, dim = data.shape
+        assert dim + sd == self.gv.shape[1]
+
+        # calculate statics of input data
+        datamean = np.average(data, axis=0)
+        datavar = np.var(data, axis=0)
+
+        # perform GV postfilter
+        odata = np.zeros((T, dim))
+        for t in range(T):
+            for d in range(dim):
+                odata[t, d] = np.sqrt(self.gv[0, d + sd] / datavar[d]) * \
+                    (data[t, d] - datamean[d]) + datamean[d]
+
+        return odata
 
 
 def main():
