@@ -39,6 +39,8 @@ def main():
     # Options for python
     description = 'estimate joint feature of source and target speakers'
     parser = argparse.ArgumentParser(description=description)
+    parser.add_argument('-cvtype', '--cvtype', type=str, default=None,
+                        help='type of the conversion [None, diff, or intra]')
     parser.add_argument('org', type=str,
                         help='original speaker label')
     parser.add_argument('tar', type=str,
@@ -47,7 +49,6 @@ def main():
                         help='yml file for the speaker')
     parser.add_argument('pair_ymlf', type=str,
                         help='yml file for the speaker pair')
-    parser.add_argument('--diff', action="store_true")
     args = parser.parse_args()
 
     # read speaker-and pair-dependent yml file
@@ -62,9 +63,9 @@ def main():
 
     # read GMM for mcep
     mcepgmmpath = pconf.pairdir + '/model/GMM.pkl'
-    mcepgmm = GMMTrainer(pconf, diff=args.diff)
+    mcepgmm = GMMTrainer(pconf, mode=args.cvtype)
     mcepgmm.open(mcepgmmpath)
-    print("Diff mode: {}".format(args.diff))
+    print("mode: {}".format(args.cvtype))
 
     # TODO: read GMM for bap
 
@@ -108,7 +109,7 @@ def main():
         cvmcep = np.c_[mcep_0th, cvmcep_wopow]
 
         # remove power coef
-        if args.diff:
+        if args.cvtype == 'diff':
             cvmcep[:, 0] = 0.0
             b = np.apply_along_axis(pysptk.mc2b, 1, cvmcep, alpha)
             assert np.isfinite(b).all()
@@ -125,8 +126,7 @@ def main():
         # cvbap = bapgmm.convert(calculate_delta(bap))
 
         # synethesis
-        # TODO: need to be bugfix it takes too slow
-        if not args.diff:
+        if args.cvtype == None:
             wav = synthesizer.synthesis(f0, cvmcep, apperiodicity)
         # wav_wGV = synthesizer.synthesis(cvf0, cvmcep, apperiodicity)
 
