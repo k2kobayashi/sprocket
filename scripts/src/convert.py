@@ -28,19 +28,11 @@ from sprocket.stats.f0statistics import F0statistics
 from sprocket.backend.synthesizer import Synthesizer
 from sprocket.util.jnt import calculate_delta
 
-import pysptk
-from pysptk.synthesis import MLSADF
-import sys
-from os.path import join, exists
-from matplotlib import pyplot as plt
-
 
 def main():
     # Options for python
     description = 'estimate joint feature of source and target speakers'
     parser = argparse.ArgumentParser(description=description)
-    parser.add_argument('-cvtype', '--cvtype', type=str, default=None,
-                        help='type of the conversion [None, diff, or intra]')
     parser.add_argument('org', type=str,
                         help='original speaker label')
     parser.add_argument('tar', type=str,
@@ -63,9 +55,8 @@ def main():
 
     # read GMM for mcep
     mcepgmmpath = pconf.pairdir + '/model/GMM.pkl'
-    mcepgmm = GMMTrainer(pconf, mode=args.cvtype)
+    mcepgmm = GMMTrainer(pconf)
     mcepgmm.open(mcepgmmpath)
-    print("mode: {}".format(args.cvtype))
 
     # TODO: read GMM for bap
 
@@ -75,10 +66,6 @@ def main():
     # open synthesizer
     synthesizer = Synthesizer(sconf)
 
-    alpha = pysptk.util.mcepalpha(sconf.fs)
-    diff_synth = pysptk.synthesis.Synthesizer(
-        MLSADF(order=24, alpha=alpha), 80)
-
     # test directory
     testdir = pconf.pairdir + '/test'
     if not os.path.exists(testdir):
@@ -86,11 +73,6 @@ def main():
 
     # file loop
     for h5 in evh5s:
-        src_wavpath = join(pconf.wavdir, args.org,
-                           "{}.wav".format(h5.flbl))
-        assert exists(src_wavpath)
-        fs, src_waveform = wavfile.read(src_wavpath)
-        assert fs == 16000
         print(h5.flbl + ' converts.')
 
         # get F0 feature
@@ -108,30 +90,13 @@ def main():
         # cvmcep_wGV = gv.postfilter(cvmcep)
         cvmcep = np.c_[mcep_0th, cvmcep_wopow]
 
-        # remove power coef
-        if args.cvtype == 'diff':
-            cvmcep[:, 0] = 0.0
-            b = np.apply_along_axis(pysptk.mc2b, 1, cvmcep, alpha)
-            assert np.isfinite(b).all()
-            src_waveform = src_waveform.astype(np.float64)
-            wav = diff_synth.synthesis(src_waveform, b)
-            wav = np.clip(wav, -32768, 32767)
-
-        if False:
-            plt.plot(src_waveform)
-            plt.plot(wav)
-            plt.show()
-
         # TODO: convert band-aperiodicity
         # cvbap = bapgmm.convert(calculate_delta(bap))
 
         # synethesis
-        if args.cvtype == None:
-            wav = synthesizer.synthesis(f0, cvmcep, apperiodicity)
+        # TODO: need to be bugfix it takes too slow
+        wav = synthesizer.synthesis(f0, cvmcep, apperiodicity)
         # wav_wGV = synthesizer.synthesis(cvf0, cvmcep, apperiodicity)
-
-        print(np.max(src_waveform), np.min(src_waveform))
-        print(np.max(wav), np.min(wav))
 
         # save as wav file
         wavpath = testdir + '/' + h5.flbl + '_cv.wav'
