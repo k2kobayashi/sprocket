@@ -9,7 +9,7 @@ f0:
   maxf0: 260
 mcep:
   dim: 24
-  alpha: 0.42
+  alpha: 0.41
 power:
-  threshold: -20
+  threshold: -15
 analyzer: world
