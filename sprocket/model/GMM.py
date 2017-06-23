@@ -42,9 +42,10 @@ class GMMTrainer(object):
 
     """
 
-    def __init__(self, conf):
+    def __init__(self, conf, mode=None):
         # copy parameters
         self.conf = conf
+        self.gmm_mode = mode
 
         # parameter definition
         self.param = sklearn.mixture.GaussianMixture(
@@ -58,17 +59,21 @@ class GMMTrainer(object):
             raise('pkl file of GMM does not exists.')
         # read model parameter file
         self.param = joblib.load(fpath)
+        self._deploy_parameters()
 
-        # read joint model parameters
-        self.w = self.param.weights_
-        self.jmean = self.param.means_
-        self.jcov = self.param.covariances_
+        # change model paramter of GMM into that of gmm_mode
+        if self.gmm_mode == 'diff':
+            self._transform_gmm_into_diffgmm()
+            print('open GMM as DIFFGMM.')
+        elif self.gmm_mode == 'intra':
+            self._transform_gmm_into_intragmm()
+            print('open GMM as Intra-GMM.')
 
         # estimate parameters for conversion
         self._set_Ab()
         self._set_pX()
 
-        print ('open GMM has been done.')
+        print('open GMM has been done.')
         return
 
     def save(self, fpath):
@@ -83,11 +88,8 @@ class GMMTrainer(object):
     def train(self, jnt):
         print('GMM modeling starts')
         self.param.fit(jnt)
+        self._deploy_parameters()
         print('GMM modeling has been done.')
-
-        self.w = self.param.weights_
-        self.jmean = self.param.means_
-        self.jcov = self.param.covariances_
 
         # estimate parameters for conversion
         self._set_Ab()
@@ -168,17 +170,26 @@ class GMMTrainer(object):
 
         # return odata
 
-    def _set_Ab(self):
-        # calculate A and b from self.jmean, self.jcov
-        sddim = self.jmean.shape[1] // 2
+    def _deploy_parameters(self):
+        # read JD-GMM parameters from self.param
+        self.w = self.param.weights_
+        self.jmean = self.param.means_
+        self.jcov = self.param.covariances_
 
         # devide GMM parameters into source and target parameters
+        sddim = self.jmean.shape[1] // 2
         self.meanX = self.jmean[:, 0:sddim]
         self.meanY = self.jmean[:, sddim:]
         self.covXX = self.jcov[:, :sddim, :sddim]
         self.covXY = self.jcov[:, :sddim, sddim:]
         self.covYX = self.jcov[:, sddim:, :sddim]
         self.covYY = self.jcov[:, sddim:, sddim:]
+
+        return
+
+    def _set_Ab(self):
+        # calculate A and b from self.jmean, self.jcov
+        sddim = self.jmean.shape[1] // 2
 
         # calculate inverse covariance for covariance XX in each mixture
         self.covXXinv = np.zeros((self.conf.n_mix, sddim, sddim))
@@ -217,6 +228,22 @@ class GMMTrainer(object):
             self.covXX, self.conf.covtype)
 
         return
+
+    def _transform_gmm_into_diffgmm(self):
+        self.meanX = self.meanX
+        self.meanY = self.meanY - self.meanX
+        covXY = self.covXY.copy()
+        covYX = self.covYX.copy()
+        covYY = self.covYY.copy()
+        self.covXX = self.covXX
+        self.covYY = self.covXX + covYY - covXY - covYX
+        self.covXY = covXY - self.covXX
+        self.covYX = self.covXY.transpose(0, 2, 1)
+
+        return
+
+    def _transform_gmm_into_intragmm(self):
+        pass
 
 
 def main():
