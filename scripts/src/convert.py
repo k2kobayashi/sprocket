@@ -51,7 +51,10 @@ def main():
     evh5s = open_h5files(pconf, mode='ev')
 
     # read F0 transfomer
+    orgf0statspath = pconf.pairdir + '/stats/org.f0stats'
+    tarf0statspath = pconf.pairdir + '/stats/tar.f0stats'
     f0trans = F0statistics(pconf)
+    f0trans.read_statistics(orgf0statspath, tarf0statspath)
 
     # read GMM for mcep
     mcepgmmpath = pconf.pairdir + '/model/GMM.pkl'
@@ -83,8 +86,8 @@ def main():
         mcep_0th = mcep[:, 0]
         apperiodicity = h5.read('ap')
 
-        # TODO: convert F0
-        # cvf0 = f0trans.convert(f0)
+        # convert F0
+        cvf0 = f0trans.transform_f0(f0)
 
         # TODO: convert band-aperiodicity
         # cvbap = bapgmm.convert(calculate_delta(bap))
@@ -92,16 +95,19 @@ def main():
         # conversion w/o GV
         cvmcep_wopow = mcepgmm.convert(calculate_delta(mcep[:, 1:]))
         cvmcep = np.c_[mcep_0th, cvmcep_wopow]
-        wav = synthesizer.synthesis(f0, cvmcep, apperiodicity)
+        wav = synthesizer.synthesis(cvf0, cvmcep, apperiodicity)
         wavpath = testdir + '/' + h5.flbl + '_cv.wav'
         wavfile.write(wavpath, sconf.fs, np.array(wav, dtype=np.int16))
 
         # conversion w/ GV
         cvmcep_wopow_wGV = mcepgv.gv_postfilter(cvmcep_wopow, sd=1)
         cvmcep_wGV = np.c_[mcep_0th, cvmcep_wopow_wGV]
-        wav_wGV = synthesizer.synthesis(f0, cvmcep_wGV, apperiodicity)
+        wav_wGV = synthesizer.synthesis(f0, cvmcep, apperiodicity)
         wav_wGVpath = testdir + '/' + h5.flbl + '_cv_wGV.wav'
         wavfile.write(wav_wGVpath, sconf.fs, np.array(wav_wGV, dtype=np.int16))
+
+        for t in range(len(f0)):
+            print f0[t], cvf0[t]
 
     # close h5 files
     close_h5files(evh5s, 'ev')
