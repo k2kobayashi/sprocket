@@ -145,11 +145,6 @@ def main():
             print(np.max(src_waveform), np.min(src_waveform))
             print(np.max(wav), np.min(wav))
 
-            if False:
-                plt.plot(src_waveform)
-                plt.plot(wav)
-                plt.show()
-
     # close h5 files
     close_h5files(evh5s, 'ev')
 
