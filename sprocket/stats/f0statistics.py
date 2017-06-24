@@ -75,21 +75,21 @@ class F0statistics (object):
 
         return
 
-    def transform_f0(self, if0):
+    def convert_f0(self, f0):
         assert self.omean, self.ostd is not None
         assert self.tmean, self.tstdis is not None
 
         # get length and dimension
-        T = len(if0)
+        T = len(f0)
 
-        # perform f0 transformation
-        of0 = np.zeros(T)
-        for t in range(T):
-            if if0[t] > 0:
-                of0[t] = (if0[t] - self.omean) * \
-                    self.tstd / self.ostd + self.tmean
+        # perform f0 conversion
+        cvf0 = np.zeros(T)
 
-        return of0
+        nonzero_indices = f0 > 0
+        cvf0[nonzero_indices] = (f0[nonzero_indices] - self.omean) * \
+            self.tstd / self.ostd + self.tmean
+
+        return cvf0
 
 
 def main():

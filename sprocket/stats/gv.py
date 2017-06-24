@@ -72,24 +72,21 @@ class GV (object):
         self.gv = gv.reshape(2, dim)
         return
 
-    def gv_postfilter(self, data, sd=1):
+    def apply_gvpostfilter(self, data, startdim=1):
         # get length and dimension
         T, dim = data.shape
         assert self.gv is not None
-        assert dim + sd == self.gv.shape[1]
+        assert dim + startdim == self.gv.shape[1]
 
         # calculate statics of input data
-        datamean = np.average(data, axis=0)
+        datamean = np.mean(data, axis=0)
         datavar = np.var(data, axis=0)
 
         # perform GV postfilter
-        odata = np.zeros((T, dim))
-        for t in range(T):
-            for d in range(dim):
-                odata[t, d] = np.sqrt(self.gv[0, d + sd] / datavar[d]) * \
-                    (data[t, d] - datamean[d]) + datamean[d]
+        filtered_data = np.sqrt(self.gv[0, startdim:] / datavar) * \
+            (data - datamean) + datamean
 
-        return odata
+        return filtered_data
 
 
 def main():
