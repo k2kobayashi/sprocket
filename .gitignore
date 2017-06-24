@@ -3,6 +3,7 @@
 /scripts/configure/*.list
 /scripts/configure/f0histgram/*.pdf
 /scripts/data/speaker/h5/*
+/scripts/data/speaker/wav/*
 
 # work files
 /scripts/data/pair/clb-slt

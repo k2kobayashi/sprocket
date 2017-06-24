@@ -59,7 +59,10 @@ def main():
     evh5s = open_h5files(pconf, mode='ev')
 
     # read F0 transfomer
-    f0trans = F0statistics(pconf)
+    orgf0statspath = pconf.pairdir + '/stats/org.f0stats'
+    tarf0statspath = pconf.pairdir + '/stats/tar.f0stats'
+    f0stats = F0statistics(pconf)
+    f0stats.read_statistics(orgf0statspath, tarf0statspath)
 
     # read GMM for mcep
     mcepgmmpath = pconf.pairdir + '/model/GMM.pkl'
@@ -67,10 +70,12 @@ def main():
     mcepgmm.open(mcepgmmpath)
     print("mode: {}".format(args.cvtype))
 
-    # TODO: read GMM for bap
+    # GV postfilter for mcep
+    mcepgvpath = pconf.pairdir + '/stats/tar.gv'
+    mcepgv = GV(pconf)
+    mcepgv.read_statistics(mcepgvpath)
 
-    # TODO: GV postfilter for mcep
-    # gv = GV(args.pair_ymlf, mode='mcep')
+    # TODO: read GMM for bap
 
     # open synthesizer
     synthesizer = Synthesizer(sconf)
@@ -85,12 +90,12 @@ def main():
         os.makedirs(testdir)
 
     # file loop
-    for h5 in evh5s:
+    for h5 in evh5s[:5]:
         src_wavpath = join(pconf.wavdir, args.org,
                            "{}.wav".format(h5.flbl))
         assert exists(src_wavpath)
         fs, src_waveform = wavfile.read(src_wavpath)
-        assert fs == 16000
+        assert fs == sconf.fs
         print(h5.flbl + ' converts.')
 
         # get F0 feature
@@ -99,17 +104,33 @@ def main():
         mcep_0th = mcep[:, 0]
         apperiodicity = h5.read('ap')
 
-        # TODO: convert F0
-        # cvf0 = f0trans.convert(f0)
+        # convert F0
+        cvf0 = f0stats.convert_f0(f0)
 
         # convert mel-cepstrum
         cvmcep_wopow = mcepgmm.convert(calculate_delta(mcep[:, 1:]))
-
-        # cvmcep_wGV = gv.postfilter(cvmcep)
         cvmcep = np.c_[mcep_0th, cvmcep_wopow]
 
-        # remove power coef
+        if args.cvtype == None:
+            # TODO: convert band-aperiodicity
+            # cvbap = bapgmm.convert(calculate_delta(bap))
+
+            # synthesis VC w/o GV
+            wav = synthesizer.synthesis(cvf0, cvmcep, apperiodicity)
+            wavpath = testdir + '/' + h5.flbl + '_VC_woGV.wav'
+            wavfile.write(wavpath, sconf.fs, np.array(wav, dtype=np.int16))
+
+            # synthesis w/ GV
+            cvmcep_wopow_wGV = mcepgv.apply_gvpostfilter(
+                cvmcep_wopow, startdim=1)
+            cvmcep_wGV = np.c_[mcep_0th, cvmcep_wopow_wGV]
+            wav_wGV = synthesizer.synthesis(cvf0, cvmcep_wGV, apperiodicity)
+            wav_wGVpath = testdir + '/' + h5.flbl + '_VC_wGV.wav'
+            wavfile.write(
+                wav_wGVpath, sconf.fs, np.array(wav_wGV, dtype=np.int16))
+
         if args.cvtype == 'diff':
+            # remove power coef
             cvmcep[:, 0] = 0.0
             b = np.apply_along_axis(pysptk.mc2b, 1, cvmcep, alpha)
             assert np.isfinite(b).all()
@@ -117,25 +138,17 @@ def main():
             wav = diff_synth.synthesis(src_waveform, b)
             wav = np.clip(wav, -32768, 32767)
 
-        if False:
-            plt.plot(src_waveform)
-            plt.plot(wav)
-            plt.show()
+            wav_DIFFVCwoGVpath = testdir + '/' + h5.flbl + '_DIFFVC_woGV.wav'
+            wavfile.write(
+                wav_DIFFVCwoGVpath, sconf.fs, np.array(wav, dtype=np.int16))
 
-        # TODO: convert band-aperiodicity
-        # cvbap = bapgmm.convert(calculate_delta(bap))
+            print(np.max(src_waveform), np.min(src_waveform))
+            print(np.max(wav), np.min(wav))
 
-        # synethesis
-        if args.cvtype == None:
-            wav = synthesizer.synthesis(f0, cvmcep, apperiodicity)
-        # wav_wGV = synthesizer.synthesis(cvf0, cvmcep, apperiodicity)
-
-        print(np.max(src_waveform), np.min(src_waveform))
-        print(np.max(wav), np.min(wav))
-
-        # save as wav file
-        wavpath = testdir + '/' + h5.flbl + '_cv.wav'
-        wavfile.write(wavpath, sconf.fs, np.array(wav, dtype=np.int16))
+            if False:
+                plt.plot(src_waveform)
+                plt.plot(wav)
+                plt.show()
 
     # close h5 files
     close_h5files(evh5s, 'ev')
