@@ -95,6 +95,7 @@ def main():
         # conversion w/o GV
         cvmcep_wopow = mcepgmm.convert(calculate_delta(mcep[:, 1:]))
         cvmcep = np.c_[mcep_0th, cvmcep_wopow]
+        # wav = synthesizer.synthesis(f0, cvmcep, apperiodicity)
         wav = synthesizer.synthesis(cvf0, cvmcep, apperiodicity)
         wavpath = testdir + '/' + h5.flbl + '_cv.wav'
         wavfile.write(wavpath, sconf.fs, np.array(wav, dtype=np.int16))
@@ -102,12 +103,9 @@ def main():
         # conversion w/ GV
         cvmcep_wopow_wGV = mcepgv.gv_postfilter(cvmcep_wopow, sd=1)
         cvmcep_wGV = np.c_[mcep_0th, cvmcep_wopow_wGV]
-        wav_wGV = synthesizer.synthesis(f0, cvmcep, apperiodicity)
+        wav_wGV = synthesizer.synthesis(cvf0, cvmcep_wGV, apperiodicity)
         wav_wGVpath = testdir + '/' + h5.flbl + '_cv_wGV.wav'
         wavfile.write(wav_wGVpath, sconf.fs, np.array(wav_wGV, dtype=np.int16))
-
-        for t in range(len(f0)):
-            print f0[t], cvf0[t]
 
     # close h5 files
     close_h5files(evh5s, 'ev')
