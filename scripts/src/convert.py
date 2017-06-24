@@ -53,8 +53,8 @@ def main():
     # read F0 transfomer
     orgf0statspath = pconf.pairdir + '/stats/org.f0stats'
     tarf0statspath = pconf.pairdir + '/stats/tar.f0stats'
-    f0trans = F0statistics(pconf)
-    f0trans.read_statistics(orgf0statspath, tarf0statspath)
+    f0stats = F0statistics(pconf)
+    f0stats.read_statistics(orgf0statspath, tarf0statspath)
 
     # read GMM for mcep
     mcepgmmpath = pconf.pairdir + '/model/GMM.pkl'
@@ -87,7 +87,7 @@ def main():
         apperiodicity = h5.read('ap')
 
         # convert F0
-        cvf0 = f0trans.transform_f0(f0)
+        cvf0 = f0stats.convert_f0(f0)
 
         # TODO: convert band-aperiodicity
         # cvbap = bapgmm.convert(calculate_delta(bap))
@@ -101,7 +101,7 @@ def main():
         wavfile.write(wavpath, sconf.fs, np.array(wav, dtype=np.int16))
 
         # conversion w/ GV
-        cvmcep_wopow_wGV = mcepgv.gv_postfilter(cvmcep_wopow, sd=1)
+        cvmcep_wopow_wGV = mcepgv.apply_gvpostfilter(cvmcep_wopow, startdim=1)
         cvmcep_wGV = np.c_[mcep_0th, cvmcep_wopow_wGV]
         wav_wGV = synthesizer.synthesis(cvf0, cvmcep_wGV, apperiodicity)
         wav_wGVpath = testdir + '/' + h5.flbl + '_cv_wGV.wav'
