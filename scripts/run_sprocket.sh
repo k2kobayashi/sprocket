@@ -126,4 +126,10 @@ if [ 1 -eq 1 ] ; then
         $tar \
         $conf_dir/$tar.yml \
         $pair_dir/$org-$tar.yml
+    python $src_dir/convert.py \
+        -cvtype diff \
+        $org \
+        $tar \
+        $conf_dir/$tar.yml \
+        $pair_dir/$org-$tar.yml
 fi

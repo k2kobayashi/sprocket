@@ -34,7 +34,7 @@ class F0statistics (object):
     def estimate(self):
         otflags = [0, 1]
         for otflag in otflags:
-            if otflag == 1:
+            if otflag == 0:
                 spkr = 'org'
             else:
                 spkr = 'tar'
@@ -62,6 +62,34 @@ class F0statistics (object):
         close_h5files(self.h5s)
 
         return
+
+    def read_statistics(self, orgstatsf, tarstatsf):
+        # read f0 statistics of source and target from binary
+        orgf0stats = np.fromfile(orgstatsf, dtype='d')
+        tarf0stats = np.fromfile(tarstatsf, dtype='d')
+
+        self.omean = orgf0stats[0]
+        self.ostd = orgf0stats[1]
+        self.tmean = tarf0stats[0]
+        self.tstd = tarf0stats[1]
+
+        return
+
+    def convert_f0(self, f0):
+        assert self.omean, self.ostd is not None
+        assert self.tmean, self.tstdis is not None
+
+        # get length and dimension
+        T = len(f0)
+
+        # perform f0 conversion
+        cvf0 = np.zeros(T)
+
+        nonzero_indices = f0 > 0
+        cvf0[nonzero_indices] = (f0[nonzero_indices] - self.omean) * \
+            self.tstd / self.ostd + self.tmean
+
+        return cvf0
 
 
 def main():
