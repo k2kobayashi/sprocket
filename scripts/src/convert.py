@@ -59,20 +59,10 @@ def main():
     evh5s = open_h5files(pconf, mode='ev')
 
     # read F0 transfomer
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-    f0trans = F0statistics(pconf)
-=======
->>>>>>> Make postfilter faster and change variable name
     orgf0statspath = pconf.pairdir + '/stats/org.f0stats'
     tarf0statspath = pconf.pairdir + '/stats/tar.f0stats'
     f0stats = F0statistics(pconf)
     f0stats.read_statistics(orgf0statspath, tarf0statspath)
-<<<<<<< HEAD
-=======
->>>>>>> Make postfilter faster and change variable name
->>>>>>> Make postfilter faster and change variable name
 
     # read GMM for mcep
     mcepgmmpath = pconf.pairdir + '/model/GMM.pkl'
