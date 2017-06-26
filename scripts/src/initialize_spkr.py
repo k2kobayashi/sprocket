@@ -41,8 +41,6 @@ def create_f0_histgram(f0s, histfile):
     # flatten two dimensional list into one dimensional list
     f0 = [f0val for i in f0s for f0val in i]
 
-    print len(f0)
-
     # plot histgram
     plt.hist(f0, bins=200, range=(40, 700), normed=True, histtype="stepfilled")
     plt.xlabel("Fundamental frequency")
@@ -70,8 +68,6 @@ def main():
     # F0 extraction with WORLD on multi processing
     p = Pool(args.multicore)
     f0s = p.map(world_f0_analysis, files)
-
-    print f0s[0]
 
     # create figure to visualize F0 histgram
     hist_dir = args.conf_dir + '/f0histgram/'
