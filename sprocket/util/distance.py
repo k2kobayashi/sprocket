@@ -16,13 +16,14 @@ Calculate distance between acoustic features
 """
 
 import math
+import numpy as np
 
 
 def melcd(vec1, vec2):
     if len(vec1) != len(vec2):
         raise ("dimension of the vectors is different.")
 
-    return 10.0 * math.sqrt(2 * sum(pow(vec1 - vec2, 2))) / math.log(10)
+    return 10.0 * math.sqrt(2 * np.sum(np.square(vec1 - vec2))) / math.log(10)
 
 
 def main():
