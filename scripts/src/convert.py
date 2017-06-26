@@ -5,8 +5,7 @@
 #   First ver.: 2017-06-17
 #
 #   Copyright 2017
-#       Kazuhiro KOBAYASHI <kobayashi.kazuhiro@g.sp.m.is.nagoya-u.ac.jp>
-#
+#       Kazuhiro KOBAYASHI <kobayashi.kazuhiro@g.sp.m.is.nagoya-u.ac.jp> #
 #   Distributed under terms of the MIT license.
 #
 

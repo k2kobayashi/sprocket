@@ -1,33 +1,55 @@
-#! /usr/local/bin/python
 # -*- coding: utf-8 -*-
-#
-# melcd.py
-#   First ver.: 2017-06-07
-#
-#   Copyright 2017
-#       Kazuhiro KOBAYASHI <kobayashi.kazuhiro@g.sp.m.is.nagoya-u.ac.jp>
-#
-#   Distributed under terms of the MIT license.
-#
 
-"""
-Calculate distance between acoustic features
-
-"""
-
-import math
+import numpy as np
 
 
 def melcd(vec1, vec2):
-    if len(vec1) != len(vec2):
-        raise ("dimension of the vectors is different.")
+    """Calculate mel-cepstrum distortion
 
-    return 10.0 * math.sqrt(2 * sum(pow(vec1 - vec2, 2))) / math.log(10)
+    Parameters
+    ----------
+    vec1 : array, shape (`dim`)
+        Vector of original
+
+    vec2 : array, shape (`dim`)
+        Vector of Target
+
+    Returns
+    -------
+    mcd : scala, number > 0
+        Scala of mel-cepstrum distortion
+
+    """
+    assert len(vec1) == len(vec2)
+
+    diff = vec1 - vec2
+    mcd = 10.0 / np.log(10) * np.sqrt(2.0 * np.sum(diff ** 2))
+
+    return mcd
 
 
-def main():
-    pass
+def normalized_melcd(array1, array2):
+    """Normalized mel-cepstrum distortion over time
 
+    Parameters
+    ----------
+    array1 : array, shape (`T`, `dim`)
+        Array of Original.
 
-if __name__ == '__main__':
-    main()
+    array2 : array, shape (`T`, `dim`)
+        Array of Target
+
+    Returns
+    -------
+    norm_mcd : scala, number > 0
+        Scala of normalized mel-cepstrum distortion.
+
+    """
+    assert array1.shape == array2.shape
+
+    diff = array1 - array2
+
+    norm_mcd = 10.0 / np.log(10) \
+        * np.mean(np.sqrt(2.0 * np.sum(diff ** 2, axis=1)))
+
+    return norm_mcd
