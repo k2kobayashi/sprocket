@@ -1,72 +1,89 @@
-#! /usr/local/bin/python
 # -*- coding: utf-8 -*-
-#
-# gv.py
-#   First ver.: 2017-06-09
-#
-#   Copyright 2017
-#       Kazuhiro KOBAYASHI <kobayashi.kazuhiro@g.sp.m.is.nagoya-u.ac.jp>
-#
-#   Distributed under terms of the MIT license.
-#
-
-"""
-Calculate log F0 mean and variance of several feature sequence
-
-"""
 
 import os
 import numpy as np
 
-from sprocket.util.hdf5 import open_h5files, close_h5files
-
 
 class F0statistics (object):
 
-    def __init__(self, conf):
-        # read pair-dependent yml file
-        self.conf = conf
+    """F0 statistics class
+    This class offers the estimation of F0 statistics and
+    convert F0
 
-        # open h5list files
-        self.h5s = open_h5files(conf, mode='tr')
-        self.num_files = len(self.h5s)
+    Attributes
+    ---------
+    orgf0stats, shape (`[mean, std]`)
+        Vector of mean and standard deviation of logarithmic F0 for original speaker
 
-    def estimate(self):
-        otflags = [0, 1]
-        for otflag in otflags:
-            if otflag == 0:
-                spkr = 'org'
+    tarf0stats, shape (`[mean, std]`)
+        Vector of mean and standard deviation of logarithmic F0 for target speaker
+
+    """
+
+    def __init__(self):
+        pass
+
+    def estimate(self, f0list):
+        """Estimate F0 statistics from list of f0
+
+        Parameters
+        ---------
+        f0list : list, shape('f0num')
+            List of several F0 sequence
+
+        Returns
+        ---------
+        f0stats : array, shape(`[mean, std]`)
+            Values of mean and standard deviation for logarithmic F0
+
+        """
+
+        n_files = len(f0list)
+        for i in range(n_files):
+            f0 = f0list[i]
+            nonzero_indices = np.nonzero(f0)
+            if i == 0:
+                f0s = np.log(f0[nonzero_indices])
             else:
-                spkr = 'tar'
+                f0s = np.r_[f0s, np.log(f0[nonzero_indices])]
 
-            for i in range(self.num_files):
-                nonzeroidx = np.nonzero(self.h5s[i][otflag].read('f0'))
-                f0 = self.h5s[i][otflag].read('f0')
-                if i == 0:
-                    f0s = np.log(f0[nonzeroidx])
-                else:
-                    f0s = np.r_[f0s, np.log(f0[nonzeroidx])]
+        f0stats = np.array([np.mean(f0s), np.std(f0s)])
 
-            f0stats = np.array([np.mean(f0s), np.std(f0s)])
+        return f0stats
 
-            f0statspath = self.conf.pairdir + '/stats/' + spkr + '.f0stats'
-            if not os.path.exists(os.path.dirname(f0statspath)):
-                os.makedirs(os.path.dirname(f0statspath))
-            fp = open(f0statspath, 'w')
+    def save(self, fpath, f0stats):
+        """Save f0 statistics into fpath as binary
+
+        Parameters
+        ---------
+        fpath : str,
+            File path of F0 statistics
+
+        f0stats : array, shape(`2`)
+            Vector of F0 statistics
+
+        """
+        if not os.path.exists(os.path.dirname(fpath)):
+            os.makedirs(os.path.dirname(fpath))
+        with open(fpath, 'w') as fp:
             fp.write(f0stats)
-            fp.close()
-
-            print('F0 statistics estimation for ' + spkr + ' has been done.')
-
-        # close h5class
-        close_h5files(self.h5s)
 
         return
 
-    def read_statistics(self, orgstatsf, tarstatsf):
-        # read f0 statistics of source and target from binary
-        orgf0stats = np.fromfile(orgstatsf, dtype='d')
-        tarf0stats = np.fromfile(tarstatsf, dtype='d')
+    def read(self, orgf0stats, tarf0stats):
+        """read F0 statistics from array
+
+        Parameters
+        ---------
+        orgstats : array, shape (`2`)
+            Vector of F0 statistics for original speaker
+
+        tarstats : array, shape (`2`)
+            Vector of F0 statistics for target speaker
+
+        """
+        self.orgf0stats = orgf0stats
+        self.tarf0stats = tarf0stats
 
         self.omean = orgf0stats[0]
         self.ostd = orgf0stats[1]
@@ -75,7 +92,45 @@ class F0statistics (object):
 
         return
 
-    def convert_f0(self, f0):
+    def open_from_file(self, orgfile, tarfile):
+        """Open F0 statistics from file
+
+        Parameters
+        ---------
+        orgfile : str
+            File path of F0 statistics for original speaker
+
+        tarfile : str
+            File path of F0 statistics for target speaker
+
+        """
+
+        # read f0 statistics of source and target from binary
+        self.orgf0stats = np.fromfile(orgfile, dtype='d')
+        self.tarf0stats = np.fromfile(tarfile, dtype='d')
+
+        self.omean = self.orgf0stats[0]
+        self.ostd = self.orgf0stats[1]
+        self.tmean = self.tarf0stats[0]
+        self.tstd = self.tarf0stats[1]
+
+        return
+
+    def convert(self, f0):
+        """Convert F0 based on F0 statistics
+
+        Parameters
+        ---------
+        f0 : array, shape(`T`, `1`)
+            Array of F0 sequence
+
+        Returns
+        ---------
+        cvf0 : array, shape(`T`, `1`)
+            Array of converted F0 sequence
+
+        """
+
         assert self.omean, self.ostd is not None
         assert self.tmean, self.tstdis is not None
 
@@ -86,15 +141,6 @@ class F0statistics (object):
         cvf0 = np.zeros(T)
 
         nonzero_indices = f0 > 0
-        cvf0[nonzero_indices] = (f0[nonzero_indices] - self.omean) * \
-            self.tstd / self.ostd + self.tmean
+        cvf0[nonzero_indices] = np.exp((self.tstd / self.ostd) * (np.log(f0[nonzero_indices]) - self.omean) + self.tmean)
 
         return cvf0
-
-
-def main():
-    pass
-
-
-if __name__ == '__main__':
-    main()
