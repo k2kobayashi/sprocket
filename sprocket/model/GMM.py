@@ -17,6 +17,7 @@
 
 import os
 import numpy as np
+import scipy.sparse
 import sklearn.mixture
 from sklearn.externals import joblib
 from sklearn.mixture.gaussian_mixture import _compute_precision_cholesky
@@ -42,10 +43,11 @@ class GMMTrainer(object):
 
     """
 
-    def __init__(self, conf, mode=None):
+    def __init__(self, conf, gmm_mode=None, cv_mode='mlpg'):
         # copy parameters
         self.conf = conf
-        self.gmm_mode = mode
+        self.gmm_mode = gmm_mode
+        self.cv_mode = cv_mode
 
         # parameter definition
         self.param = sklearn.mixture.GaussianMixture(
@@ -62,12 +64,16 @@ class GMMTrainer(object):
         self._deploy_parameters()
 
         # change model paramter of GMM into that of gmm_mode
-        if self.gmm_mode == 'diff':
+        if self.gmm_mode is None:
+            print('open GMM as JD-GMM of X and Y.')
+        elif self.gmm_mode == 'diff':
             self._transform_gmm_into_diffgmm()
             print('open GMM as DIFFGMM.')
         elif self.gmm_mode == 'intra':
             self._transform_gmm_into_intragmm()
-            print('open GMM as Intra-GMM.')
+            raise('intra-GMM does not support now')
+        else:
+            raise('please choose GMM mode in [None, diff, intra]')
 
         # estimate parameters for conversion
         self._set_Ab()
@@ -101,11 +107,14 @@ class GMMTrainer(object):
         # estimate parameter sequence
         cseq, wseq, mseq, covseq = self.gmmmap(data)
 
-        # minimum mean square error based parameter generation
-        odata = self.mmse(wseq, data)
-
-        # TODO # maximum likelihood parameter generation
-        # odata = self.mlpg(cseq, wseq, mseq, covseq)
+        if self.cv_mode == 'mlpg':
+            # maximum likelihood parameter generation
+            odata = self.mlpg(mseq, covseq)
+        elif self.cv_mode == 'mmse':
+            # minimum mean square error based parameter generation
+            odata = self.mmse(wseq, data)
+        else:
+            raise('please choose conversion mode in [mlpg, mmse]')
 
         return odata
 
@@ -148,27 +157,31 @@ class GMMTrainer(object):
         # retern static and throw away delta component
         return odata[:, :sddim / 2]
 
-    def mlpg(self, wseq, cseq, mseq, covseq):
-        pass
-        # # TODO parameter for sequencial data
-        # T, sddim = mseq.shape
+    def mlpg(self, mseq, covseq):
+        # parameter for sequencial data
+        T, sddim = mseq.shape
 
-        # # prepare W
+        # prepare W
+        W = construct_static_and_delta_matrix(T, sddim / 2)
 
-        # # prepare U
+        # prepare D
+        D = get_diagonal_precision_matrix(T, sddim, covseq)
 
-        # # estimate W'u
+        # calculate W'D
+        WD = W.T.dot(D)
 
-        # # W'UW
-        # WUW =
+        # W'DW
+        WDW = WD.dot(W)
 
-        # # W'Um
-        # WUm =
+        # W'Um
+        WDm = WD.dot(mseq.flatten())
 
-        # # calculate (W'UW)^-1 * W'UM
-        # odata = np.dot(np.linalg.inv(WUW), WUm)
+        # estimate y = (W'DW)^-1 * W'Dm
+        odata = scipy.sparse.linalg.spsolve(
+            WDW, WDm, use_umfpack=False).reshape(T, sddim / 2)
 
         # return odata
+        return odata
 
     def _deploy_parameters(self):
         # read JD-GMM parameters from self.param
@@ -244,6 +257,40 @@ class GMMTrainer(object):
 
     def _transform_gmm_into_intragmm(self):
         pass
+
+
+def construct_static_and_delta_matrix(T, D):
+    # TODO: static and delta matrix will be defined at the other place
+    static = [0, 1, 0]
+    delta = [-0.5, 0, 0.5]
+    assert len(static) == len(delta)
+
+    # generate full W
+    DT = D * T
+    ones = np.ones(DT)
+    row = np.arange(2 * DT).reshape(2 * T, D)
+    static_row = row[::2]
+    delta_row = row[1::2]
+    col = np.arange(DT)
+
+    data = np.array([ones * static[0], ones * static[1],
+                     ones * static[2], ones * delta[0],
+                     ones * delta[1], ones * delta[2]]).flatten()
+    row = np.array([[static_row] * 3,  [delta_row] * 3]).flatten()
+    col = np.array([[col - D, col, col + D] * 2]).flatten()
+
+    # remove component at first and end frame
+    valid_idx = np.logical_not(np.logical_or(col < 0, col >= DT))
+
+    W = scipy.sparse.csr_matrix(
+        (data[valid_idx], (row[valid_idx], col[valid_idx])), shape=(2 * DT, DT))
+    W.eliminate_zeros()
+
+    return W
+
+
+def get_diagonal_precision_matrix(T, D, covseq):
+    return scipy.sparse.block_diag(covseq, format='csr')
 
 
 def main():
