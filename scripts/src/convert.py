@@ -30,9 +30,7 @@ from sprocket.util.jnt import calculate_delta
 
 import pysptk
 from pysptk.synthesis import MLSADF
-import sys
 from os.path import join, exists
-from matplotlib import pyplot as plt
 
 
 def main():
@@ -66,7 +64,7 @@ def main():
 
     # read GMM for mcep
     mcepgmmpath = pconf.pairdir + '/model/GMM.pkl'
-    mcepgmm = GMMTrainer(pconf, mode=args.cvtype)
+    mcepgmm = GMMTrainer(pconf, gmm_mode=args.cvtype, cv_mode='mlpg')
     mcepgmm.open(mcepgmmpath)
     print("mode: {}".format(args.cvtype))
 
