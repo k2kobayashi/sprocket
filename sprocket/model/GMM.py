@@ -232,12 +232,9 @@ class GMMTrainer(object):
     def _transform_gmm_into_diffgmm(self):
         self.meanX = self.meanX
         self.meanY = self.meanY - self.meanX
-        covXY = self.covXY.copy()
-        covYX = self.covYX.copy()
-        covYY = self.covYY.copy()
         self.covXX = self.covXX
-        self.covYY = self.covXX + covYY - covXY - covYX
-        self.covXY = covXY - self.covXX
+        self.covYY = self.covXX + self.covYY - self.covXY - self.covYX
+        self.covXY = self.covXY - self.covXX
         self.covYX = self.covXY.transpose(0, 2, 1)
 
         return

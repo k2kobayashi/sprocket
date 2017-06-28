@@ -17,10 +17,13 @@ calculate delta of acoustic feature sequence
 
 import numpy as np
 
+from sprocket.util.decorators import optional_jit
 
+
+@optional_jit
 def delta(data):
     T, dim = data.shape
-    win = [-0.5, 0, 0.5]
+    win = np.array([-0.5, 0, 0.5], dtype=np.float64)
 
     delta = np.zeros((T, dim))
 
