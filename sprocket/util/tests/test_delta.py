@@ -10,6 +10,8 @@ class DeltaTest(unittest.TestCase):
         dim = 2
         data_1d = np.arange(T * dim)
         delta_1d = delta(data_1d)
+        assert len(delta_1d) == len(data_1d)
 
         data_2d = data_1d.reshape(T, dim)
-        delta_12 = delta(data_2d)
+        delta_2d = delta(data_2d)
+        assert data_2d.shape == delta_2d.shape
