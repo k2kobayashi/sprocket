@@ -19,17 +19,22 @@ import numpy as np
 
 
 def delta(data):
-    T, dim = data.shape
-    win = [-0.5, 0, 0.5]
+    if data.ndim == 1:
+        # change vector into 1d-array
+        T = len(data)
+        dim = data.ndim
+        data = data.reshape(T, dim)
+    else:
+        T, dim = data.shape
 
+    win = np.array([-0.5, 0, 0.5], dtype=np.float64)
     delta = np.zeros((T, dim))
 
     delta[0] = 0.5 * data[1]
     delta[-1] = - 0.5 * data[-2]
-    for t in range(1, T - 1):
-        # print(t - 1, t, t + 1, t + 2,
-        #       data[t - 1:t + 1].shape, data[t - 1:t + 2].shape)
-        delta[t] = np.dot(data[t - 1:t + 2].T, win)
+
+    for i in range(len(win)):
+        delta[1:T - 1] += win[i] * data[i:T - 2 + i]
 
     return delta
 
