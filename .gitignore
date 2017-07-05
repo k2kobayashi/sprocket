@@ -8,6 +8,9 @@
 # work files
 /scripts/data/pair/clb-slt
 
+# for wercker
+/.wercker
+
 ### OSX ###
 .DS_Store
 .AppleDouble
