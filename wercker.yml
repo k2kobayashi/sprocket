@@ -1,0 +1,28 @@
+box: python:2.7
+build:
+  steps:
+    # A step that sets up the python virtual environment
+    - virtualenv:
+        name: setup virtual environment
+        install_wheel: false # Enable wheel to speed up builds (experimental)
+
+    # Use this virtualenv step for python 3.2
+    # - virtualenv
+    #     name: setup virtual environment
+    #     python_location: /usr/bin/python3.2
+
+    # install dependencies using requirements.txt
+    - script:
+        name: numpy install
+        code: |
+            pip install numpy
+
+    # This pip-install installs packages and clears the local wheel cache
+    - pip-install:
+        clean_wheel_dir: true
+
+    # performe nosetests
+    - script:
+        name: nosetests
+        code: |
+          nosetests -s -v
