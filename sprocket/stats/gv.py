@@ -1,97 +1,124 @@
-#! /usr/local/bin/python
 # -*- coding: utf-8 -*-
-#
-# gv.py
-#   First ver.: 2017-06-09
-#
-#   Copyright 2017
-#       Kazuhiro KOBAYASHI <kobayashi.kazuhiro@g.sp.m.is.nagoya-u.ac.jp>
-#
-#   Distributed under terms of the MIT license.
-#
-
-"""
-Calculate GV of several feature sequence
-
-"""
 
 import os
 import numpy as np
 
-from sprocket.util.hdf5 import open_h5files, close_h5files
-
 
 class GV (object):
 
-    def __init__(self, conf):
-        # read pair-dependent yml file
-        self.conf = conf
+    """A global variance (GV) statistics class
+    This class offers the estimation of GV statistics and
+    postfiltering based on the GV statistics
 
-    def estimate(self, feature='mcep'):
-        # open h5list files
-        self.h5s = open_h5files(self.conf, mode='tr')
-        self.num_files = len(self.h5s)
+    Attributes
+    ---------
+    gvstats : shape (`2`, `dim`)
+        Array of mean and standard deviation of GV
 
-        otflags = [0, 1]
-        for otflag in otflags:
-            if otflag == 0:
-                spkr = 'org'
-            else:
-                spkr = 'tar'
+    """
 
-            var = []
-            for i in range(self.num_files):
-                mcep = self.h5s[i][otflag].read(feature)
-                var.append(np.var(mcep, axis=0))
+    def __init__(self):
+        pass
 
-            # calculate vm and vv
-            vm = np.mean(np.array(var), axis=0)
-            vv = np.var(np.array(var), axis=0)
-            gv = np.r_[vm, vv]
-            gv = gv.reshape(2, len(vm))
+    def estimate(self, datalist):
+        """Estimate GV statistics from list of data
 
-            gvpath = self.conf.pairdir + '/stats/' + spkr + '.gv'
-            if not os.path.exists(os.path.dirname(gvpath)):
-                os.makedirs(os.path.dirname(gvpath))
-            fp = open(gvpath, 'w')
-            fp.write(gv)
-            fp.close()
+        Parameters
+        ---------
+        datalist : list, shape ('num_data')
+            List of several data ([T, dim]) sequence
 
-            print('GV estimation of ' + feature +
-                  ' for ' + spkr + ' has been done.')
+        Returns
+        ---------
+        gvstats : array, shape (`2`, `dim`)
+            Array of mean and standard deviation fo GV
+        """
 
-        # close h5class
-        close_h5files(self.h5s)
+        n_files = len(datalist)
+
+        var = []
+        for i in range(n_files):
+            data = datalist[i]
+            var.append(np.var(data, axis=0))
+
+        # calculate vm and vv
+        vm = np.mean(np.array(var), axis=0)
+        vv = np.var(np.array(var), axis=0)
+        gvstats = np.r_[vm, vv]
+        self.gvstats = gvstats.reshape(2, len(vm))
+
+        return self.gvstats
+
+    def save(self, fpath):
+        """Save GV statistics into fpath as binary
+
+        Parameters
+        ---------
+        fpath: str,
+            File path of GV statistics
+
+        gvstats: array, shape (`2`, `dim`)
+            GV statistics
+
+        """
+
+        if self.gvstats is None:
+            raise('gvstats does not calculated')
+
+        if not os.path.exists(os.path.dirname(fpath)):
+            os.makedirs(os.path.dirname(fpath))
+
+        with open(fpath, 'w') as fp:
+            fp.write(self.gvstats)
 
         return
 
-    def read_statistics(self, fpath):
+    def open_from_file(self, fpath):
+        """Open GV statistics from binary file
+
+        Parameters
+        ---------
+        fpath: str,
+            File path of GV statistics
+
+        """
+
         # read gv from binary
         gv = np.fromfile(fpath, dtype='d')
         dim = len(gv) / 2
-        self.gv = gv.reshape(2, dim)
+        self.gvstats = gv.reshape(2, dim)
+
         return
 
-    def apply_gvpostfilter(self, data, startdim=1):
+    def postfilter(self, data, startdim=1):
+        """Perform postfilter based on GV statistics into data
+
+        Parameters
+        ---------
+        data : array, shape (`T`, `dim`)
+            Array of data sequence
+
+        startdim : int, optional
+            Start dimension to perform GV postfilter
+
+        Returns
+        ---------
+        filtered_data : array, shape (`T`, `data`)
+            Array of GV postfiltered data sequence
+
+        """
+
         # get length and dimension
         T, dim = data.shape
-        assert self.gv is not None
-        assert dim + startdim == self.gv.shape[1]
+        assert self.gvstats is not None
+        assert dim + startdim == self.gvstats.shape[1]
 
         # calculate statics of input data
         datamean = np.mean(data, axis=0)
         datavar = np.var(data, axis=0)
 
         # perform GV postfilter
-        filtered_data = np.sqrt(self.gv[0, startdim:] / datavar) * \
+        filtered_data = np.sqrt(self.gvstats[0, startdim:] / datavar) * \
             (data - datamean) + datamean
 
         return filtered_data
-
-
-def main():
-    pass
-
-
-if __name__ == '__main__':
-    main()

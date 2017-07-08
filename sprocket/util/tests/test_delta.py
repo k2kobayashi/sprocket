@@ -1,17 +1,23 @@
 import unittest
+
 import numpy as np
+from sprocket.util.delta import delta, construct_static_and_delta_matrix
 
-from sprocket.util.delta import delta
 
-class DeltaTest(unittest.TestCase):
+class DeltaFunctionsTest(unittest.TestCase):
 
     def test_delta(self):
-        T = 100
-        dim = 2
-        data_1d = np.arange(T * dim)
-        delta_1d = delta(data_1d)
-        assert len(delta_1d) == len(data_1d)
+        data1d = np.random.rand(100)
+        delta1d = delta(data1d)
+        assert len(data1d) == len(delta1d)
 
-        data_2d = data_1d.reshape(T, dim)
-        delta_2d = delta(data_2d)
-        assert data_2d.shape == delta_2d.shape
+        data2d = data1d.reshape(50, 2)
+        delta2d = delta(data2d)
+        assert delta2d.shape[0] == data2d.shape[0]
+        assert delta2d.shape[1] == data2d.shape[1]
+
+    def test_construct_W_matrix(self):
+        T, D = 100, 4
+        W = construct_static_and_delta_matrix(T, D)
+        assert W.shape[0] == 2 * T * D
+        assert W.shape[1] == T * D
