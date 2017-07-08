@@ -8,6 +8,8 @@
 # work files
 /scripts/data/pair/clb-slt
 
+# for test
+
 # for wercker
 /.wercker
 

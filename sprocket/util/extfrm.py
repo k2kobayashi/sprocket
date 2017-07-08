@@ -1,36 +1,34 @@
-#! /usr/local/bin/python
 # -*- coding: utf-8 -*-
-#
-# extfrm.py
-#   First ver.: 2017-06-09
-#
-#   Copyright 2017
-#       Kazuhiro KOBAYASHI <kobayashi.kazuhiro@g.sp.m.is.nagoya-u.ac.jp>
-#
-#   Distributed under terms of the MIT license.
-#
-
-"""
-
-
-"""
 
 import numpy as np
 
 
-def extfrm(npow, data):
-    threshold = -20
+def extfrm(npow, data, threshold=-20):
+    """Extract frame under the threshold
+
+    Parameters
+    ----------
+    npow : array, shape (`T`)
+        Vector of normalized power sequence.
+
+    data: array, shape (`T`, `dim`)
+        Array of input data
+
+    threshold: scala, optional
+        Scala of power threshold
+
+    Returns
+    -------
+    data: array, shape (`T_ext`, `dim`)
+        Remaining data after extracting frame
+        `T_ext` <= `T`
+
+    """
+
     T = data.shape[0]
     if T != len(npow):
         raise("Length of two vectors is different.")
 
-    index = np.where(npow > threshold)
-    return data[index]
+    valid_index = np.where(npow > threshold)
 
-
-def main():
-    pass
-
-
-if __name__ == '__main__':
-    main()
+    return data[valid_index]

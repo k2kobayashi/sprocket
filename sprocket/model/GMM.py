@@ -1,19 +1,4 @@
-#! /usr/local/bin/python
 # -*- coding: utf-8 -*-
-#
-# GMM.py
-#   First ver.: 2017-06-15
-#
-#   Copyright 2017
-#       Kazuhiro KOBAYASHI <kobayashi.kazuhiro@g.sp.m.is.nagoya-u.ac.jp>
-#
-#   Distributed under terms of the MIT license.
-#
-
-"""
-
-
-"""
 
 import os
 import numpy as np
@@ -22,40 +7,223 @@ import sklearn.mixture
 from sklearn.externals import joblib
 from sklearn.mixture.gaussian_mixture import _compute_precision_cholesky
 
+from sprocket.util.delta import construct_static_and_delta_matrix
+
 
 class GMMTrainer(object):
 
-    """
-    A GMM trainer
+    """GMM trainer
+    This class offers the training of GMM with several types of
+    covariance matrix.
 
-    This class assumes:
+    Parameters
+    ---------
+    n_mix: int, optional
+        The number of mixture components of the GMM
+        Default set to 32.
 
-    TODO:
-    Training and converting acoustic feature
+    n_iter: int, optional
+        THe number of iteration for EM algorithm.
+        Default set to 100.
+
+    covtype: str, optional
+        The type of covariance matrix of the GMM
+        full: full-covariance matrix
+        block_diag: block-diagonal matrix
 
     Attributes
     ---------
-    conf: parameters read from speaker yml file
-    param: parameters of the GMM
-    w: weigh of the GMM
-    jmean: mean vector of the GMM
-    jcov: covariance matrix of the GMM
+    param :
+        Sklean-based model parameters of the GMM
+
+    w : shape (`n_mix`)
+        Vector of mixture component weight of the GMM
+
+    jmean : shape (`n_mix`, `jnt.shape[0]`)
+        Array of joint mean vector of the GMM
+
+    jcov: shape (`n_mix`, `jnt.shape[0]`, `jnt.shape[0]`)
+        Array of joint covariance matrix of the GMM
 
     """
 
-    def __init__(self, conf, gmm_mode=None, cv_mode='mlpg'):
-        # copy parameters
-        self.conf = conf
-        self.gmm_mode = gmm_mode
-        self.cv_mode = cv_mode
+    def __init__(self, n_mix=32, n_iter=100, covtype='full'):
+        self.n_mix = n_mix
+        self.n_iter = n_iter
+        self.covtype = covtype
 
-        # parameter definition
+        # construct GMM parameter
         self.param = sklearn.mixture.GaussianMixture(
-            n_components=self.conf.n_mix,
-            covariance_type=self.conf.covtype,
-            max_iter=self.conf.n_iter)
+            n_components=self.n_mix,
+            covariance_type=self.covtype,
+            max_iter=self.n_iter)
 
     def open(self, fpath):
+        """Open GMM from file
+
+        Parameters
+        ---------
+        fpath : str
+            File path of the pkl file of the GMM
+
+        """
+
+        # read GMM from pkl file
+        if not os.path.exists(fpath):
+            raise('pkl file of the GMM does not exists.')
+
+        # read model and parse
+        self.param = joblib.load(fpath)
+        self._deploy_parameters()
+
+        return
+
+    def save(self, fpath):
+        """Save GMM parameters as pkl file
+
+        Parameters
+        ---------
+        fpath : str
+            File path to save pkl file
+
+        """
+
+        # save GMM intp pkl file
+        dirname = os.path.dirname(fpath)
+        if not os.path.exists(dirname):
+            os.makedirs(dirname)
+
+        # save model parameter file as pkl
+        joblib.dump(self.param, fpath)
+
+        return
+
+    def train(self, jnt):
+        """Fit GMM parameter from given joint feature vector
+
+        Parameters
+        ---------
+        jnt : array, shape(`T`, `jnt.shape[0]`)
+            Joint feature vector of original and target feature vector consisting
+            of static and delta components
+
+        """
+
+        if self.covtype == 'full':
+            self.param.fit(jnt)
+        elif self.covtype == 'block_diag':
+            self._train_block_diag(jnt)
+        self._deploy_parameters()
+
+        return
+
+    def train_singlepath(self, reference_jnt, jnt):
+        """Fit GMM parameter based on single-path training
+
+        Single-path training is a technique to fit GMM parameters of
+        `reference_jnt` using joint feature vector `jnt` and its fitted
+        paramter `param`. The single-path training assumes the hidden
+        variable of `jnt` and `reference_jnt` is equals.
+        For E-step :
+            Estimate occupancy based on `param` and `jnt`
+            P (m | param, jnt)
+        For M-step :
+            Update parameter using reference_jnt
+        EM-algorithm is performed only one time.
+
+        Parameters
+        ---------
+        reference_jnt: array, shape(`T`, `reference_jnt.shape[0]`)
+            Reference joint feature vector of original and target feature vector consisting
+            of static and delta components, which was already fit.
+
+        jnt: array, shape(`T`, `jnt.shape[0]`)
+            Joint feature vector of original and target feature vector consisting
+            of static and delta components, wichi will be fit.
+
+        """
+
+        self._deploy_parameters()
+
+        pass
+
+    def _train_block_diag(self, jnt):
+        # perform E-step using sklearn
+
+        # update parameter of weigh, mean, and block diagonal covariance
+
+        self._deploy_parameters()
+        pass
+
+    def _deploy_parameters(self):
+        # read JD-GMM parameters from self.param
+        self.w = self.param.weights_
+        self.jmean = self.param.means_
+        self.jcov = self.param.covariances_
+
+        return
+
+
+class GMMConvertor(object):
+
+    """A GMM Convertor
+    This class offers the several conversion techniques such as Maximum Likelihood
+    Parameter Generation (MLPG) and Mimimum Mean Square Error (MMSE).
+
+    Parameters
+    ---------
+    n_mix : int, optional
+        The number of mixture components of the GMM
+        Default set to 32.
+
+    covtype : str, optional
+        The type of covariance matrix of the GMM
+        `full` : full-covariance matrix
+        `block_diag : block-diagonal matrix
+
+    gmmmode: str, optional
+        The type of the GMM for opening
+        `None` : Normal JD-GMM
+        `diff` : Differential GMM
+        `intra` : Intra-speaker GMM
+
+    cvtype: str, optional
+        The type of the conversion algorithm
+        `mlgp` : MLPG
+        `mmse` : MMSE
+
+    Attributes
+    ---------
+    param :
+        Sklean-based model parameters of the GMM
+
+    w : shape (`n_mix`)
+        Vector of mixture component weight of the GMM
+
+    jmean : shape (`n_mix`, `jnt.shape[0]`)
+        Array of joint mean vector of the GMM
+
+    jcov: shape (`n_mix`, `jnt.shape[0]`, `jnt.shape[0]`)
+        Array of joint covariance matrix of the GMM
+
+    """
+
+    def __init__(self, n_mix=32, covtype='full', gmmmode=None, cvtype='mlpg'):
+        self.n_mix = n_mix
+        self.covtype = covtype
+        self.gmmmode = gmmmode
+        self.cvtype = cvtype
+
+    def open(self, fpath):
+        """Open GMM from file
+
+        Parameters
+        ---------
+        fpath: str
+            File path of the pkl of the GMM
+
+        """
+
         # read GMM from pkl file
         if not os.path.exists(fpath):
             raise('pkl file of GMM does not exists.')
@@ -63,39 +231,15 @@ class GMMTrainer(object):
         self.param = joblib.load(fpath)
         self._deploy_parameters()
 
-        # change model paramter of GMM into that of gmm_mode
-        if self.gmm_mode is None:
-            print('open GMM as JD-GMM of X and Y.')
-        elif self.gmm_mode == 'diff':
+        # change model paramter of GMM into that of gmmmode
+        if self.gmmmode is None:
+            pass
+        elif self.gmmmode == 'diff':
             self._transform_gmm_into_diffgmm()
-            print('open GMM as DIFFGMM.')
-        elif self.gmm_mode == 'intra':
+        elif self.gmmmode == 'intra':
             self._transform_gmm_into_intragmm()
-            raise('intra-GMM does not support now')
         else:
             raise('please choose GMM mode in [None, diff, intra]')
-
-        # estimate parameters for conversion
-        self._set_Ab()
-        self._set_pX()
-
-        print('open GMM has been done.')
-        return
-
-    def save(self, fpath):
-        # save GMM intp pkl file
-        dirname = os.path.dirname(fpath)
-        if not os.path.exists(dirname):
-            os.makedirs(dirname)
-
-        # save model parameter file
-        joblib.dump(self.param, fpath)
-
-    def train(self, jnt):
-        print('GMM modeling starts')
-        self.param.fit(jnt)
-        self._deploy_parameters()
-        print('GMM modeling has been done.')
 
         # estimate parameters for conversion
         self._set_Ab()
@@ -104,21 +248,35 @@ class GMMTrainer(object):
         return
 
     def convert(self, data):
-        # estimate parameter sequence
-        cseq, wseq, mseq, covseq = self.gmmmap(data)
+        """Convert data based on conditional probability densify function
 
-        if self.cv_mode == 'mlpg':
+        Parameters
+        ---------
+        data : array, shape(`T`, `dim`)
+            Original data will be converted
+
+        Returns
+        ---------
+        odata : array, shape(`T`, `dim`)
+            Converted data
+
+        """
+
+        # estimate parameter sequence
+        cseq, wseq, mseq, covseq = self._gmmmap(data)
+
+        if self.cvtype == 'mlpg':
             # maximum likelihood parameter generation
-            odata = self.mlpg(mseq, covseq)
-        elif self.cv_mode == 'mmse':
+            odata = self._mlpg(mseq, covseq)
+        elif self.cvtype == 'mmse':
             # minimum mean square error based parameter generation
-            odata = self.mmse(wseq, data)
+            odata = self._mmse(wseq, data)
         else:
             raise('please choose conversion mode in [mlpg, mmse]')
 
         return odata
 
-    def gmmmap(self, sddata):
+    def _gmmmap(self, sddata):
         # parameter for sequencial data
         T, sddim = sddata.shape
 
@@ -143,13 +301,13 @@ class GMMTrainer(object):
 
         return cseq, wseq, mseq, covseq
 
-    def mmse(self, wseq, sddata):
+    def _mmse(self, wseq, sddata):
         # parameter for sequencial data
         T, sddim = sddata.shape
 
         odata = np.zeros((T, sddim))
         for t in range(T):
-            for m in range(self.conf.n_mix):
+            for m in range(self.n_mix):
                 odata[t] += wseq[t, m] * \
                     (self.meanY[m] +
                      np.dot(self.A[m], sddata[t] - self.meanX[m]))
@@ -157,7 +315,7 @@ class GMMTrainer(object):
         # retern static and throw away delta component
         return odata[:, :sddim / 2]
 
-    def mlpg(self, mseq, covseq):
+    def _mlpg(self, mseq, covseq):
         # parameter for sequencial data
         T, sddim = mseq.shape
 
@@ -205,15 +363,15 @@ class GMMTrainer(object):
         sddim = self.jmean.shape[1] // 2
 
         # calculate inverse covariance for covariance XX in each mixture
-        self.covXXinv = np.zeros((self.conf.n_mix, sddim, sddim))
-        for m in range(self.conf.n_mix):
+        self.covXXinv = np.zeros((self.n_mix, sddim, sddim))
+        for m in range(self.n_mix):
             self.covXXinv[m] = np.linalg.inv(self.covXX[m])
 
         # calculate A, b, and conditional covariance given X
-        self.A = np.zeros((self.conf.n_mix, sddim, sddim))
-        self.b = np.zeros((self.conf.n_mix, sddim))
-        self.cond_cov_inv = np.zeros((self.conf.n_mix, sddim, sddim))
-        for m in range(self.conf.n_mix):
+        self.A = np.zeros((self.n_mix, sddim, sddim))
+        self.b = np.zeros((self.n_mix, sddim))
+        self.cond_cov_inv = np.zeros((self.n_mix, sddim, sddim))
+        for m in range(self.n_mix):
             # calculate A (i.e., A = yxcov_m * xxcov_m^-1)
             self.A[m] = np.dot(self.covYX[m], self.covXXinv[m])
 
@@ -230,7 +388,7 @@ class GMMTrainer(object):
     def _set_pX(self):
         # probability density function of X
         self.pX = sklearn.mixture.GaussianMixture(
-            n_components=self.conf.n_mix, covariance_type=self.conf.covtype)
+            n_components=self.n_mix, covariance_type=self.covtype)
         self.pX.weights_ = self.w
         self.pX.means_ = self.meanX
         self.pX.covariances_ = self.covXX
@@ -238,7 +396,7 @@ class GMMTrainer(object):
         # following function is required to estimate porsterior
         # P(X | \lambda^(X)))
         self.pX.precisions_cholesky_ = _compute_precision_cholesky(
-            self.covXX, self.conf.covtype)
+            self.covXX, self.covtype)
 
         return
 
@@ -249,50 +407,18 @@ class GMMTrainer(object):
         self.covYY = self.covXX + self.covYY - self.covXY - self.covYX
         self.covXY = self.covXY - self.covXX
         self.covYX = self.covXY.transpose(0, 2, 1)
-
         return
 
     def _transform_gmm_into_intragmm(self):
-        pass
-
-
-def construct_static_and_delta_matrix(T, D):
-    # TODO: static and delta matrix will be defined at the other place
-    static = [0, 1, 0]
-    delta = [-0.5, 0, 0.5]
-    assert len(static) == len(delta)
-
-    # generate full W
-    DT = D * T
-    ones = np.ones(DT)
-    row = np.arange(2 * DT).reshape(2 * T, D)
-    static_row = row[::2]
-    delta_row = row[1::2]
-    col = np.arange(DT)
-
-    data = np.array([ones * static[0], ones * static[1],
-                     ones * static[2], ones * delta[0],
-                     ones * delta[1], ones * delta[2]]).flatten()
-    row = np.array([[static_row] * 3,  [delta_row] * 3]).flatten()
-    col = np.array([[col - D, col, col + D] * 2]).flatten()
-
-    # remove component at first and end frame
-    valid_idx = np.logical_not(np.logical_or(col < 0, col >= DT))
-
-    W = scipy.sparse.csr_matrix(
-        (data[valid_idx], (row[valid_idx], col[valid_idx])), shape=(2 * DT, DT))
-    W.eliminate_zeros()
-
-    return W
+        self.meanX = self.meanX
+        self.meanY = self.meanX
+        self.covXX = self.covXX
+        self.covXY = np.dot(
+            self.covXY, np.linalg.solve(self.covYY, self.covYX))
+        self.covYX = self.covXY
+        self.covYY = self.covXX
+        return
 
 
 def get_diagonal_precision_matrix(T, D, covseq):
     return scipy.sparse.block_diag(covseq, format='csr')
-
-
-def main():
-    pass
-
-
-if __name__ == '__main__':
-    main()
