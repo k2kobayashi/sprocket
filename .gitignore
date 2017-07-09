@@ -1,12 +1,11 @@
 # Created by https://www.gitignore.io
 
-/scripts/configure/*.list
-/scripts/configure/f0histgram/*.pdf
-/scripts/data/speaker/h5/*
-/scripts/data/speaker/wav/*
-
-# work files
-/scripts/data/pair/clb-slt
+# data files
+/example/conf
+/example/data/h5
+/example/data/f0histgram
+/example/data/stats
+/example/data/pair
 
 # for test
 

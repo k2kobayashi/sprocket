@@ -17,7 +17,7 @@
 
 import argparse
 
-from sprocket.util.yml import PairYML
+from sprocket.util.hdf5 import HDF5files
 from sprocket.stats.gv import GV
 from sprocket.stats.f0statistics import F0statistics
 
@@ -26,24 +26,32 @@ def main():
     # Options for python
     description = 'estimate joint feature of source and target speakers'
     parser = argparse.ArgumentParser(description=description)
-    parser.add_argument('org', type=str,
-                        help='original speaker label')
-    parser.add_argument('tar', type=str,
-                        help='target speaker label')
-    parser.add_argument('pair_ymlf', type=str,
-                        help='yml file for the speaker pair')
+    parser.add_argument('spkr', type=str,
+                        help='Input speaker label')
+    parser.add_argument('listf', type=str,
+                        help='List file of the input speaker')
+    parser.add_argument('h5_dir', type=str,
+                        help='Hdf5 file directory of the speaker')
+    parser.add_argument('pair_dir', type=str,
+                        help='Statistics directory of the speaker')
     args = parser.parse_args()
 
-    # read pair-dependent yml file
-    conf = PairYML(args.pair_ymlf)
+    # open h5 files
+    h5s = HDF5files(args.listf, args.h5_dir)
+
+    statspath = args.pair_dir + '/stats/' + args.spkr
 
     # estimate and save GV of orginal and target speakers
-    gv = GV(conf)
-    gv.estimate('mcep')
+    gv = GV()
+    gv.estimate(h5s.datalist(ext='mcep'))
+    gvpath = statspath + '.gv'
+    gv.save(gvpath)
 
     # estimate and save F0 statistics of original and target speakers
-    F0stats = F0statistics(conf)
-    F0stats.estimate()
+    f0stats = F0statistics()
+    f0stats.estimate(h5s.datalist(ext='f0'))
+    f0statspath = statspath + '.f0stats'
+    f0stats.save(f0statspath)
 
     return
 

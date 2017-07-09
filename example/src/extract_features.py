@@ -15,66 +15,70 @@ acoustic feature extraction for the speaker
 
 """
 
-import glob
 import argparse
-from multiprocessing import Pool
+import numpy as np
+from scipy.io import wavfile
 
-from sprocket.backend import FeatureExtractor
+from sprocket.feature import FeatureExtractor
 from sprocket.util.yml import SpeakerYML
-
-
-def analyze_features(feat, wavf):
-    # set wave file
-    feat.set_wavf(wavf)
-
-    # extract acoustic features (i.e., F0, spc, ap, mcep, npow)
-    """
-    TODO:
-    The name of this function is unclear which features are extracted.
-    It requires to be decreared by chenging mode as follows:
-    feat.analyze(feat='mcep')  # feat, type, or mode
-    """
-    feat.analyze_all()
-
-    # TODO: synthesis with analized features (F0, spc, ap or F0, mcep, bndap)
-
-    # save acoustic features as hdf5
-    feat.save_hdf5(wavf)
-
-    return
-
-
-def fa_wrapper(args):
-    # wrapper function for multi processing with several arguments
-    return analyze_features(*args)
+from sprocket.util.hdf5 import HDF5
 
 
 def main():
     # Options for python
     dcp = 'feature extraction for the speaker'
     parser = argparse.ArgumentParser(description=dcp)
-    parser.add_argument('-m', '--multicore', type=int, default=1,
-                        help='# of cores for multi-processing')
     parser.add_argument('spkr', type=str,
-                        help='input speaker label')
+                        help='Input speaker label')
     parser.add_argument('ymlf', type=str,
-                        help='configure file for the speaker')
+                        help='Yml file of the input speaker')
+    parser.add_argument('listf', type=str,
+                        help='List file of the input speaker')
     parser.add_argument('wav_dir', type=str,
-                        help='wav file directory of the speaker')
+                        help='Wav file directory of the speaker')
+    parser.add_argument('h5_dir', type=str,
+                        help='hdf5 file directory of the speaker')
     args = parser.parse_args()
 
     # read parameters from yml
     conf = SpeakerYML(args.ymlf)
 
-    # construct feature extraction class
-    feat = FeatureExtractor(conf)
+    # open list file
+    with open(args.listf, 'r') as fp:
+        files = fp.readlines()
 
-    # grab .wav files in data directory
-    wavs = glob.glob(args.wav_dir + '/' + args.spkr + '/*.wav')
+    for f in files:
+        # open wave file
+        f = f.rstrip()
+        wavf = args.wav_dir + '/' + f + '.wav'
+        fs, x = wavfile.read(wavf)
+        x = np.array(x, dtype=np.float)
+        assert fs == conf.fs
 
-    # feature extraction with WORLD on multi processing
-    p = Pool(args.multicore)
-    p.map(fa_wrapper, [(feat, w) for w in wavs])
+        print("Processing: " + wavf)
+        # constract AcousticFeature clas
+        feat = FeatureExtractor(
+            x,
+            analyzer='world',
+            fs=fs,
+            minf0=conf.minf0,
+            maxf0=conf.maxf0,
+        )
+
+        # analyze F0, spc, and ap
+        feat.analyze()
+        mcep = feat.mcep(dim=conf.dim, alpha=conf.alpha)
+        npow = feat.npow()
+
+        # save features into a hdf5 file
+        h5f = args.h5_dir + '/' + f + '.h5'
+        h5 = HDF5(h5f, mode='w')
+        h5.save(feat.spc, ext='spc')
+        h5.save(feat.ap, ext='ap')
+        h5.save(feat.f0, ext='f0')
+        h5.save(mcep, ext='mcep')
+        h5.save(npow, ext='npow')
+        h5.close()
 
 
 if __name__ == '__main__':

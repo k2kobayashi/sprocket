@@ -47,7 +47,7 @@ class GV (object):
         gvstats = np.r_[vm, vv]
         self.gvstats = gvstats.reshape(2, len(vm))
 
-        return self.gvstats
+        return
 
     def save(self, fpath):
         """Save GV statistics into fpath as binary
