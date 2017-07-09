@@ -1,41 +1,30 @@
-#! /usr/local/bin/python
 # -*- coding: utf-8 -*-
-#
-# jnt.py
-#   First ver.: 2017-06-15
-#
-#   Copyright 2017
-#       Kazuhiro KOBAYASHI <kobayashi.kazuhiro@g.sp.m.is.nagoya-u.ac.jp>
-#
-#   Distributed under terms of the MIT license.
-#
-
-"""
-twf and joint feature extraction
-
-"""
 
 import os
 import numpy as np
-# from multiprocessing import Pool
+from fastdtw import fastdtw
 
-from dtw import dtw
-
-from sprocket.util.hdf5 import HDF5, open_h5files, close_h5files
-from sprocket.util.distance import melcd
+from sprocket.util.hdf5 import HDF5
+from sprocket.util.distance import melcd, normalized_melcd
 from sprocket.util.delta import delta
 from sprocket.util.extfrm import extfrm
-from sprocket.model.GMM import GMMTrainer
+from sprocket.model.GMM import GMMTrainer, GMMConvertor
 
 
 class JointFeatureExtractor(object):
 
-    def __init__(self, conf, feature='mcep', mnum=1):
+    """Joint feature extractor class
+    This class offers to extract time-aligned joint feature vector of original and
+    target speakers' acoustic feature.
 
-        # copy parameters
-        self.conf = conf
-        self.mnum = mnum
+    Parameters
+    ---------
+    feature : str, optional
+        The type of acoustic feature
 
+    """
+
+    def __init__(self, feature='mcep', n_iter=3, pairdir=None):
         # distance setting
         if feature == 'mcep':
             self.distance = 'melcd'
@@ -44,26 +33,56 @@ class JointFeatureExtractor(object):
             raise('distance metrics does not support.')
 
         # open GMM for training and conversion
-        self.gmm = GMMTrainer(conf)
+        self.trgmm = GMMTrainer()
+        self.cvgmm = GMMConvertor()
+        self.n_jntiter = n_iter
+        self.pairdir = pairdir
 
-    def estimate(self):
+    def estimate(self, orgfeatlist, tarfeatlist, orgnpowlist, tarnpowlist):
+        """Estimate joint feature vector
+
+        Parameters
+        ---------
+        orgfeatlist : list, shape(`num_files`)
+            List of feature vectors for original speaker
+
+        tarfeatlist : list, shape(`num_files`)
+            List of feature vectors for target speaker
+
+        orgnpowlist : list, shape(`num_files`)
+            List of npow for target speaker
+
+        tarnpowlist : list, shape(`num_files`)
+            List of npow for target speaker
+
+        """
+
+        assert len(orgfeatlist) == len(tarfeatlist)
+        assert len(orgnpowlist) == len(tarnpowlist)
+        assert len(orgfeatlist) == len(orgnpowlist)
+
+        self.orgfeat = orgfeatlist
+        self.tarfeat = tarfeatlist
+        self.orgnpow = orgnpowlist
+        self.tarnpow = tarnpowlist
+
+        self.num_files = len(self.orgfeat)
+
         itnum = 0
         print(str(itnum) + '-th joint feature extraction starts.')
-
-        # open h5list files
-        self.h5s = open_h5files(self.conf, mode='tr')
-        self.num_files = len(self.h5s)
 
         # create joint feature over utterances
         jnt = self._get_joint_feature_matrix(itnum)
 
         # iterative twf estimation
-        while (itnum < self.conf.n_jntiter):
+        while (itnum < self.n_jntiter):
             itnum += 1
             print(str(itnum) + '-th joint feature extraction start.')
 
             # train and save GMM with joint feature vectors
-            self.gmm.train(jnt)
+            self.trgmm.train(jnt)
+            self._save_gmm(itnum)
+            self._open_gmm(itnum)
 
             # dtw with converted original and target
             jnt = self._get_joint_feature_matrix(itnum)
@@ -72,29 +91,11 @@ class JointFeatureExtractor(object):
         self._save_gmm(itnum)
         self._save_jnt(jnt, itnum)
 
-        # close hdf5 files
-        close_h5files(self.h5s)
-
         return
 
-    def read_jnt(self):
-        jntdir = self.conf.pairdir + '/jnt'
-        jntpath = jntdir + '/it' + str(self.conf.n_jntiter) + '.h5'
-
-        if not os.path.exists(jntpath):
-            raise('joint feature files does not exists.')
-
-        h5 = HDF5(jntpath, mode='r')
-        jnt = h5.read(ext='mat')
-        h5.close()
-
-        return jnt
-
-    # TODO: will be modified to multiprocessing
     def _get_joint_feature_matrix(self, itnum):
         for i in range(self.num_files):
-            jdata = self._get_joint_feature(
-                itnum, self.h5s[i][0], self.h5s[i][1])
+            jdata = self._get_joint_feature(i, itnum)
 
             # concatenate joint feature data into joint feature matrix
             if i == 0:
@@ -103,32 +104,37 @@ class JointFeatureExtractor(object):
                 jnt = np.r_[jnt, jdata]
         return jnt
 
-    def _get_joint_feature(self, itnum, orgh5, tarh5):
+    def _get_joint_feature(self, i, itnum):
         # get delta and extract silence frame
         orgdata = calculate_extsddata(
-            orgh5.read('mcep')[:, self.sd:], orgh5.read('npow'))
+            self.orgfeat[i][:, self.sd:], self.orgnpow[i])
         tardata = calculate_extsddata(
-            tarh5.read('mcep')[:, self.sd:], tarh5.read('npow'))
+            self.tarfeat[i][:, self.sd:], self.tarnpow[i])
 
         if itnum == 0:
             # estimate twf function
-            dist, _, _, twf = estimate_twf(orgdata, tardata, self.distance)
+            twf = estimate_twf(orgdata, tardata, self.distance)
+
+            norm_mcd = normalized_melcd(orgdata[twf[0]], tardata[twf[1]])
         else:
+            # estimate twf with conversion
             # conversion
-            conv = self.gmm.convert(
-                calculate_delta(orgh5.read('mcep')[:, self.sd:]))
+            conv = self.cvgmm.convert(
+                calculate_delta(self.orgfeat[i][:, self.sd:]))
 
             # get delta and extract silence frame for converted
-            convdata = calculate_extsddata(conv, orgh5.read('npow'))
+            cvdata = calculate_extsddata(conv, self.orgnpow[i])
 
             # twf estimation between conv and tar
-            dist, _, _, twf = estimate_twf(convdata, tardata, self.distance)
+            twf = estimate_twf(cvdata, tardata, self.distance)
+
+            norm_mcd = normalized_melcd(cvdata[twf[0]], tardata[twf[1]])
 
         # print distortion
-        print('distortion [dB] for ' + orgh5.flbl + ': ' + str(dist))
+        print('distortion [dB] for ' + str(i) + '-th file: ' + str(norm_mcd))
 
         # save twf file
-        self._save_twf(orgh5.flbl, twf, itnum)
+        self._save_twf(str(i) + '-th', twf, itnum)
 
         # generate joint feature vector of a phrase
         jdata = generate_joint_feature_from_twf(orgdata, tardata, twf)
@@ -137,7 +143,7 @@ class JointFeatureExtractor(object):
 
     def _save_twf(self, flbl, twf, itnum):
         # save twf file as txt
-        twfdir = self.conf.pairdir + '/twf/it' + str(itnum)
+        twfdir = self.pairdir + '/twf/it' + str(itnum)
         if not os.path.exists(twfdir):
             os.makedirs(twfdir)
         twfpath = twfdir + '/' + flbl + '.twf'
@@ -148,7 +154,7 @@ class JointFeatureExtractor(object):
 
     def _save_jnt(self, jnt, itnum):
         # save jnt file as hdf5
-        jntdir = self.conf.pairdir + '/jnt'
+        jntdir = self.pairdir + '/jnt'
         if not os.path.exists(jntdir):
             os.makedirs(jntdir)
         jntpath = jntdir + '/it' + str(itnum) + '.h5'
@@ -160,11 +166,19 @@ class JointFeatureExtractor(object):
 
     def _save_gmm(self, itnum):
         # save jnt file as pkl
-        gmmdir = self.conf.pairdir + '/GMM'
+        gmmdir = self.pairdir + '/GMM'
         if not os.path.exists(gmmdir):
             os.makedirs(gmmdir)
         gmmpath = gmmdir + '/it' + str(itnum) + '_GMM.pkl'
-        self.gmm.save(gmmpath)
+        self.trgmm.save(gmmpath)
+
+        return
+
+    def _open_gmm(self, itnum):
+        # save jnt file as pkl
+        gmmdir = self.pairdir + '/GMM'
+        gmmpath = gmmdir + '/it' + str(itnum) + '_GMM.pkl'
+        self.cvgmm.open(gmmpath)
 
         return
 
@@ -179,7 +193,10 @@ def estimate_twf(orgdata, tardata, distance='melcd'):
     else:
         raise('other distance metrics does not support.')
 
-    return dtw(orgdata, tardata, dist=distance_func)
+    _, path = fastdtw(orgdata, tardata, dist=distance_func)
+    twf = np.array(path).T
+
+    return twf
 
 
 def generate_joint_feature_from_twf(orgdata, tardata, twf):
@@ -196,11 +213,3 @@ def calculate_delta(data):
 
 def extract_silence_frame(data, npow):
     return extfrm(npow, data)
-
-
-def main():
-    pass
-
-
-if __name__ == '__main__':
-    main()

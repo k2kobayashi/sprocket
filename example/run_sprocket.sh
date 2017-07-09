@@ -6,130 +6,141 @@
 # Distributed under terms of the MIT license.
 #
 
-# arguments setting
-org=clb
-tar=slt
+# speaker setting
+# org=SF1
+# tar=TF1
+org=$1
+tar=$2
+
+# flag settings
+STEP1=1 # initialize speaker
+STEP2=1 # feature extraction
+STEP3=1 # feature statistics extraction
+STEP4=1 # estimate twf and joint feature vector
+STEP5=1 # GMM training
+STEP6=1 # conversion
 
 # directory setting
+conf_dir=./conf
+list_dir=./list
 src_dir=./src
 data_dir=./data
-conf_dir=./configure
-wav_dir=$data_dir/speaker/wav
-pair_dir=$data_dir/pair/$org-$tar
+pair_dir=./data/pair/$org-$tar
+mkdir -p $pair_dir
 
-# parameter setting
-nproc=2 # # of multi-proceccing cores
-
-if [ 1 -eq 1 ] ; then
-    echo "##############################################################"
-    echo "### Copy default files for original and target speakr      ###"
-    echo "##############################################################"
-    for spkr in $org $tar; do
-        if [ ! -e $conf_dir/$spkr.yml ]; then
-            cp $conf_dir/default/speaker_default.yml $conf_dir/$spkr.yml
-        fi
-    done
+# check yml file
+if [ ! -e $conf_dir/$org.yml ] ; then
+    cp $conf_dir/default/speaker_default.yml $conf_dir/$org.yml
+fi
+if [ ! -e $conf_dir/$tar.yml ] ; then
+    cp $conf_dir/default/speaker_default.yml $conf_dir/$tar.yml
 fi
 
-if [ 1 -eq 1 ] ; then
+# check list file
+if [ ! -e $list_dir/${org}_tr.list ] && [ ! -e $list_dir/${tar}_tr.list ] ; then
+    echo "Please prepare training list files for $org and $tar."
+fi
+if [ ! -e $list_dir/${org}_ev.list ] ; then
+    echo "Please prepare evaluation list files for $org."
+fi
+
+if [ $STEP1 -eq 1 ] ; then
     echo "##############################################################"
-    echo "### Initialization of original and target speakers         ###"
+    echo "### 1. Initialization of original and target speakers      ###"
     echo "##############################################################"
-    # Initialization for speakers
+    # Initialize speakers
     for spkr in $org $tar; do
+        listf=$list_dir/${spkr}_tr.list
+        histgramf=$data_dir/f0histgram/${spkr}_f0range.png
         python $src_dir/initialize_spkr.py \
-            -m $nproc \
             $spkr \
-            $conf_dir \
-            $wav_dir
+            $listf \
+            $data_dir/wav \
+            $histgramf
     done
+    echo "# Please modify minf0 and maxf0 in yml files based on the histgram #"
+    exit
 fi
 
-if [ 1 -eq 1 ] ; then
+if [ $STEP2 -eq 1 ] ; then
     echo "##############################################################"
-    echo "### Extract features of original and target speakers       ###"
+    echo "### 2. Extract features of original and target speakers    ###"
     echo "##############################################################"
-    # Feature extraction
+    # Extract acoustic features including F0, spc, ap, mcep, npow
     for spkr in $org $tar; do
-        python $src_dir/extract_features.py \
-            -m $nproc \
-            $spkr \
-            $conf_dir/$spkr.yml \
-            $wav_dir
+        ymlf=$conf_dir/${spkr}.yml
+        for flag in tr ev; do
+            listf=$list_dir/${spkr}_$flag.list
+            python $src_dir/extract_features.py \
+                $spkr \
+                $ymlf \
+                $listf \
+                $data_dir/wav \
+                $data_dir/h5
+        done
     done
 fi
 
-if [ 1 -eq 1 ] ; then
+if [ $STEP3 -eq 1 ] ; then
     echo "##############################################################"
-    echo "### Initialization of the speaker pair                     ###"
+    echo "### 3. Estimate acoustic feature statistics                ###"
     echo "##############################################################"
-    mkdir -p $pair_dir
-    if [ ! -e $pair_dir/$org-$tar.yml ] ; then
-        cp $conf_dir/default/pair_default.yml $pair_dir/$org-$tar.yml
-        echo "    pair: $pair_dir " >> $pair_dir/$org-$tar.yml
-        echo "list:" >> $pair_dir/$org-$tar.yml
-        echo "    trlist: $pair_dir/$org-${tar}_tr.list" >> $pair_dir/$org-$tar.yml
-        echo "    evlist: $pair_dir/$org-${tar}_ev.list" >> $pair_dir/$org-$tar.yml
-    fi
-    # Initilization of the speaker pair
-    python $src_dir/initialize_pair.py \
-        $org \
-        $tar \
-        $wav_dir \
-        $pair_dir
+    # Estimate speaker-dependent statistics for F0 and mcep
+    for spkr in $org $tar; do
+        listf=$list_dir/${spkr}_tr.list
+        python $src_dir/estimate_feature_statistics.py \
+            $spkr \
+            $listf \
+            $data_dir/h5 \
+            $pair_dir
+    done
 fi
 
-if [ 1 -eq 1 ] ; then
-    echo "##############################################################"
-    echo "### Estimate acoustic feature statistics                   ###"
-    echo "##############################################################"
-    # calculate speaker-dependent statistics for F0 and mcep
-    python $src_dir/estimate_feature_statistics.py \
-        $org \
-        $tar \
-        $pair_dir/$org-$tar.yml
+# copy pair default yml file if not exit.
+if [ ! -e $pair_dir/$org-$tar.yml ] ; then
+    cp $conf_dir/default/pair_default.yml $pair_dir/$org-$tar.yml
 fi
 
 # Joint feature extraction
-if [ 1 -eq 1 ] ; then
+if [ $STEP4 -eq 1 ] ; then
     echo "##############################################################"
-    echo "### Estimate time warping function using GMM               ###"
+    echo "### 4. Estimate time warping function using GMM            ###"
     echo "##############################################################"
-    # estimate a time-aligned joint feature vector of source and target
+    # Estimate a time-aligned joint feature vector of source and target
     python $src_dir/estimate_twf.py \
-        -m $nproc \
-        $org \
-        $tar \
-        $pair_dir/$org-$tar.yml
+        $list_dir/${org}_tr.list \
+        $list_dir/${tar}_tr.list \
+        $pair_dir \
+        $data_dir/h5
 fi
 
 # GMM train
-if [ 1 -eq 1 ] ; then
+if [ $STEP5 -eq 1 ] ; then
     echo "##############################################################"
-    echo "### Train conversion model                                 ###"
+    echo "### 5. Train conversion model                              ###"
     echo "##############################################################"
     # estimate GMM parameter using the joint feature vector
     python $src_dir/train_GMM.py \
-        $org \
-        $tar \
-        $pair_dir/$org-$tar.yml
+        $pair_dir
 fi
 
 # Conversion based on GMM
-if [ 1 -eq 1 ] ; then
+if [ $STEP6 -eq 1 ] ; then
     echo "##############################################################"
-    echo "### Conversion based on the trained models                 ###"
+    echo "### 6. Conversion based on the trained models              ###"
     echo "##############################################################"
     # convertsion based on the trained GMM
     python $src_dir/convert.py \
         $org \
         $tar \
-        $conf_dir/$tar.yml \
-        $pair_dir/$org-$tar.yml
-    python $src_dir/convert.py \
-        -cvtype diff \
-        $org \
-        $tar \
-        $conf_dir/$tar.yml \
-        $pair_dir/$org-$tar.yml
+        $list_dir/${org}_ev.list \
+        $data_dir/wav \
+        $data_dir/h5 \
+        $pair_dir
+    # python $src_dir/convert.py \
+    #     -cvtype diff \
+    #     $org \
+    #     $tar \
+    #     $conf_dir/$tar.yml \
+    #     $pair_dir/$org-$tar.yml
 fi

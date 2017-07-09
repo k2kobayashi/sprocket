@@ -5,5 +5,5 @@ GMM:
 jnt:
     n_iter: 3
 dir:
-    h5: ./data/speaker/h5
-    wav: ./data/speaker/wav
+    h5: ./data/h5
+    wav: ./data/wav

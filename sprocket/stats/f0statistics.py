@@ -47,11 +47,11 @@ class F0statistics (object):
             else:
                 f0s = np.r_[f0s, np.log(f0[nonzero_indices])]
 
-        f0stats = np.array([np.mean(f0s), np.std(f0s)])
+        self.f0stats = np.array([np.mean(f0s), np.std(f0s)])
 
-        return f0stats
+        return
 
-    def save(self, fpath, f0stats):
+    def save(self, fpath):
         """Save f0 statistics into fpath as binary
 
         Parameters
@@ -59,14 +59,11 @@ class F0statistics (object):
         fpath : str,
             File path of F0 statistics
 
-        f0stats : array, shape(`2`)
-            Vector of F0 statistics
-
         """
         if not os.path.exists(os.path.dirname(fpath)):
             os.makedirs(os.path.dirname(fpath))
         with open(fpath, 'w') as fp:
-            fp.write(f0stats)
+            fp.write(self.f0stats)
 
         return
 
@@ -141,6 +138,7 @@ class F0statistics (object):
         cvf0 = np.zeros(T)
 
         nonzero_indices = f0 > 0
-        cvf0[nonzero_indices] = np.exp((self.tstd / self.ostd) * (np.log(f0[nonzero_indices]) - self.omean) + self.tmean)
+        cvf0[nonzero_indices] = np.exp((self.tstd / self.ostd) *
+                                       (np.log(f0[nonzero_indices]) - self.omean) + self.tmean)
 
         return cvf0
