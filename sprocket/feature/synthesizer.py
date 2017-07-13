@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import world
+import pyworld
 from .parameterizer import mcgram2spgram
 
 
@@ -57,13 +57,8 @@ class Synthesizer(object):
         spc = mcgram2spgram(mcep, alpha, fftl)
 
         # generate waveform using world vocoder with f0, spc, ap
-        x_len = shiftms * len(f0) * fs / 1000
-        wav = world.synthesis_from_aperiodicity(fs,
-                                                shiftms,
-                                                f0,
-                                                spc,
-                                                aperiodicity,
-                                                x_len)
+        wav = pyworld.synthesize(f0, spc, aperiodicity,
+                                 fs, frame_period=shiftms)
 
         return wav
 
@@ -101,12 +96,7 @@ class Synthesizer(object):
         """
 
         # generate waveform using world vocoder with f0, spc, ap
-        x_len = shiftms * len(f0) * fs / 1000
-        wav = world.synthesis_from_aperiodicity(fs,
-                                                shiftms,
-                                                f0,
-                                                spc,
-                                                ap,
-                                                x_len)
+        wav = pyworld.synthesize(f0, spc, ap,
+                                 fs, frame_period=shiftms)
 
         return wav
