@@ -19,29 +19,6 @@ Voice conversion toolkit - Voice conversion (VC) is a technique to convert a spe
 
 ## Installation
 
-### Install WORLD for python
-
-```
-git clone https://github.com/jimsotelo/world.py
-cd world.py
-bash build_world.sh
-python setup.py develop
-```
-
-- lib/world`ディレクトリに移動して、`sudo ./waf install` としてWORLDを`/usr/local/lib` にインストールする（※必須ではないが、こうしておくと楽）
-
-
-- pythonから`import world` として、エラーがでなければOK
-- Memo（2017/06/19）: waf installをしても，world.pyディレクトリを削除するとimportでエラーが出る．
-
-### Other packages
-
-```
-pip install -r requirements.txt
-```
-
-### Install sprocket
-
 ```bash
 python setup.py develop
 ```

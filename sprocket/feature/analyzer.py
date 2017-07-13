@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 
-import world
+import pyworld
 
 
 class WORLD(object):
@@ -24,15 +24,6 @@ class WORLD(object):
 
     f0_ceil : float
         ceil in f0 estimation
-
-    channels_in_octave : int
-        number of F0 search candidates for each octave
-
-    speed : int
-        re-sampling parameter (see WORLD for details)
-
-    time_len : int
-        time length for analyzed speech signal
     """
 
     def __init__(self,
@@ -40,8 +31,6 @@ class WORLD(object):
                  fs=44100,
                  f0_floor=40.0,
                  f0_ceil=700.0,
-                 channels_in_octave=2,
-                 speed=4
                  ):
         super(WORLD, self).__init__()
 
@@ -49,12 +38,6 @@ class WORLD(object):
         self.fs = fs
         self.f0_floor = f0_floor
         self.f0_ceil = f0_ceil
-        self.channels_in_octave = channels_in_octave
-        self.speed = speed
-
-        self.opt = world.pyDioOption(self.f0_floor, self.f0_ceil,
-                                     self.channels_in_octave,
-                                     self.period, self.speed)
 
     def analyze(self, x):
         """Analyze acoustic features based on WORLD
@@ -69,14 +52,12 @@ class WORLD(object):
         x : array, shape (`T`)
             monoral speech signal in time domain
         """
-
-        f0, time_axis = world.dio(x, self.fs, self.period, self.opt)
-        f0 = world.stonemask(x, self.fs, self.period, time_axis, f0)
-        spectrum_envelope = world.cheaptrick(x, self.fs, self.period,
-                                             time_axis, f0)
-        aperiodicity = world.aperiodicityratio(x, self.fs, self.period,
-                                               time_axis, f0)
-        # TODO self.time_len = len(x)
+        f0, time_axis = pyworld.harvest(x, self.fs, f0_floor=self.f0_floor,
+                                        f0_ceil=self.f0_ceil,
+                                        frame_period=self.period)
+        spectrum_envelope = pyworld.cheaptrick(
+            x, f0, time_axis, self.fs, f0_floor=self.f0_floor)
+        aperiodicity = pyworld.d4c(x, f0, time_axis, self.fs)
 
         return f0, spectrum_envelope, aperiodicity
 
@@ -88,10 +69,9 @@ class WORLD(object):
         x: array, shape (`T`)
             monoral speech signal in time domain
         """
-
-        f0, time_axis = world.dio(x, self.fs, self.period, self.opt)
-        f0 = world.stonemask(x, self.fs, self.period, time_axis, f0)
-
+        f0, time_axis = pyworld.harvest(x, self.fs, f0_floor=self.f0_floor,
+                                        f0_ceil=self.f0_ceil,
+                                        frame_period=self.period)
         return f0
 
     def synthesis(self, f0, spc, ap):
@@ -109,5 +89,5 @@ class WORLD(object):
             Aperiodicity sequence
 
         """
-        y = world.synthesizey(f0, spc, ap, self.fs, 5)
+        y = pyworld.synthesize(f0, spc, ap, self.fs, frame_period=self.period)
         return y

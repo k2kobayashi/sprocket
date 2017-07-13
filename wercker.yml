@@ -13,9 +13,9 @@ build:
 
     # install dependencies using requirements.txt
     - script:
-        name: numpy install
+        name: install build requirements
         code: |
-            pip install numpy
+            pip install numpy cython
 
     # This pip-install installs packages and clears the local wheel cache
     - pip-install:
