@@ -15,6 +15,7 @@
 
 """
 
+import os
 import argparse
 
 from sprocket.util.hdf5 import HDF5files
@@ -26,9 +27,9 @@ def main():
     # Options for python
     description = 'estimate joint feature of source and target speakers'
     parser = argparse.ArgumentParser(description=description)
-    parser.add_argument('spkr', type=str,
+    parser.add_argument('speaker', type=str,
                         help='Input speaker label')
-    parser.add_argument('listf', type=str,
+    parser.add_argument('list_file', type=str,
                         help='List file of the input speaker')
     parser.add_argument('h5_dir', type=str,
                         help='Hdf5 file directory of the speaker')
@@ -37,20 +38,20 @@ def main():
     args = parser.parse_args()
 
     # open h5 files
-    h5s = HDF5files(args.listf, args.h5_dir)
+    h5s = HDF5files(args.list_file, args.h5_dir)
 
-    statspath = args.pair_dir + '/stats/' + args.spkr
+    statspath = os.path.join(args.pair_dir + '/stats/' + args.speaker)
 
     # estimate and save GV of orginal and target speakers
     gv = GV()
     gv.estimate(h5s.datalist(ext='mcep'))
-    gvpath = statspath + '.gv'
+    gvpath = os.path.join(statspath + '.gv')
     gv.save(gvpath)
 
     # estimate and save F0 statistics of original and target speakers
     f0stats = F0statistics()
     f0stats.estimate(h5s.datalist(ext='f0'))
-    f0statspath = statspath + '.f0stats'
+    f0statspath = os.path.join(statspath + '.f0stats')
     f0stats.save(f0statspath)
 
     return

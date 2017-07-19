@@ -13,11 +13,11 @@ org=$1
 tar=$2
 
 # flag settings
-STEP1=1 # initialize speaker
-STEP2=1 # feature extraction
-STEP3=1 # feature statistics extraction
-STEP4=1 # estimate twf and joint feature vector
-STEP5=1 # GMM training
+STEP1=0 # initialize speaker
+STEP2=0 # feature extraction
+STEP3=0 # feature statistics extraction
+STEP4=0 # estimate twf and joint feature vector
+STEP5=0 # GMM training
 STEP6=1 # conversion
 
 # directory setting
@@ -49,11 +49,11 @@ if [ $STEP1 -eq 1 ] ; then
     echo "### 1. Initialization of original and target speakers      ###"
     echo "##############################################################"
     # Initialize speakers
-    for spkr in $org $tar; do
-        listf=$list_dir/${spkr}_tr.list
-        histgramf=$data_dir/f0histgram/${spkr}_f0range.png
-        python $src_dir/initialize_spkr.py \
-            $spkr \
+    for speaker in $org $tar; do
+        listf=$list_dir/${speaker}_tr.list
+        histgramf=$data_dir/f0histgram/${speaker}_f0range.png
+        python $src_dir/initialize_speaker.py \
+            $speaker \
             $listf \
             $data_dir/wav \
             $histgramf
@@ -67,12 +67,12 @@ if [ $STEP2 -eq 1 ] ; then
     echo "### 2. Extract features of original and target speakers    ###"
     echo "##############################################################"
     # Extract acoustic features including F0, spc, ap, mcep, npow
-    for spkr in $org $tar; do
-        ymlf=$conf_dir/${spkr}.yml
+    for speaker in $org $tar; do
+        ymlf=$conf_dir/${speaker}.yml
         for flag in tr ev; do
-            listf=$list_dir/${spkr}_$flag.list
+            listf=$list_dir/${speaker}_$flag.list
             python $src_dir/extract_features.py \
-                $spkr \
+                $speaker \
                 $ymlf \
                 $listf \
                 $data_dir/wav \
@@ -86,10 +86,10 @@ if [ $STEP3 -eq 1 ] ; then
     echo "### 3. Estimate acoustic feature statistics                ###"
     echo "##############################################################"
     # Estimate speaker-dependent statistics for F0 and mcep
-    for spkr in $org $tar; do
-        listf=$list_dir/${spkr}_tr.list
+    for speaker in $org $tar; do
+        listf=$list_dir/${speaker}_tr.list
         python $src_dir/estimate_feature_statistics.py \
-            $spkr \
+            $speaker \
             $listf \
             $data_dir/h5 \
             $pair_dir
@@ -137,10 +137,12 @@ if [ $STEP6 -eq 1 ] ; then
         $data_dir/wav \
         $data_dir/h5 \
         $pair_dir
-    # python $src_dir/convert.py \
-    #     -cvtype diff \
-    #     $org \
-    #     $tar \
-    #     $conf_dir/$tar.yml \
-    #     $pair_dir/$org-$tar.yml
+    python $src_dir/convert.py \
+        -cvtype diff \
+        $org \
+        $tar \
+        $list_dir/${org}_ev.list \
+        $data_dir/wav \
+        $data_dir/h5 \
+        $pair_dir
 fi

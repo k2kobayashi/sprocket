@@ -28,11 +28,11 @@ def main():
     # Options for python
     dcp = 'feature extraction for the speaker'
     parser = argparse.ArgumentParser(description=dcp)
-    parser.add_argument('spkr', type=str,
+    parser.add_argument('speaker', type=str,
                         help='Input speaker label')
     parser.add_argument('ymlf', type=str,
                         help='Yml file of the input speaker')
-    parser.add_argument('listf', type=str,
+    parser.add_argument('list_file', type=str,
                         help='List file of the input speaker')
     parser.add_argument('wav_dir', type=str,
                         help='Wav file directory of the speaker')
@@ -44,7 +44,7 @@ def main():
     conf = SpeakerYML(args.ymlf)
 
     # open list file
-    with open(args.listf, 'r') as fp:
+    with open(args.list_file, 'r') as fp:
         files = fp.readlines()
 
     for f in files:
