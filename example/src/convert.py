@@ -102,26 +102,26 @@ def main():
 
         # convert mel-cepstrum
         cvmcep_wopow = mcepgmm.convert(np.c_[mcep[:, 1:], delta(mcep[:, 1:])])
+        cvmcep = np.c_[mcep_0th, cvmcep_wopow]
 
         if args.cvtype == None:
             # synthesis w/ GV
-            cvmcep_wopow_wGV = mcepgv.postfilter(
-                cvmcep_wopow, startdim=1)
-            cvmcep = np.c_[mcep_0th, cvmcep_wopow_wGV]
-            wav = synthesizer.synthesis(cvf0, cvmcep, apperiodicity)
+            cvmcep_wGV = mcepgv.postfilter(cvmcep, startdim=1)
+            wav = synthesizer.synthesis(cvf0, cvmcep_wGV, apperiodicity)
             wav = np.clip(wav, -32768, 32767)
             wavpath = testdir + '/' + h5.flbl + '_VC.wav'
 
         if args.cvtype == 'diff':
             # remove power coef
             cvmcep[:, 0] = 0.0
-            b = np.apply_along_axis(pysptk.mc2b, 1, cvmcep, alpha)
+            cvmcep_wGV = mcepgv.postfilter(mcep + cvmcep, startdim=1) - mcep
+            b = np.apply_along_axis(pysptk.mc2b, 1, cvmcep_wGV, alpha)
             assert np.isfinite(b).all()
             src_waveform = src_waveform.astype(np.float64)
             wav = diff_synth.synthesis(src_waveform, b)
             wav = np.clip(wav, -32768, 32767)
 
-            wavpath = testdir + '/' + h5.flbl + '_DIFFVC_woGV.wav'
+            wavpath = testdir + '/' + h5.flbl + '_DIFFVC.wav'
 
         wavfile.write(
             wavpath, fs, np.array(wav, dtype=np.int16))
