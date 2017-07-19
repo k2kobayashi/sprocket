@@ -111,14 +111,16 @@ class GV (object):
         # get length and dimension
         T, dim = data.shape
         assert self.gvstats is not None
-        assert dim + startdim == self.gvstats.shape[1]
+        assert dim == self.gvstats.shape[1]
 
         # calculate statics of input data
         datamean = np.mean(data, axis=0)
         datavar = np.var(data, axis=0)
 
         # perform GV postfilter
-        filtered_data = np.sqrt(self.gvstats[0, startdim:] / datavar) * \
-            (data - datamean) + datamean
+        filtered = np.sqrt(self.gvstats[0, startdim:] / datavar[startdim:]) * \
+            (data[:, startdim:] - datamean[startdim:]) + datamean[startdim:]
+
+        filtered_data = np.c_[data[:, :startdim], filtered]
 
         return filtered_data
