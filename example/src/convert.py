@@ -28,7 +28,6 @@ from sprocket.util.delta import delta
 
 import pysptk
 from pysptk.synthesis import MLSADF
-from os.path import join, exists
 
 
 def main():
@@ -41,7 +40,7 @@ def main():
                         help='Original speaker')
     parser.add_argument('tar', type=str,
                         help='Original speaker')
-    parser.add_argument('evlistf', type=str,
+    parser.add_argument('eval_list_file', type=str,
                         help='List file for evaluation')
     parser.add_argument('wav_dir', type=str,
                         help='Directory path of source spekaer')
@@ -52,23 +51,24 @@ def main():
     args = parser.parse_args()
 
     # open evaluation files from list
-    evh5s = HDF5files(args.evlistf, args.h5_dir)
+    evh5s = HDF5files(args.eval_list_file, args.h5_dir)
 
     # read F0 transfomer
-    orgf0statspath = args.pair_dir + '/stats/' + args.org + '.f0stats'
-    tarf0statspath = args.pair_dir + '/stats/' + args.tar + '.f0stats'
+    orgf0statspath = os.path.join(args.pair_dir + '/stats/' + args.org + '.f0stats')
+    tarf0statspath = os.path.join(args.pair_dir + '/stats/' + args.tar + '.f0stats')
+
     f0stats = F0statistics()
     f0stats.open_from_file(orgf0statspath, tarf0statspath)
 
     # read GMM for mcep
-    mcepgmmpath = args.pair_dir + '/model/GMM.pkl'
+    mcepgmmpath = os.path.join(args.pair_dir + '/model/GMM.pkl')
     mcepgmm = GMMConvertor(n_mix=32, covtype='full',
                            gmmmode=args.cvtype, cvtype='mlpg')
     mcepgmm.open(mcepgmmpath)
-    print("mode: {}".format(args.cvtype))
+    print("conversion mode: {}".format(args.cvtype))
 
     # GV postfilter for mcep
-    mcepgvpath = args.pair_dir + '/stats/' + args.tar + '.gv'
+    mcepgvpath = os.path.join(args.pair_dir + '/stats/' + args.tar + '.gv')
     mcepgv = GV()
     mcepgv.open_from_file(mcepgvpath)
 
@@ -85,11 +85,11 @@ def main():
 
     # file loop
     for h5 in evh5s.h5list[:5]:
-        src_wavpath = join(args.wav_dir, args.org,
+        src_wavpath = os.path.join(args.wav_dir, args.org,
                            "{}.wav".format(h5.flbl))
-        assert exists(src_wavpath)
+        assert os.path.exists(src_wavpath)
         fs, src_waveform = wavfile.read(src_wavpath)
-        print(h5.flbl + ' converts.')
+        print('convert ' + h5.flbl)
 
         # get F0 feature
         f0 = h5.read('f0')
@@ -109,7 +109,7 @@ def main():
             cvmcep_wGV = mcepgv.postfilter(cvmcep, startdim=1)
             wav = synthesizer.synthesis(cvf0, cvmcep_wGV, apperiodicity)
             wav = np.clip(wav, -32768, 32767)
-            wavpath = testdir + '/' + h5.flbl + '_VC.wav'
+            wavpath = os.path.join(testdir + '/' + h5.flbl + '_VC.wav')
 
         if args.cvtype == 'diff':
             # remove power coef
@@ -120,8 +120,7 @@ def main():
             src_waveform = src_waveform.astype(np.float64)
             wav = diff_synth.synthesis(src_waveform, b)
             wav = np.clip(wav, -32768, 32767)
-
-            wavpath = testdir + '/' + h5.flbl + '_DIFFVC.wav'
+            wavpath = os.path.join(testdir + '/' + h5.flbl + '_DIFFVC.wav')
 
         wavfile.write(
             wavpath, fs, np.array(wav, dtype=np.int16))

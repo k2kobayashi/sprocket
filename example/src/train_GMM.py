@@ -15,6 +15,7 @@
 
 """
 
+import os
 import argparse
 
 from sprocket.model.GMM import GMMTrainer
@@ -35,7 +36,7 @@ def main():
     jnt = h5.read(ext='mat')
 
     # train GMM using joint feature vector
-    GMMpath = args.pair_dir + '/model/GMM.pkl'
+    GMMpath = os.path.join(args.pair_dir + '/model/GMM.pkl')
     gmm = GMMTrainer()
     gmm.train(jnt)
     gmm.save(GMMpath)

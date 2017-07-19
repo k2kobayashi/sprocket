@@ -26,9 +26,9 @@ def main():
     # Options for python
     description = 'estimate joint feature of source and target speakers'
     parser = argparse.ArgumentParser(description=description)
-    parser.add_argument('orglistf', type=str,
+    parser.add_argument('org_list_file', type=str,
                         help='List file of original speaker')
-    parser.add_argument('tarlistf', type=str,
+    parser.add_argument('tar_list_file', type=str,
                         help='List file of target speaker')
     parser.add_argument('pair_dir', type=str,
                         help='Directory path of h5 files')
@@ -39,8 +39,8 @@ def main():
     # read pair-dependent yml file
     # conf = PairYML(args.pair_ymlf)
 
-    orgh5s = HDF5files(args.orglistf, args.h5_dir)
-    tarh5s = HDF5files(args.tarlistf, args.h5_dir)
+    orgh5s = HDF5files(args.org_list_file, args.h5_dir)
+    tarh5s = HDF5files(args.tar_list_file, args.h5_dir)
 
     # joint feature extraction
     jnt = JointFeatureExtractor(

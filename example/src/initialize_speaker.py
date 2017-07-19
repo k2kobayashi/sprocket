@@ -36,11 +36,11 @@ def create_f0_histgram(f0s, histgramf):
 
 def main():
     # Options for python
-    dcp = 'create speaker-dependent configure file (spkr.yml)'
+    dcp = 'create speaker-dependent configure file (speaker.yml)'
     parser = argparse.ArgumentParser(description=dcp)
     parser.add_argument('-m', '--multicore', type=int, default=1,
                         help='# of cores for multi-processing')
-    parser.add_argument('spkr', type=str,
+    parser.add_argument('speaker', type=str,
                         help='Input speaker label')
     parser.add_argument('list_file', type=str,
                         help='List file of the input speaker')
