@@ -19,18 +19,21 @@ import argparse
 import numpy as np
 from scipy.io import wavfile
 import matplotlib.pyplot as plt
-
+import os
+from os.path import exists, dirname
 from sprocket.feature import FeatureExtractor
 
 
 def create_f0_histgram(f0s, histgramf):
-    # flatten F0
-    f0 = [f0val for i in f0s for f0val in i]
-
     # plot histgram
-    plt.hist(f0, bins=200, range=(40, 700), normed=True, histtype="stepfilled")
+    plt.hist(f0s, bins=200, range=(40, 700), normed=True, histtype="stepfilled")
     plt.xlabel("Fundamental frequency")
     plt.ylabel("Probability")
+
+    dst_dir = dirname(histgramf)
+    if not exists(dst_dir):
+        os.makedirs(dst_dir)
+
     plt.savefig(histgramf)
 
 
@@ -38,8 +41,6 @@ def main():
     # Options for python
     dcp = 'create speaker-dependent configure file (speaker.yml)'
     parser = argparse.ArgumentParser(description=dcp)
-    parser.add_argument('-m', '--multicore', type=int, default=1,
-                        help='# of cores for multi-processing')
     parser.add_argument('speaker', type=str,
                         help='Input speaker label')
     parser.add_argument('list_file', type=str,
@@ -72,10 +73,11 @@ def main():
         feat.analyze()
 
         # f0 extraction
-        f0s.append(feat.f0)
+        f0s.append(feat.f0())
 
     # create figure to visualize F0 range of the speaker
-    create_f0_histgram(f0s, args.histgramf)
+    create_f0_histgram(np.hstack(f0s).flatten(), args.histgramf)
+
 
 if __name__ == '__main__':
     main()
