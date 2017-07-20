@@ -3,7 +3,9 @@
 import numpy as np
 
 from .analyzer import WORLD
-from .parameterizer import spgram2mcgram, spgram2npow
+from .parameterizer import spgram2npow
+
+import pysptk
 
 
 class FeatureExtractor(object):
@@ -144,7 +146,7 @@ class FeatureExtractor(object):
         """
         self._analyzed_check()
 
-        return spgram2mcgram(self._spc, dim, alpha)
+        return pysptk.sp2mc(self._spc, dim, alpha)
 
     def bndap(self, dim=5):
         # TODO: Not support yet
