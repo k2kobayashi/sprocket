@@ -56,7 +56,5 @@ def main():
     jnt.estimate(org_h5s.datalist('mcep'), tar_h5s.datalist('mcep'),
                  org_h5s.datalist('npow'), tar_h5s.datalist('npow'))
 
-    return
-
 if __name__ == '__main__':
     main()

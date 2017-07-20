@@ -74,7 +74,7 @@ def main():
         # save features into a hdf5 file
         h5_dir = os.path.join(args.pair_dir, 'h5')
         if not os.path.exists(h5_dir):
-            os.mkdir(h5_dir)
+            os.mkdirs(h5_dir)
         h5f = os.path.join(h5_dir + '/' + f + '.h5')
         h5 = HDF5(h5f, mode='w')
         h5.save(f0, ext='f0')

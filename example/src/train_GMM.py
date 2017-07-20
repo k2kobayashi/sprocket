@@ -46,7 +46,7 @@ def main():
     # train GMM for mcep using joint feature vector
     model_dir = os.path.join(args.pair_dir, 'model')
     if not os.path.exists(model_dir):
-        os.mkdir(model_dir)
+        os.mkdirs(model_dir)
     GMMpath = os.path.join(model_dir, 'GMM.pkl')
     gmm = GMMTrainer(n_mix=pconf.GMM_mcep_n_mix, n_iter=pconf.GMM_mcep_n_iter,
                      covtype=pconf.GMM_mcep_covtype)
@@ -54,8 +54,6 @@ def main():
     gmm.save(GMMpath)
 
     # train GMM for bandap using criating joint feature vector
-
-    return
 
 
 if __name__ == '__main__':

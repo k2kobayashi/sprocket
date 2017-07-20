@@ -39,7 +39,7 @@ class JointFeatureExtractor(object):
 
     def set_GMM_parameter(self, n_mix=32, n_iter=100, covtype='full', cvtype='mlpg'):
         self.trgmm = GMMTrainer(n_mix=n_mix, n_iter=n_iter, covtype=covtype)
-        self.cvgmm = GMMConvertor(n_mix=n_mix, covtype=covtype, cvtype='mlpg')
+        self.cvgmm = GMMConvertor(n_mix=n_mix, covtype=covtype, cvtype=cvtype)
 
     def estimate(self, orgfeatlist, tarfeatlist, orgnpowlist, tarnpowlist):
         """Estimate joint feature vector
