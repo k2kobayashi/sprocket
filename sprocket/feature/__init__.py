@@ -6,6 +6,7 @@ from .analyzer import WORLD
 from .parameterizer import spgram2npow
 
 import pysptk
+import pyworld
 
 
 class FeatureExtractor(object):
@@ -148,8 +149,7 @@ class FeatureExtractor(object):
 
         return pysptk.sp2mc(self._spc, dim, alpha)
 
-    def bndap(self, dim=5):
-        # TODO: Not support yet
+    def bandap(self):
         """Return band-averaged aperiodicity sequence
 
         Parameters
@@ -165,7 +165,7 @@ class FeatureExtractor(object):
         """
         self._analyzed_check()
 
-        return self._bndap
+        return pyworld.code_aperiodicity(self._ap, self.fs)
 
     def npow(self):
         """Return normalized power sequence calculated using analized spc
