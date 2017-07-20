@@ -11,7 +11,7 @@
 #
 
 """
-
+train GMM based on joint feature vector
 
 """
 
@@ -21,27 +21,39 @@ import argparse
 from sprocket.model.GMM import GMMTrainer
 from sprocket.util.hdf5 import HDF5
 
+from yml import PairYML
+
 
 def main():
     # Options for python
     description = 'estimate joint feature of source and target speakers'
     parser = argparse.ArgumentParser(description=description)
+    parser.add_argument('pair_yml', type=str,
+                        help='Yml file of the speaker pair')
     parser.add_argument('pair_dir', type=str,
-                        help='yml file for the speaker pair')
+                        help='Directory path of h5 files')
     args = parser.parse_args()
 
-    # read joint feature vector
-    jntf = args.pair_dir + '/jnt/it3.h5'
-    h5 = HDF5(jntf, mode='r')
-    jnt = h5.read(ext='mat')
+    # read pair-dependent yml file
+    pconf = PairYML(args.pair_yml)
 
-    # train GMM using joint feature vector
-    GMMpath = os.path.join(args.pair_dir + '/model/GMM.pkl')
-    gmm = GMMTrainer()
+    # read joint feature vector
+    jntf = os.path.join(args.pair_dir, 'jnt',
+                        'it' + str(pconf.jnt_n_iter) + '.h5')
+    h5 = HDF5(jntf, mode='r')
+    jnt = h5.read(ext='jnt')
+
+    # train GMM for mcep using joint feature vector
+    model_dir = os.path.join(args.pair_dir, 'model')
+    if not os.path.exists(model_dir):
+        os.mkdirs(model_dir)
+    GMMpath = os.path.join(model_dir, 'GMM.pkl')
+    gmm = GMMTrainer(n_mix=pconf.GMM_mcep_n_mix, n_iter=pconf.GMM_mcep_n_iter,
+                     covtype=pconf.GMM_mcep_covtype)
     gmm.train(jnt)
     gmm.save(GMMpath)
 
-    return
+    # train GMM for bandap using criating joint feature vector
 
 
 if __name__ == '__main__':

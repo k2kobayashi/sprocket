@@ -1,9 +1,13 @@
-GMM:
-    n_mix: 32
-    n_iter: 100
-    covtype : full
 jnt:
     n_iter: 3
-dir:
-    h5: ./data/h5
-    wav: ./data/wav
+GMM:
+    mcep:
+        n_mix: 32
+        n_iter: 100
+        covtype: full
+        cvtype: mlpg
+    bandap:
+        n_mix: 16
+        n_iter: 100
+        covtype: full
+        cvtype: mlpg
