@@ -24,7 +24,8 @@ class JointFeatureExtractor(object):
 
     """
 
-    def __init__(self, feature='mcep', n_iter=3, pairdir=None):
+    def __init__(self, feature='mcep', jnt_iter=3, pairdir=None,
+            ):
         # distance setting
         if feature == 'mcep':
             self.distance = 'melcd'
@@ -33,10 +34,12 @@ class JointFeatureExtractor(object):
             raise('distance metrics does not support.')
 
         # open GMM for training and conversion
-        self.trgmm = GMMTrainer()
-        self.cvgmm = GMMConvertor()
-        self.n_jntiter = n_iter
+        self.n_jntiter = jnt_iter
         self.pairdir = pairdir
+
+    def set_GMM_parameter(self, n_mix=32, n_iter=100, covtype='full', cvtype='mlpg'):
+        self.trgmm = GMMTrainer(n_mix=n_mix, n_iter=n_iter, covtype=covtype)
+        self.cvgmm = GMMConvertor(n_mix=n_mix, covtype=covtype, cvtype='mlpg')
 
     def estimate(self, orgfeatlist, tarfeatlist, orgnpowlist, tarnpowlist):
         """Estimate joint feature vector
@@ -159,7 +162,7 @@ class JointFeatureExtractor(object):
             os.makedirs(jntdir)
         jntpath = jntdir + '/it' + str(itnum) + '.h5'
         h5 = HDF5(jntpath, mode='w')
-        h5.save(jnt, ext='mat')
+        h5.save(jnt, ext='jnt')
         h5.close()
 
         return
