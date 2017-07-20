@@ -39,19 +39,21 @@ def main():
 
     # read joint feature vector
     jntf = os.path.join(args.pair_dir, 'jnt',
-                        'it' + str(pconf.n_jntiter) + '.h5')
+                        'it' + str(pconf.jnt_n_iter) + '.h5')
     h5 = HDF5(jntf, mode='r')
     jnt = h5.read(ext='jnt')
 
-    # train GMM using joint feature vector
+    # train GMM for mcep using joint feature vector
     model_dir = os.path.join(args.pair_dir, 'model')
     if not os.path.exists(model_dir):
         os.mkdir(model_dir)
     GMMpath = os.path.join(model_dir, 'GMM.pkl')
-    gmm = GMMTrainer(n_mix=pconf.n_mix, n_iter=pconf.n_iter,
-                     covtype=pconf.covtype)
+    gmm = GMMTrainer(n_mix=pconf.GMM_mcep_n_mix, n_iter=pconf.GMM_mcep_n_iter,
+                     covtype=pconf.GMM_mcep_covtype)
     gmm.train(jnt)
     gmm.save(GMMpath)
+
+    # train GMM for bandap using criating joint feature vector
 
     return
 

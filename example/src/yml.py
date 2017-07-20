@@ -12,13 +12,20 @@ class SpeakerYML(object):
             conf = yaml.safe_load(yf)
 
         # read parameter from yml file
-        self.fs = conf['wav']['fs']
-        self.shiftms = conf['wav']['shiftms']
-        self.fftl = conf['wav']['fftl']
-        self.minf0 = conf['f0']['minf0']
-        self.maxf0 = conf['f0']['maxf0']
-        self.dim = conf['mcep']['dim']
-        self.alpha = conf['mcep']['alpha']
+        self.wav_fs = conf['wav']['fs']
+        self.wav_bit = conf['wav']['bit']
+        self.wav_framems = conf['wav']['framems']
+        self.wav_shiftms = conf['wav']['shiftms']
+        self.wav_fftl = conf['wav']['fftl']
+
+        self.f0_minf0 = conf['f0']['minf0']
+        self.f0_maxf0 = conf['f0']['maxf0']
+
+        self.mcep_dim = conf['mcep']['dim']
+        self.mcep_alpha = conf['mcep']['alpha']
+
+        self.power_dim = conf['power']['threshold']
+
         self.analyzer = conf['analyzer']
 
     def print_params(self):
@@ -32,12 +39,17 @@ class PairYML(object):
         with open(ymlf) as yf:
             conf = yaml.safe_load(yf)
 
-        self.n_jntiter = conf['jnt']['n_iter']
+        self.jnt_n_iter = conf['jnt']['n_iter']
 
-        self.n_mix = conf['GMM']['n_mix']
-        self.n_iter = conf['GMM']['n_iter']
-        self.covtype = conf['GMM']['covtype']
-        self.cvtype = conf['GMM']['cvtype']
+        self.GMM_mcep_n_mix = conf['GMM']['mcep']['n_mix']
+        self.GMM_mcep_n_iter = conf['GMM']['mcep']['n_iter']
+        self.GMM_mcep_covtype = conf['GMM']['mcep']['covtype']
+        self.GMM_mcep_cvtype = conf['GMM']['mcep']['cvtype']
+
+        self.GMM_bandap_n_mix = conf['GMM']['bandap']['n_mix']
+        self.GMM_bandap_n_iter = conf['GMM']['bandap']['n_iter']
+        self.GMM_bandap_covtype = conf['GMM']['bandap']['covtype']
+        self.GMM_bandap_cvtype = conf['GMM']['bandap']['cvtype']
 
     def _read_training_list(self):
         if not os.path.exists(self.trlist):

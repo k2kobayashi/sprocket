@@ -15,7 +15,7 @@ STEP1=0 # get figures of f0 range
 STEP2=0 # extract acoustic feature
 STEP3=0 # estimate acoustic feature statistics
 STEP4=0 # estimate time warping function and joint feature vector
-STEP5=1 # train GMM
+STEP5=0 # train GMM
 STEP6=1 # convert based on the trained GMM
 
 # directory setting
@@ -80,11 +80,10 @@ if [ $STEP2 -eq 1 ] ; then
             $data_dir/wav \
             $pair_dir
     done
-    listf=$list_dir/${org}_eval.list
     python $src_dir/extract_features.py \
         $org \
-        $ymlf \
-        $listf \
+        $conf_dir/${org}.yml \
+        $list_dir/${org}_eval.list \
         $data_dir/wav \
         $pair_dir
 fi

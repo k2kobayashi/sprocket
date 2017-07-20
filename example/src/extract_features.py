@@ -55,19 +55,20 @@ def main():
         wavf = os.path.join(args.wav_dir, f + '.wav')
         fs, x = wavfile.read(wavf)
         x = np.array(x, dtype=np.float)
-        assert fs == sconf.fs
+        assert fs == sconf.wav_fs
 
         print("Extract acoustic features: " + wavf)
         # constract FeatureExtractor clas
-        feat = FeatureExtractor(x, analyzer='world', fs=fs, shiftms=sconf.shiftms,
-                                minf0=sconf.minf0, maxf0=sconf.maxf0)
+        feat = FeatureExtractor(x, analyzer=sconf.analyzer, fs=sconf.wav_fs,
+                                shiftms=sconf.wav_shiftms,
+                                minf0=sconf.f0_minf0, maxf0=sconf.f0_maxf0)
 
         # analyze F0, spc, and ap
         feat.analyze()
         f0 = feat.f0()
         spc = feat.spc()
         ap = feat.ap()
-        mcep = feat.mcep(dim=sconf.dim, alpha=sconf.alpha)
+        mcep = feat.mcep(dim=sconf.mcep_dim, alpha=sconf.mcep_alpha)
         npow = feat.npow()
 
         # save features into a hdf5 file
