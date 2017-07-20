@@ -1,6 +1,6 @@
 numpy
 scipy
-pysptk
+pysptk>=0.1.7
 pyworld
 h5py
 dtw

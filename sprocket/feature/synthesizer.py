@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import pyworld
-from .parameterizer import mcgram2spgram
+import pysptk
 
 
 class Synthesizer(object):
@@ -54,7 +54,7 @@ class Synthesizer(object):
         """
 
         # mcep into spc
-        spc = mcgram2spgram(mcep, alpha, fftl)
+        spc = pysptk.mc2sp(mcep, alpha, fftl)
 
         # generate waveform using world vocoder with f0, spc, ap
         wav = pyworld.synthesize(f0, spc, aperiodicity,
