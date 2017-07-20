@@ -18,6 +18,8 @@ import os
 import argparse
 import numpy as np
 from scipy.io import wavfile
+import pysptk
+from pysptk.synthesis import MLSADF
 
 from sprocket.util.hdf5 import HDF5files
 from sprocket.model.GMM import GMMConvertor
@@ -26,69 +28,77 @@ from sprocket.stats.f0statistics import F0statistics
 from sprocket.feature.synthesizer import Synthesizer
 from sprocket.util.delta import delta
 
-import pysptk
-from pysptk.synthesis import MLSADF
+from yml import SpeakerYML, PairYML
 
 
 def main():
     # Options for python
     description = 'estimate joint feature of source and target speakers'
     parser = argparse.ArgumentParser(description=description)
-    parser.add_argument('-cvtype', '--cvtype', type=str, default=None,
-                        help='type of the conversion [None, diff, or intra]')
+    parser.add_argument('-gmmmode', '--gmmmode', type=str, default=None,
+                        help='mode of the GMM [None, diff, or intra]')
     parser.add_argument('org', type=str,
                         help='Original speaker')
     parser.add_argument('tar', type=str,
                         help='Original speaker')
+    parser.add_argument('org_yml', type=str,
+                        help='Yml file of the original speaker')
+    parser.add_argument('pair_yml', type=str,
+                        help='Yml file of the speaker pair')
     parser.add_argument('eval_list_file', type=str,
                         help='List file for evaluation')
     parser.add_argument('wav_dir', type=str,
                         help='Directory path of source spekaer')
-    parser.add_argument('h5_dir', type=str,
-                        help='Directory path of hdf5 files')
     parser.add_argument('pair_dir', type=str,
                         help='Directory path of pair directory')
     args = parser.parse_args()
 
+    # read parameters from speaker yml
+    sconf = SpeakerYML(args.org_yml)
+    pconf = PairYML(args.pair_yml)
+
     # open evaluation files from list
-    evh5s = HDF5files(args.eval_list_file, args.h5_dir)
+    h5_dir = os.path.join(args.pair_dir, 'h5')
+    eval_h5s = HDF5files(args.eval_list_file, h5_dir)
 
-    # read F0 transfomer
-    orgf0statspath = os.path.join(args.pair_dir + '/stats/' + args.org + '.f0stats')
-    tarf0statspath = os.path.join(args.pair_dir + '/stats/' + args.tar + '.f0stats')
-
+    # read F0 statistics file
+    orgf0statspath = os.path.join(
+        args.pair_dir, 'stats', args.org + '.f0stats')
+    tarf0statspath = os.path.join(
+        args.pair_dir, 'stats', args.tar + '.f0stats')
     f0stats = F0statistics()
     f0stats.open_from_file(orgf0statspath, tarf0statspath)
 
     # read GMM for mcep
-    mcepgmmpath = os.path.join(args.pair_dir + '/model/GMM.pkl')
-    mcepgmm = GMMConvertor(n_mix=32, covtype='full',
-                           gmmmode=args.cvtype, cvtype='mlpg')
+    mcepgmmpath = os.path.join(args.pair_dir, 'model/GMM.pkl')
+    mcepgmm = GMMConvertor(n_mix=pconf.GMM_mcep_n_mix, covtype=pconf.GMM_mcep_covtype,
+                           gmmmode=args.gmmmode, cvtype=pconf.GMM_mcep_cvtype)
     mcepgmm.open(mcepgmmpath)
-    print("conversion mode: {}".format(args.cvtype))
+    print("conversion mode: {}".format(args.gmmmode))
 
     # GV postfilter for mcep
-    mcepgvpath = os.path.join(args.pair_dir + '/stats/' + args.tar + '.gv')
+    mcepgvpath = os.path.join(args.pair_dir, 'stats', args.tar + '.gv')
     mcepgv = GV()
     mcepgv.open_from_file(mcepgvpath)
 
     # open synthesizer
     synthesizer = Synthesizer()
-    alpha = pysptk.util.mcepalpha(16000)
-    diff_synth = pysptk.synthesis.Synthesizer(
-        MLSADF(order=24, alpha=alpha), 80)
+    alpha = pysptk.util.mcepalpha(sconf.wav_fs)
+    shiftl = int(sconf.wav_fs / 1000 * sconf.wav_shiftms)
+    mlsa_fil = pysptk.synthesis.Synthesizer(
+        MLSADF(order=sconf.mcep_dim, alpha=sconf.mcep_alpha), shiftl)
 
     # test directory
-    testdir = args.pair_dir + '/test'
+    testdir = os.path.join(args.pair_dir, 'test')
     if not os.path.exists(testdir):
         os.makedirs(testdir)
 
-    # file loop
-    for h5 in evh5s.h5list[:5]:
-        src_wavpath = os.path.join(args.wav_dir, args.org,
-                           "{}.wav".format(h5.flbl))
-        assert os.path.exists(src_wavpath)
-        fs, src_waveform = wavfile.read(src_wavpath)
+    # conversion in each evaluation file
+    for h5 in eval_h5s.h5list:
+        wavpath = os.path.join(args.wav_dir, args.org,
+                               "{}.wav".format(h5.flbl))
+        assert os.path.exists(wavpath)
+        fs, x = wavfile.read(wavpath)
         print('convert ' + h5.flbl)
 
         # get F0 feature
@@ -104,29 +114,29 @@ def main():
         cvmcep_wopow = mcepgmm.convert(np.c_[mcep[:, 1:], delta(mcep[:, 1:])])
         cvmcep = np.c_[mcep_0th, cvmcep_wopow]
 
-        if args.cvtype == None:
-            # synthesis w/ GV
+        if args.gmmmode == None:
+            # synthesis VC w/ GV
             cvmcep_wGV = mcepgv.postfilter(cvmcep, startdim=1)
             wav = synthesizer.synthesis(cvf0, cvmcep_wGV, apperiodicity)
             wav = np.clip(wav, -32768, 32767)
-            wavpath = os.path.join(testdir + '/' + h5.flbl + '_VC.wav')
+            wavpath = os.path.join(testdir, h5.flbl + '_VC.wav')
 
-        if args.cvtype == 'diff':
-            # remove power coef
+        if args.gmmmode == 'diff':
+            # synthesis DIFFVC w/ GV
             cvmcep[:, 0] = 0.0
             cvmcep_wGV = mcepgv.postfilter(mcep + cvmcep, startdim=1) - mcep
             b = np.apply_along_axis(pysptk.mc2b, 1, cvmcep_wGV, alpha)
             assert np.isfinite(b).all()
-            src_waveform = src_waveform.astype(np.float64)
-            wav = diff_synth.synthesis(src_waveform, b)
+            x = x.astype(np.float64)
+            wav = mlsa_fil.synthesis(x, b)
             wav = np.clip(wav, -32768, 32767)
-            wavpath = os.path.join(testdir + '/' + h5.flbl + '_DIFFVC.wav')
+            wavpath = os.path.join(testdir, h5.flbl + '_DIFFVC.wav')
 
         wavfile.write(
             wavpath, fs, np.array(wav, dtype=np.int16))
 
     # close h5 files
-    evh5s.close()
+    eval_h5s.close()
 
 
 if __name__ == '__main__':
