@@ -3,6 +3,7 @@
 import os
 import yaml
 
+
 class SpeakerYML(object):
 
     def __init__(self, ymlf):
@@ -31,22 +32,12 @@ class PairYML(object):
         with open(ymlf) as yf:
             conf = yaml.safe_load(yf)
 
-        # read parameter from yml file
-        self.trlist = conf['list']['trlist']
-        self.evlist = conf['list']['evlist']
-
-        self.h5dir = conf['dir']['h5']
-        self.wavdir = conf['dir']['wav']
-        self.pairdir = conf['dir']['pair']
-
         self.n_jntiter = conf['jnt']['n_iter']
 
         self.n_mix = conf['GMM']['n_mix']
         self.n_iter = conf['GMM']['n_iter']
         self.covtype = conf['GMM']['covtype']
-
-        self._read_training_list()
-        self._read_evaluation_list()
+        self.cvtype = conf['GMM']['cvtype']
 
     def _read_training_list(self):
         if not os.path.exists(self.trlist):
@@ -67,4 +58,3 @@ class PairYML(object):
 
     def print_params(self):
         pass
-
