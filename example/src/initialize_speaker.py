@@ -19,6 +19,8 @@ import os
 import argparse
 import numpy as np
 from scipy.io import wavfile
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from sprocket.feature import FeatureExtractor
 
