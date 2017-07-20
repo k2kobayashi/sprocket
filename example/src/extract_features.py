@@ -1,7 +1,7 @@
 #! /usr/local/bin/python
 # -*- coding: utf-8 -*-
 #
-# feature_extraction.py
+# extract_features.py
 #   First ver.: 2017-06-05
 #
 #   Copyright 2017
@@ -11,7 +11,7 @@
 #
 
 """
-acoustic feature extraction for the speaker
+Extract acoustic features for the speaker
 
 """
 
@@ -21,13 +21,14 @@ import numpy as np
 from scipy.io import wavfile
 
 from sprocket.feature import FeatureExtractor
-from sprocket.util.yml import SpeakerYML
 from sprocket.util.hdf5 import HDF5
+
+from yml import SpeakerYML
 
 
 def main():
     # Options for python
-    dcp = 'feature extraction for the speaker'
+    dcp = 'Extract aoucstic features for the speaker'
     parser = argparse.ArgumentParser(description=dcp)
     parser.add_argument('speaker', type=str,
                         help='Input speaker label')
@@ -37,12 +38,12 @@ def main():
                         help='List file of the input speaker')
     parser.add_argument('wav_dir', type=str,
                         help='Wav file directory of the speaker')
-    parser.add_argument('h5_dir', type=str,
-                        help='hdf5 file directory of the speaker')
+    parser.add_argument('pair_dir', type=str,
+                        help='Directory of the speaker pair')
     args = parser.parse_args()
 
-    # read parameters from yml
-    conf = SpeakerYML(args.ymlf)
+    # read parameters from speaker yml
+    sconf = SpeakerYML(args.ymlf)
 
     # open list file
     with open(args.list_file, 'r') as fp:
@@ -51,31 +52,29 @@ def main():
     for f in files:
         # open wave file
         f = f.rstrip()
-        wavf = os.path.join(args.wav_dir + '/' + f + '.wav')
+        wavf = os.path.join(args.wav_dir, f + '.wav')
         fs, x = wavfile.read(wavf)
         x = np.array(x, dtype=np.float)
-        assert fs == conf.fs
+        assert fs == sconf.fs
 
-        print("Processing: " + wavf)
-        # constract AcousticFeature clas
-        feat = FeatureExtractor(
-            x,
-            analyzer='world',
-            fs=fs,
-            minf0=conf.minf0,
-            maxf0=conf.maxf0,
-        )
+        print("Extract acoustic features: " + wavf)
+        # constract FeatureExtractor clas
+        feat = FeatureExtractor(x, analyzer='world', fs=fs, shiftms=sconf.shiftms,
+                                minf0=sconf.minf0, maxf0=sconf.maxf0)
 
         # analyze F0, spc, and ap
         feat.analyze()
         f0 = feat.f0()
         spc = feat.spc()
         ap = feat.ap()
-        mcep = feat.mcep(dim=conf.dim, alpha=conf.alpha)
+        mcep = feat.mcep(dim=sconf.dim, alpha=sconf.alpha)
         npow = feat.npow()
 
         # save features into a hdf5 file
-        h5f = os.path.join(args.h5_dir + '/' + f + '.h5')
+        h5_dir = os.path.join(args.pair_dir, 'h5')
+        if not os.path.exists(h5_dir):
+            os.mkdir(h5_dir)
+        h5f = os.path.join(h5_dir + '/' + f + '.h5')
         h5 = HDF5(h5f, mode='w')
         h5.save(f0, ext='f0')
         h5.save(spc, ext='spc')
@@ -83,7 +82,6 @@ def main():
         h5.save(mcep, ext='mcep')
         h5.save(npow, ext='npow')
         h5.close()
-
 
 if __name__ == '__main__':
     main()

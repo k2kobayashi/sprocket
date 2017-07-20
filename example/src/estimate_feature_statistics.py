@@ -1,7 +1,7 @@
 #! /usr/local/bin/python
 # -*- coding: utf-8 -*-
 #
-# estimate_feature_stats.py
+# estimate_feature_statistics.py
 #   First ver.: 2017-06-09
 #
 #   Copyright 2017
@@ -11,6 +11,7 @@
 #
 
 """
+Estimate acoustic feature statistics
 
 
 """
@@ -31,28 +32,29 @@ def main():
                         help='Input speaker label')
     parser.add_argument('list_file', type=str,
                         help='List file of the input speaker')
-    parser.add_argument('h5_dir', type=str,
-                        help='Hdf5 file directory of the speaker')
     parser.add_argument('pair_dir', type=str,
                         help='Statistics directory of the speaker')
     args = parser.parse_args()
 
     # open h5 files
-    h5s = HDF5files(args.list_file, args.h5_dir)
+    h5_dir = os.path.join(args.pair_dir, 'h5')
+    h5s = HDF5files(args.list_file, h5_dir)
 
-    statspath = os.path.join(args.pair_dir + '/stats/' + args.speaker)
+    statspath = os.path.join(args.pair_dir, 'stats', args.speaker)
 
     # estimate and save GV of orginal and target speakers
     gv = GV()
     gv.estimate(h5s.datalist(ext='mcep'))
     gvpath = os.path.join(statspath + '.gv')
     gv.save(gvpath)
+    print gvpath
 
     # estimate and save F0 statistics of original and target speakers
     f0stats = F0statistics()
     f0stats.estimate(h5s.datalist(ext='f0'))
     f0statspath = os.path.join(statspath + '.f0stats')
     f0stats.save(f0statspath)
+    print f0statspath
 
     return
 
