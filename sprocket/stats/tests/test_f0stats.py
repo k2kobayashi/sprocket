@@ -25,7 +25,7 @@ class F0statisticsTest(unittest.TestCase):
         for i in range(1, 4):
             f0s.append(200 * np.r_[np.random.rand(100 * i), np.zeros(100)])
 
-        tmpf0stats = f0stats.estimate(f0s)
-        f0stats.save(tmppath, tmpf0stats)
-        f0stats.read(tmpf0stats, tmppath)
+        f0stats.estimate(f0s)
+        f0stats.save(tmppath)
+        f0stats.read(f0stats.f0stats, f0stats.f0stats)
         os.remove(tmppath)

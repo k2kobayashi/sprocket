@@ -42,17 +42,17 @@ def main():
     assert len(orgfiles) != 0 or len(tarfiles) != 0
 
     listfile = args.pair_dir + '/' + args.org + '-' + args.tar
-    trlist = listfile + '_tr.list'
-    evlist = listfile + '_ev.list'
+    train_list = listfile + '_tr.list'
+    eval_list = listfile + '_ev.list'
 
     # existing training and eve file check
-    if os.path.exists(trlist) and os.path.exists(evlist):
+    if os.path.exists(train_list) and os.path.exists(eval_list):
         print ("List files are already excisted.")
         sys.exit(0)
 
     # open files and write wave file path
-    tf = open(trlist, 'w')
-    ef = open(evlist, 'w')
+    tf = open(train_list, 'w')
+    ef = open(eval_list, 'w')
     for (owav, twav) in zip(orgfiles, tarfiles):
         olbl, _ = os.path.splitext(args.org + '/' + os.path.basename(owav))
         tlbl, _ = os.path.splitext(args.tar + '/' + os.path.basename(twav))
