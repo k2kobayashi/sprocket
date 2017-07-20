@@ -6,7 +6,7 @@ from .analyzer import WORLD
 from .parameterizer import spgram2mcgram, spgram2npow
 
 
-class AcousticFeature(object):
+class FeatureExtractor(object):
 
     """Analysis and synthesize acoustic features from a given waveform
 
@@ -76,46 +76,56 @@ class AcousticFeature(object):
             raise(
                 'Other analyzer does not support, please use "world" instead')
 
-        self.f0 = None
-        self.spc = None
-        self.ap = None
+        self._f0 = None
+        self._spc = None
+        self._ap = None
 
     def analyze(self):
         """Analyzer acoustic features using analyzer
             Following acoustic features are analized:
                 world: F0, spc, ap
         """
-        self.f0, self.spc, self.ap = self.analyzer.analyze(self.x)
+        self._f0, self._spc, self._ap = self.analyzer.analyze(self.x)
 
         return
 
-    def get_f0(self):
-        """Return F0 sequence using analyzer
+    def f0(self):
+        """Return F0 sequence
 
         Returns
         -------
-        spc : array, shape (`T`,)
-            F0 sequence.
+        f0 : array, shape (`T`,)
+            F0 sequence
 
         """
-        self._analyzed_check()
 
-        return self.f0
+        return self._f0
 
-    def get_spc(self):
-        """Return spectral envelope sequence using analyzer
+    def spc(self):
+        """Return spectral envelope sequence
 
         Returns
         -------
         spc : array, shape (`T`, `fftl / 2 + 1`)
-            Spectral envelope sequence of the waveform
+            Spectral envelope sequence
 
         """
-        self._analyzed_check()
 
-        return self.spc
+        return self._spc
 
-    def get_mcep(self, dim=24, alpha=0.42):
+    def ap(self):
+        """Return aperiodicity sequence
+
+        Returns
+        -------
+        ap: array, shape (`T`, `fftl / 2 + 1`)
+            aperiodicity sequence
+
+        """
+
+        return self._ap
+
+    def mcep(self, dim=24, alpha=0.42):
         """Return mel-cepstrum sequence parameterized from spc
 
         Parameters
@@ -134,24 +144,9 @@ class AcousticFeature(object):
         """
         self._analyzed_check()
 
-        self.mcep = spgram2mcgram(self.spc, dim, alpha)
+        return spgram2mcgram(self._spc, dim, alpha)
 
-        return spgram2mcgram(self.spc, dim, alpha)
-
-    def get_ap(self):
-        """Return aperiodicity sequence using analyzer
-
-        Returns
-        -------
-        ap : array, shape (`T`, `fftl / 2 + 1`)
-            Aperiodicity sequence.
-
-        """
-        self._analyzed_check()
-
-        return self.ap
-
-    def get_bandap(self, dim=5):
+    def bndap(self, dim=5):
         # TODO: Not support yet
         """Return band-averaged aperiodicity sequence
 
@@ -168,9 +163,9 @@ class AcousticFeature(object):
         """
         self._analyzed_check()
 
-        return self.bandap
+        return self._bndap
 
-    def get_npow(self):
+    def npow(self):
         """Return normalized power sequence calculated using analized spc
 
         Returns
@@ -181,11 +176,9 @@ class AcousticFeature(object):
         """
         self._analyzed_check()
 
-        self.npow = spgram2npow(self.spc)
-
-        return self.npow
+        return spgram2npow(self._spc)
 
     def _analyzed_check(self):
-        if self.f0 is None and self.spc is None and self.ap is None:
+        if self._f0 is None and self._spc is None and self._ap is None:
             raise(
-                'Please call AcousticFeature.analyze() before get acoustic feature.')
+                'Please call FeatureExtractor.analyze() before get acoustic features.')

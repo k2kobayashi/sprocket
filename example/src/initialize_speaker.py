@@ -1,7 +1,7 @@
 #! /usr/local/bin/python
 # -*- coding: utf-8 -*-
 #
-# feature_extraction.py
+# init_spkr.py
 #   First ver.: 2017-06-05
 #
 #   Copyright 2017
@@ -11,79 +11,71 @@
 #
 
 """
-acoustic feature extraction for the speaker
+Generate F0 histgram
 
 """
 
-import os
 import argparse
 import numpy as np
 from scipy.io import wavfile
+import matplotlib.pyplot as plt
 
 from sprocket.feature import FeatureExtractor
-from sprocket.util.yml import SpeakerYML
-from sprocket.util.hdf5 import HDF5
+
+
+def create_f0_histgram(f0s, histgramf):
+    # flatten F0
+    f0 = [f0val for i in f0s for f0val in i]
+
+    # plot histgram
+    plt.hist(f0, bins=200, range=(40, 700), normed=True, histtype="stepfilled")
+    plt.xlabel("Fundamental frequency")
+    plt.ylabel("Probability")
+    plt.savefig(histgramf)
 
 
 def main():
     # Options for python
-    dcp = 'feature extraction for the speaker'
+    dcp = 'create speaker-dependent configure file (speaker.yml)'
     parser = argparse.ArgumentParser(description=dcp)
+    parser.add_argument('-m', '--multicore', type=int, default=1,
+                        help='# of cores for multi-processing')
     parser.add_argument('speaker', type=str,
                         help='Input speaker label')
-    parser.add_argument('ymlf', type=str,
-                        help='Yml file of the input speaker')
     parser.add_argument('list_file', type=str,
                         help='List file of the input speaker')
     parser.add_argument('wav_dir', type=str,
                         help='Wav file directory of the speaker')
-    parser.add_argument('h5_dir', type=str,
-                        help='hdf5 file directory of the speaker')
+    parser.add_argument('histgramf', type=str,
+                        help='Output histgram file')
     args = parser.parse_args()
-
-    # read parameters from yml
-    conf = SpeakerYML(args.ymlf)
 
     # open list file
     with open(args.list_file, 'r') as fp:
         files = fp.readlines()
 
+    f0s = []
     for f in files:
-        # open wave file
+        # open waveform
         f = f.rstrip()
-        wavf = os.path.join(args.wav_dir + '/' + f + '.wav')
+        wavf = args.wav_dir + '/' + f + '.wav'
         fs, x = wavfile.read(wavf)
         x = np.array(x, dtype=np.float)
-        assert fs == conf.fs
-
         print("Processing: " + wavf)
+
         # constract AcousticFeature clas
         feat = FeatureExtractor(
             x,
             analyzer='world',
             fs=fs,
-            minf0=conf.minf0,
-            maxf0=conf.maxf0,
         )
-
-        # analyze F0, spc, and ap
         feat.analyze()
-        f0 = feat.f0()
-        spc = feat.spc()
-        ap = feat.ap()
-        mcep = feat.mcep(dim=conf.dim, alpha=conf.alpha)
-        npow = feat.npow()
 
-        # save features into a hdf5 file
-        h5f = os.path.join(args.h5_dir + '/' + f + '.h5')
-        h5 = HDF5(h5f, mode='w')
-        h5.save(f0, ext='f0')
-        h5.save(spc, ext='spc')
-        h5.save(ap, ext='ap')
-        h5.save(mcep, ext='mcep')
-        h5.save(npow, ext='npow')
-        h5.close()
+        # f0 extraction
+        f0s.append(feat.f0)
 
+    # create figure to visualize F0 range of the speaker
+    create_f0_histgram(f0s, args.histgramf)
 
 if __name__ == '__main__':
     main()

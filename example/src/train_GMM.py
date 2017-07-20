@@ -15,36 +15,30 @@
 
 """
 
+import os
 import argparse
 
-from sprocket.util.yml import PairYML
-from sprocket.util.jnt import JointFeatureExtractor
 from sprocket.model.GMM import GMMTrainer
+from sprocket.util.hdf5 import HDF5
 
 
 def main():
     # Options for python
     description = 'estimate joint feature of source and target speakers'
     parser = argparse.ArgumentParser(description=description)
-    parser.add_argument('org', type=str,
-                        help='original speaker label')
-    parser.add_argument('tar', type=str,
-                        help='target speaker label')
-    parser.add_argument('pair_ymlf', type=str,
+    parser.add_argument('pair_dir', type=str,
                         help='yml file for the speaker pair')
     args = parser.parse_args()
 
-    # read pair-dependent yml file
-    conf = PairYML(args.pair_ymlf)
-
     # read joint feature vector
-    jnt = JointFeatureExtractor(conf)
-    jntdata = jnt.read_jnt()
+    jntf = args.pair_dir + '/jnt/it3.h5'
+    h5 = HDF5(jntf, mode='r')
+    jnt = h5.read(ext='mat')
 
     # train GMM using joint feature vector
-    GMMpath = conf.pairdir + '/model/GMM.pkl'
-    gmm = GMMTrainer(conf)
-    gmm.train(jntdata)
+    GMMpath = os.path.join(args.pair_dir + '/model/GMM.pkl')
+    gmm = GMMTrainer()
+    gmm.train(jnt)
     gmm.save(GMMpath)
 
     return
