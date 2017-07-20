@@ -27,8 +27,6 @@ class AnalysisSynthesisTest(unittest.TestCase):
         wav = synth.synthesis(
             f0, mcep, ap, alpha=0.42, fftl=1024, fs=fs, shiftms=5)
         nun_check(wav)
-        opath = dirpath + '/data/anasyn16000.wav'
-        wavfile.write(opath, fs, np.array(wav, dtype=np.int16))
 
     def test_anasyn_44100(self):
         path = dirpath + '/data/test44100.wav'
@@ -44,8 +42,6 @@ class AnalysisSynthesisTest(unittest.TestCase):
         wav = synth.synthesis(
             f0, mcep, ap, alpha=0.50, fftl=2048, fs=fs, shiftms=5)
         nun_check(wav)
-        opath = dirpath + '/data/anasyn44100.wav'
-        wavfile.write(opath, fs, np.array(wav, dtype=np.int16))
 
     def test_spc_and_npow(self):
         path = dirpath + '/data/test16000.wav'
