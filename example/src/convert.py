@@ -71,8 +71,8 @@ def main():
 
     # read GMM for mcep
     mcepgmmpath = os.path.join(args.pair_dir, 'model/GMM.pkl')
-    mcepgmm = GMMConvertor(n_mix=pconf.n_mix, covtype=pconf.covtype,
-                           gmmmode=args.gmmmode, cvtype=pconf.cvtype)
+    mcepgmm = GMMConvertor(n_mix=pconf.GMM_mcep_n_mix, covtype=pconf.GMM_mcep_covtype,
+                           gmmmode=args.gmmmode, cvtype=pconf.GMM_mcep_cvtype)
     mcepgmm.open(mcepgmmpath)
     print("conversion mode: {}".format(args.gmmmode))
 
@@ -83,10 +83,10 @@ def main():
 
     # open synthesizer
     synthesizer = Synthesizer()
-    alpha = pysptk.util.mcepalpha(sconf.fs)
-    shiftl = int(sconf.fs / 1000 * sconf.shiftms)
+    alpha = pysptk.util.mcepalpha(sconf.wav_fs)
+    shiftl = int(sconf.wav_fs / 1000 * sconf.wav_shiftms)
     mlsa_fil = pysptk.synthesis.Synthesizer(
-        MLSADF(order=sconf.dim, alpha=sconf.alpha), shiftl)
+        MLSADF(order=sconf.mcep_dim, alpha=sconf.mcep_alpha), shiftl)
 
     # test directory
     testdir = os.path.join(args.pair_dir, 'test')

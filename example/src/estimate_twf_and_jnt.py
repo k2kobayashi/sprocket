@@ -47,12 +47,12 @@ def main():
 
     # extract twf and joint feature
     jnt = JointFeatureExtractor(feature='mcep',
-                                jnt_iter=pconf.n_jntiter,
+                                jnt_iter=pconf.jnt_n_iter,
                                 pairdir=args.pair_dir)
-    jnt.set_GMM_parameter(n_mix=pconf.n_mix,
-                          n_iter=pconf.n_iter,
-                          covtype=pconf.covtype,
-                          cvtype=pconf.cvtype)
+    jnt.set_GMM_parameter(n_mix=pconf.GMM_mcep_n_mix,
+                          n_iter=pconf.GMM_mcep_n_iter,
+                          covtype=pconf.GMM_mcep_covtype,
+                          cvtype=pconf.GMM_mcep_cvtype)
     jnt.estimate(org_h5s.datalist('mcep'), tar_h5s.datalist('mcep'),
                  org_h5s.datalist('npow'), tar_h5s.datalist('npow'))
 
