@@ -17,9 +17,9 @@ class AnalysisSynthesisTest(unittest.TestCase):
         fs, x = wavfile.read(path)
         af = FeatureExtractor(x, analyzer='world', fs=fs, shiftms=5)
         af.analyze()
-        f0 = af.f0
+        f0 = af.f0()
         mcep = af.mcep(dim=24, alpha=0.42)
-        ap = af.ap
+        ap = af.ap()
         synth = Synthesizer()
 
         # mcep synthesis
@@ -34,9 +34,9 @@ class AnalysisSynthesisTest(unittest.TestCase):
         fs, x = wavfile.read(path)
         af = FeatureExtractor(x, analyzer='world', fs=fs, shiftms=5)
         af.analyze()
-        f0 = af.f0
+        f0 = af.f0()
         mcep = af.mcep(dim=40, alpha=0.50)
-        ap = af.ap
+        ap = af.ap()
         synth = Synthesizer()
 
         # mcep synthesis
@@ -51,7 +51,7 @@ class AnalysisSynthesisTest(unittest.TestCase):
         fs, x = wavfile.read(path)
         af = FeatureExtractor(x, analyzer='world', fs=fs, shiftms=5)
         af.analyze()
-        spc = af.spc
+        spc = af.spc()
         npow = af.npow()
         assert spc.shape[0] == npow.shape[0]
 
