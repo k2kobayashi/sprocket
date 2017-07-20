@@ -25,7 +25,7 @@ class Shifter:
         self.epstep = int(self.sl / self.f0rate)  # step size for WSOLA
         self.win = np.hanning(self.fl)  # window function for a frame
 
-    def transform(self, data):
+    def f0transform(self, data):
         """Transform F0 of given waveform signals using
 
         Parameters

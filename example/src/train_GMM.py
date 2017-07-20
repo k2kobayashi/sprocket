@@ -52,6 +52,7 @@ def main():
                      covtype=pconf.GMM_mcep_covtype)
     gmm.train(jnt)
     gmm.save(GMMpath)
+    print(GMMpath)
 
     # train GMM for bandap using criating joint feature vector
 

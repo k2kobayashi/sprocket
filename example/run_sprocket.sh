@@ -11,8 +11,8 @@ org=SF1
 tar=TF1
 
 # flag settings
-STEP1=0 # get figures of f0 range
-STEP2=0 # extract acoustic feature
+STEP1=1 # get figures of f0 range
+STEP2=1 # extract acoustic feature
 STEP3=1 # estimate acoustic feature statistics
 STEP4=1 # estimate time warping function and joint feature vector
 STEP5=1 # train GMM
