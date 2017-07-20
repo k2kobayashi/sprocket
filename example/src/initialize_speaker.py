@@ -36,8 +36,6 @@ def create_f0_histogram(f0s, f0histogrampath):
 
     plt.savefig(f0histogrampath)
 
-    return
-
 
 def main():
     dcp = 'create speaker-dependent configure file (speaker.yml)'

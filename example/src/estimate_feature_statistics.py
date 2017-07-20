@@ -47,16 +47,14 @@ def main():
     gv.estimate(h5s.datalist(ext='mcep'))
     gvpath = os.path.join(statspath + '.gv')
     gv.save(gvpath)
-    print gvpath
+    print(gvpath)
 
     # estimate and save F0 statistics of original and target speakers
     f0stats = F0statistics()
     f0stats.estimate(h5s.datalist(ext='f0'))
     f0statspath = os.path.join(statspath + '.f0stats')
     f0stats.save(f0statspath)
-    print f0statspath
-
-    return
+    print(f0statspath)
 
 
 if __name__ == '__main__':
