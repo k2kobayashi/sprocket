@@ -15,6 +15,7 @@ acoustic feature extraction for the speaker
 
 """
 
+import os
 import argparse
 import numpy as np
 from scipy.io import wavfile
@@ -50,7 +51,7 @@ def main():
     for f in files:
         # open wave file
         f = f.rstrip()
-        wavf = args.wav_dir + '/' + f + '.wav'
+        wavf = os.path.join(args.wav_dir + '/' + f + '.wav')
         fs, x = wavfile.read(wavf)
         x = np.array(x, dtype=np.float)
         assert fs == conf.fs
@@ -67,15 +68,18 @@ def main():
 
         # analyze F0, spc, and ap
         feat.analyze()
+        f0 = feat.f0()
+        spc = feat.spc()
+        ap = feat.ap()
         mcep = feat.mcep(dim=conf.dim, alpha=conf.alpha)
         npow = feat.npow()
 
         # save features into a hdf5 file
-        h5f = args.h5_dir + '/' + f + '.h5'
+        h5f = os.path.join(args.h5_dir + '/' + f + '.h5')
         h5 = HDF5(h5f, mode='w')
-        h5.save(feat.spc, ext='spc')
-        h5.save(feat.ap, ext='ap')
-        h5.save(feat.f0, ext='f0')
+        h5.save(f0, ext='f0')
+        h5.save(spc, ext='spc')
+        h5.save(ap, ext='ap')
         h5.save(mcep, ext='mcep')
         h5.save(npow, ext='npow')
         h5.close()

@@ -76,18 +76,54 @@ class FeatureExtractor(object):
             raise(
                 'Other analyzer does not support, please use "world" instead')
 
-        self.f0 = None
-        self.spc = None
-        self.ap = None
+        self._f0 = None
+        self._spc = None
+        self._ap = None
 
     def analyze(self):
         """Analyzer acoustic features using analyzer
             Following acoustic features are analized:
                 world: F0, spc, ap
         """
-        self.f0, self.spc, self.ap = self.analyzer.analyze(self.x)
+        self._f0, self._spc, self._ap = self.analyzer.analyze(self.x)
 
         return
+
+    def f0(self):
+        """Return F0 sequence
+
+        Returns
+        -------
+        f0 : array, shape (`T`,)
+            F0 sequence
+
+        """
+
+        return self._f0
+
+    def spc(self):
+        """Return spectral envelope sequence
+
+        Returns
+        -------
+        spc : array, shape (`T`, `fftl / 2 + 1`)
+            Spectral envelope sequence
+
+        """
+
+        return self._spc
+
+    def ap(self):
+        """Return aperiodicity sequence
+
+        Returns
+        -------
+        ap: array, shape (`T`, `fftl / 2 + 1`)
+            aperiodicity sequence
+
+        """
+
+        return self._ap
 
     def mcep(self, dim=24, alpha=0.42):
         """Return mel-cepstrum sequence parameterized from spc
@@ -108,9 +144,7 @@ class FeatureExtractor(object):
         """
         self._analyzed_check()
 
-        self.mcep = spgram2mcgram(self.spc, dim, alpha)
-
-        return spgram2mcgram(self.spc, dim, alpha)
+        return spgram2mcgram(self._spc, dim, alpha)
 
     def bndap(self, dim=5):
         # TODO: Not support yet
@@ -129,7 +163,7 @@ class FeatureExtractor(object):
         """
         self._analyzed_check()
 
-        return self.bndap
+        return self._bndap
 
     def npow(self):
         """Return normalized power sequence calculated using analized spc
@@ -142,11 +176,9 @@ class FeatureExtractor(object):
         """
         self._analyzed_check()
 
-        self.npow = spgram2npow(self.spc)
-
-        return self.npow
+        return spgram2npow(self._spc)
 
     def _analyzed_check(self):
-        if self.f0 is None and self.spc is None and self.ap is None:
+        if self._f0 is None and self._spc is None and self._ap is None:
             raise(
-                'Please call AcousticFeature.analyze() before get acoustic feature.')
+                'Please call FeatureExtractor.analyze() before get acoustic features.')

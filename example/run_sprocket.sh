@@ -14,11 +14,11 @@ tar=$2
 
 # flag settings
 STEP1=0 # initialize speaker
-STEP2=0 # feature extraction
+STEP2=1 # feature extraction
 STEP3=0 # feature statistics extraction
 STEP4=0 # estimate twf and joint feature vector
 STEP5=0 # GMM training
-STEP6=1 # conversion
+STEP6=0 # conversion
 
 # directory setting
 conf_dir=./conf
