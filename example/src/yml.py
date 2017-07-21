@@ -20,6 +20,8 @@ class SpeakerYML(object):
 
         self.f0_minf0 = conf['f0']['minf0']
         self.f0_maxf0 = conf['f0']['maxf0']
+        assert self.f0_minf0 < self.f0_maxf0, \
+            "should be minf0 < maxf0 in yml file"
 
         self.mcep_dim = conf['mcep']['dim']
         self.mcep_alpha = conf['mcep']['alpha']
