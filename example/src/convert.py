@@ -114,15 +114,18 @@ def main():
         cvmcep_wopow = mcepgmm.convert(np.c_[mcep[:, 1:], delta(mcep[:, 1:])])
         cvmcep = np.c_[mcep_0th, cvmcep_wopow]
 
+        # synthesis VC w/ GV
         if args.gmmmode == None:
-            # synthesis VC w/ GV
             cvmcep_wGV = mcepgv.postfilter(cvmcep, startdim=1)
-            wav = synthesizer.synthesis(cvf0, cvmcep_wGV, apperiodicity)
+            wav = synthesizer.synthesis(cvf0, cvmcep_wGV, apperiodicity,
+                                        alpha=sconf.mcep_alpha, fftl=sconf.wav_fftl,
+                                        fs=sconf.wav_fs)
+
             wav = np.clip(wav, -32768, 32767)
             wavpath = os.path.join(testdir, h5.flbl + '_VC.wav')
 
+        # synthesis DIFFVC w/ GV
         if args.gmmmode == 'diff':
-            # synthesis DIFFVC w/ GV
             cvmcep[:, 0] = 0.0
             cvmcep_wGV = mcepgv.postfilter(mcep + cvmcep, startdim=1) - mcep
             b = np.apply_along_axis(pysptk.mc2b, 1, cvmcep_wGV, alpha)
@@ -132,6 +135,7 @@ def main():
             wav = np.clip(wav, -32768, 32767)
             wavpath = os.path.join(testdir, h5.flbl + '_DIFFVC.wav')
 
+        # write waveform
         wavfile.write(
             wavpath, fs, np.array(wav, dtype=np.int16))
 
