@@ -52,13 +52,13 @@ def get_f0s_from_list(conf, list_file, wav_dir):
     return f0s
 
 
-def transform_f0_from_list(f0rate, conf, list_file, wav_dir):
+def transform_f0_from_list(f0rate, wav_fs, list_file, wav_dir):
     # open list file
     with open(list_file, 'r') as fp:
         files = fp.readlines()
 
     # Construct Shifter class
-    shifter = Shifter(conf.wav_fs, f0rate=f0rate)
+    shifter = Shifter(wav_fs, f0rate=f0rate)
 
     for f in files:
         # open wave file
@@ -66,7 +66,7 @@ def transform_f0_from_list(f0rate, conf, list_file, wav_dir):
         wavf = os.path.join(wav_dir, f + '.wav')
         fs, x = wavfile.read(wavf)
         x = np.array(x, dtype=np.float)
-        assert fs == conf.wav_fs
+        assert fs == wav_fs
 
         # F0 transform
         transformed_x = shifter.f0transform(x)
@@ -140,8 +140,10 @@ def main():
     print ('F0 transformation ratio: ' + str(f0rate))
 
     # F0 transformation of original waveform in both train and eval list files
-    transform_f0_from_list(f0rate, org_conf, args.org_train_list, args.wav_dir)
-    transform_f0_from_list(f0rate, org_conf, args.org_eval_list, args.wav_dir)
+    transform_f0_from_list(
+        f0rate, org_conf.wav_fs, args.org_train_list, args.wav_dir)
+    transform_f0_from_list(
+        f0rate, org_conf.wav_fs, args.org_eval_list, args.wav_dir)
 
     # create list files for F0 transformed original
     create_F0_transformed_list_file(args.speaker, f0rate, args.org_train_list)
