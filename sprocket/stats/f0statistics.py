@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+
 import os
 import numpy as np
 
@@ -62,10 +63,7 @@ class F0statistics (object):
         """
         if not os.path.exists(os.path.dirname(fpath)):
             os.makedirs(os.path.dirname(fpath))
-        with open(fpath, 'w') as fp:
-            fp.write(self.f0stats)
-
-        return
+        self.f0stats.tofile(fpath)
 
     def read(self, orgf0stats, tarf0stats):
         """read F0 statistics from array
@@ -87,8 +85,6 @@ class F0statistics (object):
         self.tmean = tarf0stats[0]
         self.tstd = tarf0stats[1]
 
-        return
-
     def open_from_file(self, orgfile, tarfile):
         """Open F0 statistics from file
 
@@ -103,15 +99,13 @@ class F0statistics (object):
         """
 
         # read f0 statistics of source and target from binary
-        self.orgf0stats = np.fromfile(orgfile, dtype='d')
-        self.tarf0stats = np.fromfile(tarfile, dtype='d')
+        self.orgf0stats = np.fromfile(orgfile)
+        self.tarf0stats = np.fromfile(tarfile)
 
         self.omean = self.orgf0stats[0]
         self.ostd = self.orgf0stats[1]
         self.tmean = self.tarf0stats[0]
         self.tstd = self.tarf0stats[1]
-
-        return
 
     def convert(self, f0):
         """Convert F0 based on F0 statistics
