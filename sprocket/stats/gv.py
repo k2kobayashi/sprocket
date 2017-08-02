@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+
 import os
 import numpy as np
 
@@ -68,10 +69,7 @@ class GV (object):
         if not os.path.exists(os.path.dirname(fpath)):
             os.makedirs(os.path.dirname(fpath))
 
-        with open(fpath, 'w') as fp:
-            fp.write(self.gvstats)
-
-        return
+        self.gvstats.tofile(fpath)
 
     def open_from_file(self, fpath):
         """Open GV statistics from binary file
@@ -84,8 +82,8 @@ class GV (object):
         """
 
         # read gv from binary
-        gv = np.fromfile(fpath, dtype='d')
-        dim = len(gv) / 2
+        gv = np.fromfile(fpath)
+        dim = len(gv) // 2
         self.gvstats = gv.reshape(2, dim)
 
         return
