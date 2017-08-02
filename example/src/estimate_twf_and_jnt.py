@@ -15,6 +15,8 @@ estimate joint feature vector of the speaker pair using GMM
 
 """
 
+from __future__ import division, print_function, absolute_import
+
 import os
 import argparse
 
@@ -55,6 +57,7 @@ def main():
                           cvtype=pconf.GMM_mcep_cvtype)
     jnt.estimate(org_h5s.datalist('mcep'), tar_h5s.datalist('mcep'),
                  org_h5s.datalist('npow'), tar_h5s.datalist('npow'))
+
 
 if __name__ == '__main__':
     main()
