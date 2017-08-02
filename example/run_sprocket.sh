@@ -11,11 +11,11 @@ org=SF1
 tar=TF1
 
 # flag settings
-STEP1=0 # get figures of f0 range
-STEP2=0 # extract acoustic feature
-STEP3=0 # estimate acoustic feature statistics
-STEP4=0 # estimate time warping function and joint feature vector
-STEP5=0 # train GMM
+STEP1=1 # get figures of f0 range
+STEP2=1 # extract acoustic feature
+STEP3=1 # estimate acoustic feature statistics
+STEP4=1 # estimate time warping function and joint feature vector
+STEP5=1 # train GMM
 STEP6=1 # convert based on the trained GMM
 
 # directory setting
@@ -43,8 +43,8 @@ if [ ! -e $list_dir/${org}_train.list ] && [ ! -e $list_dir/${tar}_train.list ] 
     echo "Please prepare training list files for $org and $tar."
     exit
 fi
-if [ ! -e $list_dir/${org}_eval.list ] ; then
-    echo "Please prepare evaluation list files for $org."
+if [ ! -e $list_dir/${org}_eval.list ] && [ ! -e $list_dir/${tar}_eval.list ] ; then
+    echo "Please prepare evaluation list files for $org and $tar."
     exit
 fi
 
@@ -71,21 +71,17 @@ if [ $STEP2 -eq 1 ] ; then
     echo "##############################################################"
     # Extract acoustic features consisting of F0, spc, ap, mcep, npow
     for speaker in $org $tar; do
-        ymlf=$conf_dir/${speaker}.yml
-        listf=$list_dir/${speaker}_train.list
-        python $src_dir/extract_features.py \
-            $speaker \
-            $ymlf \
-            $listf \
-            $data_dir/wav \
-            $pair_dir
+        for flag in train eval; do
+            ymlf=$conf_dir/${speaker}.yml
+            listf=$list_dir/${speaker}_${flag}.list
+            python $src_dir/extract_features.py \
+                $speaker \
+                $ymlf \
+                $listf \
+                $data_dir/wav \
+                $pair_dir
+        done
     done
-    python $src_dir/extract_features.py \
-        $org \
-        $conf_dir/${org}.yml \
-        $list_dir/${org}_eval.list \
-        $data_dir/wav \
-        $pair_dir
 fi
 
 if [ $STEP3 -eq 1 ] ; then
