@@ -1,28 +1,51 @@
-box: python:2.7
+box: python
+
+# Since Wercker doesn't seem to support build matrix as Travis,
+# wrote *single* build script to test both python 2.7 and python 3.6 versions.
+# Once we can switch to Travis, we can simplify the testing steps.
 build:
   steps:
-    # A step that sets up the python virtual environment
-    - virtualenv:
-        name: setup virtual environment
-        install_wheel: false # Enable wheel to speed up builds (experimental)
-
-    # Use this virtualenv step for python 3.2
-    # - virtualenv
-    #     name: setup virtual environment
-    #     python_location: /usr/bin/python3.2
-
-    # install dependencies using requirements.txt
+    # Python2.7
     - script:
-        name: install build requirements
+        name: py27 setup environment
         code: |
-            pip install numpy cython
+          wget http://repo.continuum.io/miniconda/Miniconda-3.8.3-Linux-x86_64.sh -O miniconda.sh;
+          bash miniconda.sh -b -p $HOME/miniconda
+          export PATH="$HOME/miniconda/bin:$PATH"
+          conda config --set always_yes yes --set changeps1 no
+          conda update -q conda
+          conda create -q -n test-py27-environment "python=2.7" numpy cython nose
+          source activate test-py27-environment
 
-    # This pip-install installs packages and clears the local wheel cache
-    - pip-install:
-        clean_wheel_dir: true
-
-    # performe nosetests
     - script:
-        name: nosetests
+        name: py27 pip install
         code: |
-          nosetests -s -v
+          pip install -e .
+
+    - script:
+        name: py27 nosetests
+        code: |
+          nosetests  -s -v
+
+    # Python3.6
+    - script:
+        name: py36 setup environment
+        code: |
+          wget http://repo.continuum.io/miniconda/Miniconda3-3.8.3-Linux-x86_64.sh -O miniconda.sh;
+          bash miniconda.sh -b -p $HOME/miniconda3
+          source activate root          
+          export PATH="$HOME/miniconda3/bin:$PATH"
+          conda config --set always_yes yes --set changeps1 no
+          conda update -q conda
+          conda create -q -n test-py36-environment "python=3.6" numpy cython nose
+          source activate test-py36-environment
+
+    - script:
+        name: py36 pip install
+        code: |
+          pip install -e .
+
+    - script:
+        name: py36 nosetests
+        code: |
+          nosetests  -s -v
