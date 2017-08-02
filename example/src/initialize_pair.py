@@ -15,6 +15,8 @@ create training and evaluation list files
 
 """
 
+from __future__ import division, print_function, absolute_import
+
 import os
 import sys
 import glob
@@ -47,7 +49,7 @@ def main():
 
     # existing training and eve file check
     if os.path.exists(train_list) and os.path.exists(eval_list):
-        print ("List files are already excisted.")
+        print("List files are already excisted.")
         sys.exit(0)
 
     # open files and write wave file path
@@ -60,6 +62,7 @@ def main():
         ef.write(olbl + '\n')
     tf.close()
     ef.close()
+
 
 if __name__ == '__main__':
     main()

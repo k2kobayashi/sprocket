@@ -15,6 +15,8 @@ Generate F0 histgram
 
 """
 
+from __future__ import division, print_function, absolute_import
+
 import os
 import argparse
 import numpy as np
@@ -77,6 +79,7 @@ def main():
     f0histogrampath = os.path.join(
         figure_dir, args.speaker + '_f0histogram.png')
     create_f0_histogram(np.hstack(f0s).flatten(), f0histogrampath)
+
 
 if __name__ == '__main__':
     main()
