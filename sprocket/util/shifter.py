@@ -46,7 +46,7 @@ class Shifter:
         wsolaed = self.duration_modification(data)
 
         # resampling
-        transformed = self.resampling(wsolaed)
+        transformed = scipy.signal.resample(wsolaed, self.xlen)
 
         return transformed
 
@@ -102,23 +102,6 @@ class Shifter:
 
         return wsolaed
 
-    def resampling(self, data):
-        """Resampling
-
-        Parameters
-        ---------
-        data : array, shape ('int(len(data) * f0rate)')
-            array of wsolaed waveform
-
-        Returns
-        ---------
-        resampled : array, shape (`len(data)`)
-            Array of resampled (F0 transformed) waveform sequence
-
-        """
-
-        return scipy.signal.resample(data, self.xlen)
-
     def resampling_by_interpolate(self, data):
         """Resampling base on 1st order interpolation
 
@@ -152,6 +135,3 @@ class Shifter:
         corr = scipy.signal.correlate2d(buffmat, refwin, mode='valid')
 
         return np.argmax(corr) - self.sl
-
-    def _cross_correration(self, org, tar):
-        return np.correlate(org, tar)
