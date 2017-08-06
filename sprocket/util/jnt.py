@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import division, print_function, absolute_import
+
 import os
 import numpy as np
 from fastdtw import fastdtw
@@ -25,7 +27,7 @@ class JointFeatureExtractor(object):
     """
 
     def __init__(self, feature='mcep', jnt_iter=3, pairdir=None,
-            ):
+                 ):
         # distance setting
         if feature == 'mcep':
             self.distance = 'melcd'
@@ -192,7 +194,7 @@ def estimate_twf(orgdata, tardata, distance='melcd'):
     """
 
     if distance == 'melcd':
-        distance_func = lambda x, y: melcd(x, y)
+        def distance_func(x, y): return melcd(x, y)
     else:
         raise('other distance metrics does not support.')
 

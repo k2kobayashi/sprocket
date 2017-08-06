@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import division, print_function, absolute_import
+
 import os
 import h5py
 
@@ -44,7 +46,7 @@ class HDF5(object):
                 print("overwrite: " + self.fpath)
         elif self.mode == 'r':
             if not os.path.exists(self.fpath):
-                raise("h5 file does not exist in " + self.fpath)
+                raise "h5 file does not exist in " + self.fpath
 
         # open hdf5 file to fpath
         self.h5 = h5py.File(self.fpath, self.mode)
