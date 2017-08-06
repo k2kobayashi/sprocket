@@ -1,27 +1,30 @@
+from __future__ import division, print_function, absolute_import
+
 import unittest
 
-import os
 import numpy as np
 from dtw import dtw
 
+
+import pysptk
 from sprocket.util.distance import melcd, normalized_melcd
 
-dirpath = os.path.dirname(os.path.realpath(__file__))
-orgf = dirpath + '/data/test_org.mcep'
-tarf = dirpath + '/data/test_tar.mcep'
+
+def get_random_peseudo_mcep(order=24, alpha=0.41):
+    T, N = 10, 512
+    frames = np.random.rand(T, N) * pysptk.blackman(N)
+    mc = pysptk.mcep(frames, order=order, alpha=alpha)
+    return mc
 
 
 class DistanceTest(unittest.TestCase):
 
     def test_melcd(self):
-        # read mcep from file
-        org = np.fromfile(orgf)
-        org = org.reshape(len(org) / 25, 25)
-        tar = np.fromfile(tarf)
-        tar = tar.reshape(len(tar) / 25, 25)
+        org = get_random_peseudo_mcep()
+        tar = get_random_peseudo_mcep()
 
         # perform dtw for mel-cd function test
-        distance_func = lambda x, y: melcd(x, y)
+        def distance_func(x, y): return melcd(x, y)
         dist, cost, acost, twf = dtw(org, tar, dist=distance_func)
 
         # align org and tar

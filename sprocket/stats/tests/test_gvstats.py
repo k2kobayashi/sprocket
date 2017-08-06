@@ -1,3 +1,5 @@
+from __future__ import division, print_function, absolute_import
+
 import unittest
 
 import os
@@ -15,7 +17,7 @@ class GVstatisticsTest(unittest.TestCase):
         gvstats = GV()
         gvstats.open_from_file(fpath)
 
-        data = np.random.rand(100 * 5).reshape(100 * 5 / 2, 2)
+        data = np.random.rand(100 * 5).reshape(100 * 5 // 2, 2)
         odata = gvstats.postfilter(data, startdim=0)
 
         assert data.shape == odata.shape
@@ -24,7 +26,7 @@ class GVstatisticsTest(unittest.TestCase):
         gvstats = GV()
         datalist = []
         for i in range(1, 4):
-            datalist.append(np.random.rand(100 * i).reshape(100 * i / 2, 2))
+            datalist.append(np.random.rand(100 * i).reshape(100 * i // 2, 2))
 
         gvstats.estimate(datalist)
         gvstats.save(tmppath)

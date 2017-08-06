@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import division, print_function, absolute_import
+
 import os
 import numpy as np
 import scipy.sparse
@@ -313,14 +315,14 @@ class GMMConvertor(object):
                      np.dot(self.A[m], sddata[t] - self.meanX[m]))
 
         # retern static and throw away delta component
-        return odata[:, :sddim / 2]
+        return odata[:, :sddim // 2]
 
     def _mlpg(self, mseq, covseq):
         # parameter for sequencial data
         T, sddim = mseq.shape
 
         # prepare W
-        W = construct_static_and_delta_matrix(T, sddim / 2)
+        W = construct_static_and_delta_matrix(T, sddim // 2)
 
         # prepare D
         D = get_diagonal_precision_matrix(T, sddim, covseq)
@@ -336,7 +338,7 @@ class GMMConvertor(object):
 
         # estimate y = (W'DW)^-1 * W'Dm
         odata = scipy.sparse.linalg.spsolve(
-            WDW, WDm, use_umfpack=False).reshape(T, sddim / 2)
+            WDW, WDm, use_umfpack=False).reshape(T, sddim // 2)
 
         # return odata
         return odata
