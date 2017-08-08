@@ -4,44 +4,15 @@
 readonly ORG=$1
 readonly TAR=$2
 
+. variable_and_function.sh
+
 # flag settings
 readonly STEP1=1 # extract acoustic feature
 readonly STEP2=1 # estimate acoustic feature statistics
 readonly STEP3=1 # estimate time warping function and joint feature vector
 readonly STEP4=1 # train GMM
 readonly STEP5=1 # convert based on the trained GMM
-
-# directory setting
-readonly CONF_DIR=./conf
-readonly LIST_DIR=./list
-readonly SRC_DIR=./src
-readonly DATA_DIR=./data
-readonly PAIR_DIR=$DATA_DIR/pair/$ORG-$TAR
 mkdir -p $PAIR_DIR
-
-function isexist_file () {
-    local _target_file=$1
-    if [ ! -e $_target_file ] ; then
-        echo "ERROR: $_target_file does not exist."
-        exit 1
-    else
-        return 0
-    fi
-}
-
-function check_list_length () {
-    local _org_list=$1
-    local _tar_list=$2
-
-    local _org_len=(`cat $_org_list | wc -w`)
-    local _tar_len=(`cat $_tar_list | wc -w`)
-    if [ ! ${_org_len} == ${_tar_len} ] ; then
-        echo "ERROR: lengths of following list files are different."
-        echo "$_org_list, $_tar_list"
-        exit 1
-    fi
-    return 0
-}
 
 # check list file
 isexist_file $LIST_DIR/${ORG}_train.list
@@ -50,6 +21,10 @@ isexist_file $LIST_DIR/${TAR}_train.list
 isexist_file $LIST_DIR/${TAR}_eval.list
 check_list_length $LIST_DIR/${ORG}_train.list $LIST_DIR/${TAR}_train.list
 check_list_length $LIST_DIR/${ORG}_eval.list $LIST_DIR/${TAR}_eval.list
+
+# check YAML file
+isexist_file $CONF_DIR/speaker/${ORG}.yml
+isexist_file $CONF_DIR/speaker/${TAR}.yml
 
 if [ $STEP1 -eq 1 ] ; then
     echo "##############################################################"
