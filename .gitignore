@@ -1,14 +1,12 @@
 # Created by https://www.gitignore.io
 
-# data files
+# list and conf
+/example/list
 /example/conf
-/example/data/h5
-/example/data/f0histgram
-/example/data/stats
+
+# data files
 /example/data/pair
 /example/data/wav
-
-# for test
 
 # for wercker
 /.wercker
