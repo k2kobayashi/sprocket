@@ -30,7 +30,12 @@ function check_list() {
         echo "$_target_list exists."
     else
         echo "generate $_target_list"
-        for _wav_file in `\ls $_wav_dir`;
+        local wavfiles=(`ls $_wav_dir | grep -e "wav$"`)
+        if [ ${#wavfiles[@]} == 0 ] ; then
+            echo "wav files do not exist in $_wav_dir"
+            exit 1
+        fi
+        for _wav_file in ${wavfiles[@]} ;
         do
             echo `basename $_wav_dir`/${_wav_file%.*} >> $_target_list
         done
@@ -39,17 +44,7 @@ function check_list() {
 }
 
 echo "##############################################################"
-echo "### 1. check configure files                               ###"
-echo "##############################################################"
-# check speaker-dependent configure file
-check_configure $CONF_DIR/speaker/$ORG.yml $CONF_DIR/default/speaker_default_$FS.yml
-check_configure $CONF_DIR/speaker/$TAR.yml $CONF_DIR/default/speaker_default_$FS.yml
-
-# check pair-dependent configure file
-check_configure $CONF_DIR/pair/$ORG-$TAR.yml $CONF_DIR/default/pair_default.yml
-
-echo "##############################################################"
-echo "### 2. check list files                                    ###"
+echo "### 1. check list files                                    ###"
 echo "##############################################################"
 # check list files for original speaker
 check_list $LIST_DIR/${ORG}_train.list $DATA_DIR/wav/${ORG}
@@ -58,6 +53,17 @@ check_list $LIST_DIR/${ORG}_eval.list $DATA_DIR/wav/${ORG}
 # check list files for target speaker
 check_list $LIST_DIR/${TAR}_train.list $DATA_DIR/wav/${TAR}
 check_list $LIST_DIR/${TAR}_eval.list $DATA_DIR/wav/${TAR}
+echo "# Please modify train and eval list files, if you want. #"
+
+echo "##############################################################"
+echo "### 2. check configure files                               ###"
+echo "##############################################################"
+# check speaker-dependent configure file
+check_configure $CONF_DIR/speaker/$ORG.yml $CONF_DIR/default/speaker_default_$FS.yml
+check_configure $CONF_DIR/speaker/$TAR.yml $CONF_DIR/default/speaker_default_$FS.yml
+
+# check pair-dependent configure file
+check_configure $CONF_DIR/pair/$ORG-$TAR.yml $CONF_DIR/default/pair_default.yml
 
 echo "##############################################################"
 echo "### 3. create figures to define F0 range                   ###"
@@ -71,4 +77,4 @@ for _speaker in $ORG $TAR; do
         $DATA_DIR/wav \
         $CONF_DIR/figure
 done
-echo "# Please modify minf0 and maxf0 in yml files based on the histgram #"
+echo "# Please modify f0 range values in speaker-dependent YAML files based on the figure #"
