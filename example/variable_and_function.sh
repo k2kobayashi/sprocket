@@ -39,7 +39,7 @@ function create_list() {
     return 0
 }
 
-function isexist_file () {
+function isexist_file() {
     local _target_file=$1
     if [ ! -e $_target_file ] ; then
         echo "ERROR: $_target_file does not exist."
@@ -49,7 +49,7 @@ function isexist_file () {
     fi
 }
 
-function check_list_length () {
+function check_list_length() {
     local _org_list=$1
     local _tar_list=$2
 

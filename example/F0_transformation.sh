@@ -30,4 +30,5 @@ if [ $STEP1 -eq 1 ] ; then
         $LIST_DIR/${ORG}_eval.list \
         $LIST_DIR/${TAR}_train.list \
         $DATA_DIR/wav
+    echo "# F0 transformed waveforms are generated #"
 fi
