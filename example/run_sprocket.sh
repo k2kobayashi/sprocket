@@ -12,7 +12,6 @@ readonly STEP2=1 # estimate acoustic feature statistics
 readonly STEP3=1 # estimate time warping function and joint feature vector
 readonly STEP4=1 # train GMM
 readonly STEP5=1 # convert based on the trained GMM
-mkdir -p $PAIR_DIR
 
 # check list file
 isexist_file $LIST_DIR/${ORG}_train.list
@@ -26,6 +25,7 @@ check_list_length $LIST_DIR/${ORG}_eval.list $LIST_DIR/${TAR}_eval.list
 isexist_file $CONF_DIR/speaker/${ORG}.yml
 isexist_file $CONF_DIR/speaker/${TAR}.yml
 
+mkdir -p $PAIR_DIR
 if [ $STEP1 -eq 1 ] ; then
     echo "##############################################################"
     echo "### 1. Extract acoustic features                           ###"

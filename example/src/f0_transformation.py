@@ -60,27 +60,33 @@ def transform_f0_from_list(f0rate, wav_fs, list_file, wav_dir):
     # Construct Shifter class
     shifter = Shifter(wav_fs, f0rate=f0rate)
 
+    # check output directory
+    transformed_wavdir = os.path.join(wav_dir + '_' + str(f0rate))
+    if not os.path.exists(transformed_wavdir):
+        os.makedirs(transformed_wavdir)
+
     for f in files:
         # open wave file
         f = f.rstrip()
         wavf = os.path.join(wav_dir, f + '.wav')
-        fs, x = wavfile.read(wavf)
-        x = np.array(x, dtype=np.float)
-        assert fs == wav_fs
 
-        # F0 transform
-        transformed_x = shifter.f0transform(x)
-
-        # save F0 transformed wav file
-        transformed_wavdir = os.path.join(
-            os.path.dirname(wavf) + '_' + str(f0rate))
-        if not os.path.exists(transformed_wavdir):
-            os.makedirs(transformed_wavdir)
+        # output file path
         transformed_wavpath = os.path.join(
             transformed_wavdir, os.path.basename(wavf))
-        wavfile.write(
-            transformed_wavpath, fs, np.array(transformed_x, dtype=np.int16))
-        print('F0 transformed wav file: ' + transformed_wavpath)
+
+        if not os.path.exists(transformed_wavpath):
+            # transform F0 of waveform
+            fs, x = wavfile.read(wavf)
+            x = np.array(x, dtype=np.float)
+            assert fs == wav_fs
+            transformed_x = shifter.f0transform(x)
+
+            wavfile.write(transformed_wavpath, fs,
+                          np.array(transformed_x, dtype=np.int16))
+            print('F0 transformed wav file: ' + transformed_wavpath)
+        else:
+            print('F0 transformed wav file already exists: ' + transformed_wavpath)
+
 
 
 def create_F0_transformed_list_file(speaker, f0rate, list_file):

@@ -8,7 +8,7 @@ readonly FS=$3
 . variable_and_function.sh
 
 echo "##############################################################"
-echo "### 1. check list files                                    ###"
+echo "### 1. create initial list files                           ###"
 echo "##############################################################"
 # check list files for original speaker
 create_list $LIST_DIR/${ORG}_train.list $DATA_DIR/wav/${ORG}
@@ -20,7 +20,7 @@ create_list $LIST_DIR/${TAR}_eval.list $DATA_DIR/wav/${TAR}
 echo "# Please modify train and eval list files, if you want. #"
 
 echo "##############################################################"
-echo "### 2. check configure files                               ###"
+echo "### 2. create configure files                              ###"
 echo "##############################################################"
 # check speaker-dependent configure file
 create_configure $CONF_DIR/speaker/$ORG.yml $CONF_DIR/default/speaker_default_$FS.yml
