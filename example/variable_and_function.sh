@@ -29,7 +29,7 @@ function create_list() {
         local wavfiles=(`ls $_wav_dir | grep -e "wav$"`)
         if [ ${#wavfiles[@]} == 0 ] ; then
             echo "wav files do not exist in $_wav_dir"
-            exit 1
+            return 1
         fi
         for _wav_file in ${wavfiles[@]} ;
         do
@@ -43,7 +43,7 @@ function isexist_file() {
     local _target_file=$1
     if [ ! -e $_target_file ] ; then
         echo "ERROR: $_target_file does not exist."
-        exit 1
+        return 1
     else
         return 0
     fi
@@ -58,7 +58,7 @@ function check_list_length() {
     if [ ! ${_org_len} == ${_tar_len} ] ; then
         echo "ERROR: lengths of following list files are different."
         echo "$_org_list, $_tar_list"
-        exit 1
+        return 1
     fi
     return 0
 }
