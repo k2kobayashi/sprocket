@@ -82,11 +82,10 @@ def transform_f0_from_list(f0rate, wav_fs, list_file, wav_dir):
             transformed_x = shifter.f0transform(x)
 
             wavfile.write(transformed_wavpath, fs,
-                          np.array(transformed_x, dtype=np.int16))
+                          transformed_x.astype(np.int16))
             print('F0 transformed wav file: ' + transformed_wavpath)
         else:
             print('F0 transformed wav file already exists: ' + transformed_wavpath)
-
 
 
 def create_F0_transformed_list_file(speaker, f0rate, list_file):
@@ -143,7 +142,7 @@ def main():
 
     # calculate F0 transformation ratio between original and target speakers
     f0rate = np.round(np.exp(tar_f0stats[0] - org_f0stats[0]), decimals=2)
-    print ('F0 transformation ratio: ' + str(f0rate))
+    print('F0 transformation ratio: ' + str(f0rate))
 
     # F0 transformation of original waveform in both train and eval list files
     transform_f0_from_list(
