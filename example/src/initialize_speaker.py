@@ -11,7 +11,7 @@
 #
 
 """
-Generate F0 histgram
+Generate F0 histgram for defining F0 range of the speaker
 
 """
 
@@ -50,8 +50,8 @@ def main():
                         help='List file of the input speaker')
     parser.add_argument('wav_dir', type=str,
                         help='Directory of wav file')
-    parser.add_argument('pair_dir', type=str,
-                        help='Directory of speaker pair')
+    parser.add_argument('figure_dir', type=str,
+                        help='Directory for figure output')
     args = parser.parse_args()
 
     # open list file
@@ -75,9 +75,8 @@ def main():
         f0s.append(feat.f0())
 
     # create a figure to visualize F0 range of the speaker
-    figure_dir = os.path.join(args.pair_dir, 'figure')
     f0histogrampath = os.path.join(
-        figure_dir, args.speaker + '_f0histogram.png')
+        args.figure_dir, args.speaker + '_f0histogram.png')
     create_f0_histogram(np.hstack(f0s).flatten(), f0histogrampath)
 
 
