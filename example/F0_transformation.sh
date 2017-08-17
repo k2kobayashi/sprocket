@@ -10,12 +10,12 @@ readonly TAR=$2
 readonly STEP1=1 # F0 transformation of original waveform
 
 # check list file
-check_list_length $LIST_DIR/${ORG}_train.list $LIST_DIR/${TAR}_train.list
-check_list_length $LIST_DIR/${ORG}_eval.list $LIST_DIR/${TAR}_eval.list
+check_list_length $LIST_DIR/${ORG}_train.list $LIST_DIR/${TAR}_train.list || exit $?
+check_list_length $LIST_DIR/${ORG}_eval.list $LIST_DIR/${TAR}_eval.list || exit $?
 
 # check YAML file
-isexist_file $CONF_DIR/speaker/${ORG}.yml
-isexist_file $CONF_DIR/speaker/${TAR}.yml
+isexist_file $CONF_DIR/speaker/${ORG}.yml || exit $?
+isexist_file $CONF_DIR/speaker/${TAR}.yml || exit $?
 
 if [ $STEP1 -eq 1 ] ; then
     echo "##############################################################"

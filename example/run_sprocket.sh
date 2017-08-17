@@ -14,16 +14,16 @@ readonly STEP4=1 # train GMM
 readonly STEP5=1 # convert based on the trained GMM
 
 # check list file
-isexist_file $LIST_DIR/${ORG}_train.list
-isexist_file $LIST_DIR/${ORG}_eval.list
-isexist_file $LIST_DIR/${TAR}_train.list
-isexist_file $LIST_DIR/${TAR}_eval.list
-check_list_length $LIST_DIR/${ORG}_train.list $LIST_DIR/${TAR}_train.list
-check_list_length $LIST_DIR/${ORG}_eval.list $LIST_DIR/${TAR}_eval.list
+isexist_file $LIST_DIR/${ORG}_train.list || exit $?
+isexist_file $LIST_DIR/${ORG}_eval.list || exit $?
+isexist_file $LIST_DIR/${TAR}_train.list || exit $?
+isexist_file $LIST_DIR/${TAR}_eval.list || exit $?
+check_list_length $LIST_DIR/${ORG}_train.list $LIST_DIR/${TAR}_train.list || exit $?
+check_list_length $LIST_DIR/${ORG}_eval.list $LIST_DIR/${TAR}_eval.list || exit $?
 
 # check YAML file
-isexist_file $CONF_DIR/speaker/${ORG}.yml
-isexist_file $CONF_DIR/speaker/${TAR}.yml
+isexist_file $CONF_DIR/speaker/${ORG}.yml || exit $?
+isexist_file $CONF_DIR/speaker/${TAR}.yml || exit $?
 
 mkdir -p $PAIR_DIR
 if [ $STEP1 -eq 1 ] ; then
