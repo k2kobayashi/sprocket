@@ -6,17 +6,19 @@ Estimate acoustic feature statistics
 
 """
 
-from __future__ import division, print_function, absolute_import
+from __future__ import absolute_import, division, print_function
 
-import os
 import argparse
+import os
+import sys
 
-from sprocket.util.hdf5 import read_feats
-from sprocket.stats.gv import GV
 from sprocket.stats.f0statistics import F0statistics
+from sprocket.stats.gv import GV
+from sprocket.util.hdf5 import HDF5files, read_feats
 
 
-def main():
+def main(*argv):
+    argv = argv if argv else sys.argv[1:]
     # Options for python
     description = 'estimate joint feature of source and target speakers'
     parser = argparse.ArgumentParser(description=description)

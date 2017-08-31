@@ -6,26 +6,28 @@ Conversion
 
 """
 
-from __future__ import division, print_function, absolute_import
+from __future__ import absolute_import, division, print_function
 
-import os
 import argparse
+import os
+import sys
+
 import numpy as np
-from scipy.io import wavfile
+
 import pysptk
 from pysptk.synthesis import MLSADF
-
-from sprocket.util.hdf5 import HDF5
-from sprocket.model.GMM import GMMConvertor
-from sprocket.stats.gv import GV
-from sprocket.stats.f0statistics import F0statistics
+from scipy.io import wavfile
 from sprocket.feature.synthesizer import Synthesizer
+from sprocket.model.GMM import GMMConvertor
+from sprocket.stats.f0statistics import F0statistics
+from sprocket.stats.gv import GV
 from sprocket.util.delta import delta
+from sprocket.util.hdf5 import HDF5, HDF5files
+from yml import PairYML, SpeakerYML
 
-from yml import SpeakerYML, PairYML
 
-
-def main():
+def main(*argv):
+    argv = argv if argv else sys.argv[1:]
     # Options for python
     description = 'estimate joint feature of source and target speakers'
     parser = argparse.ArgumentParser(description=description)
@@ -45,7 +47,7 @@ def main():
                         help='Directory path of source spekaer')
     parser.add_argument('pair_dir', type=str,
                         help='Directory path of pair directory')
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     # read parameters from speaker yml
     sconf = SpeakerYML(args.org_yml)
