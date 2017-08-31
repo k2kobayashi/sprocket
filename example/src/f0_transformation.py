@@ -15,15 +15,16 @@ Transform F0 of original waveform
 
 """
 
-import os
 import argparse
+import os
+import sys
+
 import numpy as np
 from scipy.io import wavfile
 
 from sprocket.feature import FeatureExtractor
 from sprocket.stats.f0statistics import F0statistics
 from sprocket.util.shifter import Shifter
-
 from yml import SpeakerYML
 
 
@@ -105,7 +106,8 @@ def create_F0_transformed_list_file(speaker, f0rate, list_file):
         fp.writelines(transformed_list)
 
 
-def main():
+def main(*argv):
+    argv = argv if argv else sys.argv[1:]
     # Options for python
     dcp = 'Extract aoucstic features for the speaker'
     parser = argparse.ArgumentParser(description=dcp)

@@ -6,18 +6,20 @@ Extract acoustic features for the speaker
 
 """
 
-import os
 import argparse
+import os
+import sys
+
 import numpy as np
 from scipy.io import wavfile
 
 from sprocket.feature import FeatureExtractor
 from sprocket.util.hdf5 import HDF5
-
 from yml import SpeakerYML
 
 
-def main():
+def main(*argv):
+    argv = argv if argv else sys.argv
     # Options for python
     dcp = 'Extract aoucstic features for the speaker'
     parser = argparse.ArgumentParser(description=dcp)
@@ -33,7 +35,7 @@ def main():
                         help='Wav file directory of the speaker')
     parser.add_argument('pair_dir', type=str,
                         help='Directory of the speaker pair')
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     # read parameters from speaker yml
     sconf = SpeakerYML(args.ymlf)
@@ -81,6 +83,7 @@ def main():
                 h5.close()
             else:
                 print("Acoustic features already exist: " + h5f)
+
 
 
 if __name__ == '__main__':

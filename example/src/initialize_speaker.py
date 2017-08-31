@@ -15,16 +15,22 @@ Generate F0 histgram for defining F0 range of the speaker
 
 """
 
-from __future__ import division, print_function, absolute_import
+from __future__ import absolute_import, division, print_function
 
-import os
 import argparse
+import os
+import sys
+
+import matplotlib
 import numpy as np
 from scipy.io import wavfile
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
+
 from sprocket.feature import FeatureExtractor
+
+matplotlib.use('Agg') #noqa #isort:skip
+import matplotlib.pyplot as plt #isort:skip
+
+
 
 
 def create_f0_histogram(f0s, f0histogrampath):
@@ -41,7 +47,8 @@ def create_f0_histogram(f0s, f0histogrampath):
     plt.savefig(f0histogrampath)
 
 
-def main():
+def main(*argv):
+    argv = argv if argv else sys.argv[1:]
     dcp = 'create speaker-dependent configure file (speaker.yml)'
     parser = argparse.ArgumentParser(description=dcp)
     parser.add_argument('speaker', type=str,
