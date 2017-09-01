@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""An example script to run sprocket.
+"""An example script to initialize audio lists and speaker configurations.
 
 Usage: initialize.py SOURCE TARGET SAMPLING_RATE
 
