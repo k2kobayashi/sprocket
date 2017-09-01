@@ -1,13 +1,10 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# convert.py
-#   First ver.: 2017-06-17
-#
-#   Copyright 2017
-#       Kazuhiro KOBAYASHI <kobayashi.kazuhiro@g.sp.m.is.nagoya-u.ac.jp> #
-#   Distributed under terms of the MIT license.
-#
+
+"""
+Conversion
+
+"""
 
 from __future__ import division, print_function, absolute_import
 
@@ -18,7 +15,7 @@ from scipy.io import wavfile
 import pysptk
 from pysptk.synthesis import MLSADF
 
-from sprocket.util.hdf5 import HDF5files
+from sprocket.util.hdf5 import HDF5
 from sprocket.model.GMM import GMMConvertor
 from sprocket.stats.gv import GV
 from sprocket.stats.f0statistics import F0statistics
@@ -53,10 +50,7 @@ def main():
     # read parameters from speaker yml
     sconf = SpeakerYML(args.org_yml)
     pconf = PairYML(args.pair_yml)
-
-    # open evaluation files from list
     h5_dir = os.path.join(args.pair_dir, 'h5')
-    eval_h5s = HDF5files(args.eval_list_file, h5_dir)
 
     # read F0 statistics file
     orgf0statspath = os.path.join(
@@ -91,18 +85,23 @@ def main():
         os.makedirs(testdir)
 
     # conversion in each evaluation file
-    for h5 in eval_h5s.h5list:
+    with open(args.eval_list_file, 'r') as fp:
+        files = fp.readlines()
+
+    for f in files:
+        f = f.rstrip()
+        h5f = os.path.join(h5_dir + '/' + f + '.h5')
+        h5 = HDF5(h5f, mode='r')
+        print (h5f)
+        f0 = h5.read('f0')
+        mcep = h5.read('mcep')
+        mcep_0th = mcep[:, 0]
+        apperiodicity = h5.read('ap')
         wavpath = os.path.join(args.wav_dir, args.org,
                                "{}.wav".format(h5.flbl))
         assert os.path.exists(wavpath)
         fs, x = wavfile.read(wavpath)
         print('convert ' + h5.flbl)
-
-        # get F0 feature
-        f0 = h5.read('f0')
-        mcep = h5.read('mcep')
-        mcep_0th = mcep[:, 0]
-        apperiodicity = h5.read('ap')
 
         # convert F0
         cvf0 = f0stats.convert(f0)
@@ -136,8 +135,7 @@ def main():
         wavfile.write(
             wavpath, fs, np.array(wav, dtype=np.int16))
 
-    # close h5 files
-    eval_h5s.close()
+        h5.close()
 
 
 if __name__ == '__main__':
