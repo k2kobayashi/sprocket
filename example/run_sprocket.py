@@ -24,17 +24,14 @@ import os
 import shutil
 import sys
 
-import docopt
 import six
+
+import docopt
 import yaml
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "src"))
-try:
-    from src import (convert, estimate_feature_statistics, estimate_twf_and_jnt,
-                     extract_features, train_GMM)
-except:
-    raise
-
+sys.path.append(os.path.join(os.path.dirname(__file__), "src")) # isort:skip
+from src import (convert, estimate_feature_statistics, estimate_twf_and_jnt, # isort:skip # pylint: disable=C0413
+                 extract_features, train_GMM)
 
 if six.PY2:
     # pylint: disable=unused-import, redefined-builtin, import-error, line-too-long
