@@ -28,7 +28,7 @@ def create_configure(dest, base, exist_ok=False):
     """Creates a configuration file based on a template file.
 
     Parameters
-    ---------
+    ----------
     dest : str or path-like
         The path of the configuration file you are creating.
     base : str or path-like
@@ -46,8 +46,8 @@ def create_configure(dest, base, exist_ok=False):
 def create_list(dest, wav_dir, exist_ok=False):
     """Create an audio list file based on a template.
 
-    Arguments
-    ---------
+    Parameters
+    ----------
     dest : str or path-like
         The path of the list file you are creating.
     wav_dir : str or path-like

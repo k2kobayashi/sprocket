@@ -50,7 +50,7 @@ def list_lengths_are_all_same(first_path, *remain_paths):
     """Check whether the lengths of list files are all same.
 
     Parameters
-    ---------
+    ----------
     first_path : str or path-like object
     remain_paths : list of str or path-like object
 
@@ -68,7 +68,7 @@ def list_lengths_are_all_same(first_path, *remain_paths):
         """Counts the number of words in a file.
 
         Parameters
-        ---------
+        ----------
         path : str or path-like object
             The path of the file the number of words of which you want to know.
 
