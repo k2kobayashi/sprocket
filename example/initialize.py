@@ -12,16 +12,13 @@ from __future__ import division  # , unicode_literals
 from __future__ import absolute_import, print_function
 
 import os
-import sys
 import shutil
+import sys
 
 from docopt import docopt
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "src"))
-try:
-    from src import initialize_speaker
-except:
-    raise
+sys.path.append(os.path.join(os.path.dirname(__file__), "src")) # isort:skip
+from src import initialize_speaker  # isort:skip # pylint: disable=C0413
 
 
 def create_configure(dest, base, exist_ok=False):
@@ -80,7 +77,7 @@ LIST_DIR = os.path.join(EXAMPLE_ROOT_DIR, "list")
 WAV_DIR = os.path.join(DATA_DIR, "wav")
 
 if __name__ == "__main__":
-    args = docopt(__doc__) #pylint: disable=invalid-name
+    args = docopt(__doc__)  # pylint: disable=invalid-name
     LABELS = {label: args[label.upper()] for label in ("source", "target")}
     SOURCE_TARGET_PAIR = LABELS["source"] + "-" + LABELS["target"]
     PAIR_DIR = os.path.join(DATA_DIR, "pair",
