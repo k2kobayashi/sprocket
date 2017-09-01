@@ -15,6 +15,7 @@ import os
 import shutil
 import sys
 
+import six
 from docopt import docopt
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "src")) # isort:skip
@@ -31,10 +32,17 @@ def create_configure(dest, base, exist_ok=False):
     base : str or path-like
         The path of the template configure file.
     exist_ok : bool
-        If `False`, this function throws `FileExistsError` when `dest` is already created.
+        If `False`, this function throws `IOError` (Python 2.7) or `FileExistsError` (Python 3 or later) when `dest` is already created.
+
+    Raises
+    ------
+    IOError (Python 2.7) or FileExistsError (Python 3 or later)
+        If `exist_ok` is `False` and `dest` is already exists.
+        You can catch both of them by:
+        >>> except IOError:
     """
     if not exist_ok and os.path.exists(dest):
-        raise FileExistsError(
+        raise (IOError if six.PY2 else FileExistsError)(
             "The configuration file {} already exists.".format(dest))
     print("Generate {}".format(dest), file=sys.stderr)
     shutil.copy(base, dest)
@@ -50,10 +58,17 @@ def create_list(dest, wav_dir, exist_ok=False):
     wav_dir : str or path-like
         The path of the directory of audio files.abs
     exist_ok : bool
-        If `False`, this function throws `FileExistsError` when `dest` is already created.
+        If `False`, this function throws `IOError` (Python 2.7) or `FileExistsError` (Python 3 or later) when `dest` is already created.
+
+    Raises
+    ------
+    IOError (Python 2.7) or FileExistsError (Python 3 or later)
+        If `exist_ok` is `False` and `dest` is already exists.
+        You can catch both of them by:
+        >>> except IOError:
     """
     if not exist_ok and os.path.exists(dest):
-        raise FileExistsError(
+        raise (IOError if six.PY2 else FileExistsError)(
             "The list file {} already exists.".format(dest))
     print("Generate {}".format(dest))
     speaker_label = os.path.basename(dest)
