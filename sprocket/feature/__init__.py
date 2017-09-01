@@ -93,7 +93,7 @@ class FeatureExtractor(object):
         self._f0, self._spc, self._ap = self.analyzer.analyze(self.x)
 
         # check non-negative for F0
-        self._f0[0 < self._f0] = 0
+        self._f0[self._f0 < 0] = 0
 
         return
 
