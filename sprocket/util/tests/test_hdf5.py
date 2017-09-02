@@ -9,6 +9,7 @@ from sprocket.util.hdf5 import HDF5, read_feats
 dirpath = os.path.dirname(os.path.realpath(__file__))
 listf = os.path.join(dirpath, '/data/test.h5')
 
+
 class hdf5FunctionsTest(unittest.TestCase):
 
     def test_HDF5(self):
