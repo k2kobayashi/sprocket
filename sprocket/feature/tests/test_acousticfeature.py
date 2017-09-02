@@ -25,6 +25,8 @@ class AnalysisSynthesisTest(unittest.TestCase):
         ap = af.ap()
         synth = Synthesizer()
 
+        assert len(np.nonzero(f0)[0]) > 0
+
         # mcep synthesis
         wav = synth.synthesis(
             f0, mcep, ap, alpha=0.42, fftl=1024, fs=fs, shiftms=5)
@@ -39,6 +41,8 @@ class AnalysisSynthesisTest(unittest.TestCase):
         mcep = af.mcep(dim=40, alpha=0.50)
         ap = af.ap()
         synth = Synthesizer()
+
+        assert len(np.nonzero(f0)[0]) > 0
 
         # mcep synthesis
         wav = synth.synthesis(
