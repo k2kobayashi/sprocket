@@ -95,6 +95,9 @@ class FeatureExtractor(object):
         # check non-negative for F0
         self._f0[self._f0 < 0] = 0
 
+        if np.sum(self._f0) == 0.0:
+            print("WARNING: F0 values are all zero.")
+
         return
 
     def f0(self):
