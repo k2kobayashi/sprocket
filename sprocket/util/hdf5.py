@@ -122,13 +122,11 @@ def read_feats(listf, h5dir, ext='mcep'):
 
     datalist = []
     with open(listf, 'r') as fp:
-        files = fp.readlines()
-
-    for f in files:
-        f = f.rstrip()
-        h5f = h5dir + '/' + f + '.h5'
-        h5 = HDF5(h5f, mode='r')
-        datalist.append(h5.read(ext))
-        h5.close()
+        for line in fp:
+            f = line.rstrip()
+            h5f = os.path.join(h5dir, f + '.h5')
+            h5 = HDF5(h5f, mode='r')
+            datalist.append(h5.read(ext))
+            h5.close()
 
     return datalist

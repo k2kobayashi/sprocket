@@ -62,8 +62,10 @@ def main():
 
     # read GMM for mcep
     mcepgmmpath = os.path.join(args.pair_dir, 'model/GMM.pkl')
-    mcepgmm = GMMConvertor(n_mix=pconf.GMM_mcep_n_mix, covtype=pconf.GMM_mcep_covtype,
-                           gmmmode=args.gmmmode, cvtype=pconf.GMM_mcep_cvtype)
+    mcepgmm = GMMConvertor(n_mix=pconf.GMM_mcep_n_mix,
+                           covtype=pconf.GMM_mcep_covtype,
+                           gmmmode=args.gmmmode,
+                           cvtype=pconf.GMM_mcep_cvtype)
     mcepgmm.open(mcepgmmpath)
     print("conversion mode: {}".format(args.gmmmode))
 
@@ -86,56 +88,58 @@ def main():
 
     # conversion in each evaluation file
     with open(args.eval_list_file, 'r') as fp:
-        files = fp.readlines()
+        for line in fp:
+            f = line.rstrip()
+            h5f = os.path.join(h5_dir, f + '.h5')
+            h5 = HDF5(h5f, mode='r')
+            f0 = h5.read('f0')
+            mcep = h5.read('mcep')
+            mcep_0th = mcep[:, 0]
+            apperiodicity = h5.read('ap')
+            wavpath = os.path.join(args.wav_dir, args.org,
+                                   "{}.wav".format(h5.flbl))
+            assert os.path.exists(wavpath)
+            fs, x = wavfile.read(wavpath)
+            print('convert ' + h5.flbl)
 
-    for f in files:
-        f = f.rstrip()
-        h5f = os.path.join(h5_dir + '/' + f + '.h5')
-        h5 = HDF5(h5f, mode='r')
-        print (h5f)
-        f0 = h5.read('f0')
-        mcep = h5.read('mcep')
-        mcep_0th = mcep[:, 0]
-        apperiodicity = h5.read('ap')
-        wavpath = os.path.join(args.wav_dir, args.org,
-                               "{}.wav".format(h5.flbl))
-        assert os.path.exists(wavpath)
-        fs, x = wavfile.read(wavpath)
-        print('convert ' + h5.flbl)
+            # convert F0
+            cvf0 = f0stats.convert(f0)
 
-        # convert F0
-        cvf0 = f0stats.convert(f0)
+            # convert mel-cepstrum
+            cvmcep_wopow = mcepgmm.convert(
+                np.c_[mcep[:, 1:], delta(mcep[:, 1:])])
+            cvmcep = np.c_[mcep_0th, cvmcep_wopow]
 
-        # convert mel-cepstrum
-        cvmcep_wopow = mcepgmm.convert(np.c_[mcep[:, 1:], delta(mcep[:, 1:])])
-        cvmcep = np.c_[mcep_0th, cvmcep_wopow]
+            # synthesis VC w/ GV
+            if args.gmmmode == None:
+                cvmcep_wGV = mcepgv.postfilter(cvmcep, startdim=1)
+                wav = synthesizer.synthesis(cvf0,
+                                            cvmcep_wGV,
+                                            apperiodicity,
+                                            alpha=sconf.mcep_alpha,
+                                            fftl=sconf.wav_fftl,
+                                            fs=sconf.wav_fs)
 
-        # synthesis VC w/ GV
-        if args.gmmmode == None:
-            cvmcep_wGV = mcepgv.postfilter(cvmcep, startdim=1)
-            wav = synthesizer.synthesis(cvf0, cvmcep_wGV, apperiodicity,
-                                        alpha=sconf.mcep_alpha, fftl=sconf.wav_fftl,
-                                        fs=sconf.wav_fs)
+                wav = np.clip(wav, -32768, 32767)
+                wavpath = os.path.join(testdir, h5.flbl + '_VC.wav')
 
-            wav = np.clip(wav, -32768, 32767)
-            wavpath = os.path.join(testdir, h5.flbl + '_VC.wav')
+            # synthesis DIFFVC w/ GV
+            if args.gmmmode == 'diff':
+                cvmcep[:, 0] = 0.0
+                cvmcep_wGV = mcepgv.postfilter(
+                    mcep + cvmcep, startdim=1) - mcep
+                b = np.apply_along_axis(pysptk.mc2b, 1, cvmcep_wGV, alpha)
+                assert np.isfinite(b).all()
+                x = x.astype(np.float64)
+                wav = mlsa_fil.synthesis(x, b)
+                wav = np.clip(wav, -32768, 32767)
+                wavpath = os.path.join(testdir, h5.flbl + '_DIFFVC.wav')
 
-        # synthesis DIFFVC w/ GV
-        if args.gmmmode == 'diff':
-            cvmcep[:, 0] = 0.0
-            cvmcep_wGV = mcepgv.postfilter(mcep + cvmcep, startdim=1) - mcep
-            b = np.apply_along_axis(pysptk.mc2b, 1, cvmcep_wGV, alpha)
-            assert np.isfinite(b).all()
-            x = x.astype(np.float64)
-            wav = mlsa_fil.synthesis(x, b)
-            wav = np.clip(wav, -32768, 32767)
-            wavpath = os.path.join(testdir, h5.flbl + '_DIFFVC.wav')
+            # write waveform
+            wavfile.write(
+                wavpath, fs, np.array(wav, dtype=np.int16))
 
-        # write waveform
-        wavfile.write(
-            wavpath, fs, np.array(wav, dtype=np.int16))
-
-        h5.close()
+            h5.close()
 
 
 if __name__ == '__main__':

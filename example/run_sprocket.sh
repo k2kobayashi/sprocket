@@ -36,6 +36,7 @@ if [ $STEP1 -eq 1 ] ; then
             ymlf=$CONF_DIR/speaker/${_speaker}.yml
             listf=$LIST_DIR/${_speaker}_${_flag}.list
             python $SRC_DIR/extract_features.py \
+                # --overwrite \
                 $_speaker \
                 $ymlf \
                 $listf \
