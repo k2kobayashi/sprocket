@@ -13,7 +13,7 @@ Options:
     -5, --step5  Execute step5 (Conversion based on the trained models)
 
 Note:
-    Except for step1 are executed if no options about executing steps are not given.
+    At least one of the options that designates steps that are to be executed is required.
 """
 
 from __future__ import division  # , unicode_literals
@@ -98,6 +98,7 @@ WAV_DIR = os.path.join(DATA_DIR, "wav")
 
 if __name__ == "__main__":
     args = docopt.docopt(__doc__)
+
     LABELS = {label: args[label.upper()] for label in ("source", "target")}
     SOURCE_TARGET_PAIR = LABELS["source"] + "-" + LABELS["target"]
     PAIR_DIR = os.path.join(DATA_DIR, "pair",
@@ -116,12 +117,13 @@ if __name__ == "__main__":
 
     # The first False is dummy for alignment
     #   between indexes of `args_execute_steps` and arguments
-    args_execute_steps = [False] \
+    execute_steps = [False] \
         + [args["--step{}".format(step_index)] for step_index in range(1, 6)]
-    # The first False is also dummy because of the similar reason
-    # Except for Step 1 are executed by default
-    execute_steps = args_execute_steps if any(args_execute_steps[1:]) \
-        else [False] * 2 + [True] * 4
+
+    # At least one of the ptions --stepN required
+    if not any(execute_steps[1:]):
+       print("Error: At least one of the options that designates steps that are to be executed is required.", file=sys.stderr) 
+       exit(1)
 
     # Check the lengchs of list files for each use (training / evaluation)
     for use in USES:
