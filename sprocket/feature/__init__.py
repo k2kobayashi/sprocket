@@ -92,6 +92,12 @@ class FeatureExtractor(object):
         """
         self._f0, self._spc, self._ap = self.analyzer.analyze(self.x)
 
+        # check non-negative for F0
+        self._f0[self._f0 < 0] = 0
+
+        if np.sum(self._f0) == 0.0:
+            print("WARNING: F0 values are all zero.")
+
         return
 
     def f0(self):
