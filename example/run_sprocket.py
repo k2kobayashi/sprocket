@@ -29,8 +29,8 @@ import six
 import docopt
 import yaml
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "src")) # isort:skip
-from src import (convert, estimate_feature_statistics, estimate_twf_and_jnt, # isort:skip # pylint: disable=C0413
+sys.path.append(os.path.join(os.path.dirname(__file__), "src"))  # isort:skip
+from src import (convert, estimate_feature_statistics, estimate_twf_and_jnt,  # isort:skip # pylint: disable=C0413
                  extract_features, train_GMM)
 
 if six.PY2:
@@ -122,8 +122,10 @@ if __name__ == "__main__":
 
     # At least one of the ptions --stepN required
     if not any(execute_steps[1:]):
-       print("Error: At least one of the options that designates steps that are to be executed is required.", file=sys.stderr) 
-       exit(1)
+        print("Error: At least one of the options "
+              "that designates steps that are to be executed is required.  "
+              "Show the help by the option --help.", file=sys.stderr)
+        exit(1)
 
     # Check the lengchs of list files for each use (training / evaluation)
     for use in USES:
