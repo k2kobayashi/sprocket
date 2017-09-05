@@ -71,8 +71,8 @@ def create_list(dest, wav_dir, exist_ok=False):
         raise (IOError if six.PY2 else FileExistsError)(
             "The list file {} already exists.".format(dest))
     print("Generate {}".format(dest))
-    speaker_label = os.path.basename(dest)
-    lines = (os.path.join(speaker_label, wav_file_name) for wav_file_name in os.listdir(
+    speaker_label = os.path.basename(wav_dir)
+    lines = (os.path.join(speaker_label, os.path.splitext(wav_file_name)[0]) for wav_file_name in os.listdir(
         wav_dir) if os.path.splitext(wav_file_name)[1] == ".wav")
     with open(dest, "w") as file_handler:
         for line in lines:
