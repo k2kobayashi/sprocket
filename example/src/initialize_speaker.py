@@ -59,7 +59,7 @@ def main(*argv):
                         help='Directory of wav file')
     parser.add_argument('figure_dir', type=str,
                         help='Directory for figure output')
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     # open list file
     with open(args.list_file, 'r') as fp:
