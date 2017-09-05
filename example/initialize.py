@@ -59,7 +59,7 @@ def create_list(dest, wav_dir, exist_ok=True):
     dest : str or path-like
         The path of the list file you are creating.
     wav_dir : str or path-like
-        The path of the directory of audio files.abs
+        The path of the directory of audio files.  The name of directory must be that of speaker.
     exist_ok : bool
         If `False`, this function throws `IOError` (Python 2.7) or `FileExistsError` (Python 3 or later) when `dest` is already created.
 
@@ -69,6 +69,21 @@ def create_list(dest, wav_dir, exist_ok=True):
         If `exist_ok` is `False` and `dest` is already exists.
         You can catch both of them by:
         >>> except IOError:
+
+    Notes
+    -----
+    List example of the speaker `SPEAKER`::
+
+        SPEAKER/001
+        SPEAKER/002
+        SPEAKER/003
+
+    when there is a audio directory of him/her named `SPEAKER` that contains:
+        * 001.wav
+        * 002.wav
+        * 003.wav
+        * other_file.txt (ignored)
+    Note that the delimiter `/` turns to `\\` in Windows.
     """
     if os.path.exists(dest):
         message = "The list file {} already exists.".format(dest)
