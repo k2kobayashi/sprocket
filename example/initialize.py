@@ -5,7 +5,10 @@
 Usage: initialize.py SOURCE TARGET SAMPLING_RATE
 
 Options:
-    -h, --help   Show the help
+    -h, --help     Show the help
+    SOURCE         The name of speaker whose voice you would like to convert from
+    TARGET         The name of speaker whose voice you would like to convert to
+    SAMPLING_RATE  The sampling rate of WAV files of voices
 """
 
 from __future__ import division  # , unicode_literals
