@@ -1,44 +1,48 @@
-sprocket (vctk)
-======
-
-Voice conversion toolkit - Voice conversion (VC) is a technique to convert a speaker identity of a source speaker into that of a target speaker. In this framework, it enables us to develop a joint feature vector between source and target speech samples aligned using dynamic time warping (DTW) and model it based on statistical conversion models such as Gaussian mixture model (GMM), differential GMM (DIFFGMM), and deep neural networks (DNN).
-
-[![Build Status](http://img.shields.io/travis/{{cookiecutter.github_username}}/{{cookiecutter.github_repo}}/master.svg)](https://travis-ci.org/{{cookiecutter.github_username}}/{{cookiecutter.github_repo}})
-[![Coverage Status](http://img.shields.io/coveralls/{{cookiecutter.github_username}}/{{cookiecutter.github_repo}}/master.svg)](https://coveralls.io/r/{{cookiecutter.github_username}}/{{cookiecutter.github_repo}})
-[![Scrutinizer Code Quality](http://img.shields.io/scrutinizer/g/{{cookiecutter.github_username}}/{{cookiecutter.github_repo}}.svg)](https://scrutinizer-ci.com/g/{{cookiecutter.github_username}}/{{cookiecutter.github_repo}}/?branch=master)
+[![Wercker](https://img.shields.io/wercker/ci/wercker/docs.svg)](https://app.wercker.com/k2kobayashi/sprocket)
 [![PyPI Version](http://img.shields.io/pypi/v/{{sprocket}}.svg)](https://pypi.python.org/pypi/{{sprocket}})
 [![PyPI Downloads](http://img.shields.io/pypi/dm/{{sproket}}.svg)](https://pypi.python.org/pypi/{{sprocket}})
+[![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
 
-## Requirements
+sprocket
+======
 
-- world
-- numpy
-- scipy
-- pysptk
-- h5py
+Voice conversion toolkit - Voice conversion (VC) is a technique to convert a speaker identity of a source speaker into that of a target speaker. In this framework, it enables for the users to develop a joint feature vector using parallel dataset between source and target speech samples and model it based on a Gaussian mixture model (GMM) and differential GMM (DIFFGMM).
 
-## Installation
 
-```bash
+## Purpose
+1. Reproduce VC based on the GMM and DIFFVC based on the DIFFGMM
+
+In the major purpose of this framework, it enables for the users to implement voice conversion only preparing parallel dataset and excusing example scripts.
+As the details of conversion method, please see the following papers.
+	- Toda et al., "Voice Conversion Based on Maximum-Likelihood Estimation of Spectral Parameter Trajectory," IEEE Trans. on ASLP, Vol. 15, No. 8, pp. 2222-2235, Nov. 2007
+	- Kobayashi et al., "F0 TRANSFORMATION TECHNIQUES FOR STATISTICAL VOICE CONVERSION WITH DIRECT WAVEFORM MODIFICATION WITH SPECTRAL DIFFERENTIAL," Proc. IEEE SLT, pp. 693-700, Dec 2016.
+
+2. Supply Python2/3 library related to VC
+
+To easily develop VC and speech-based application using Python, the library of sprocket supplies several interfaces such ash acoustic feature analysis/synthesis, acoustic feature modeling and acoustic feature modifications.
+For the details of the library, please see sprocket documents in https://hogehoge.hoge
+
+## Installation & Run
+
+### Current stable version
+
+Ver. 0.00
+
+### Install requirements
+
+```
+pip install -r requirements.txt
+```
+
+### Install sprocket
+
+```
 python setup.py develop
 ```
 
-## Run demonstration script
+### Run example
 
-```
-cd scripts
-bash run_sprocket.sh
-```
-
-## Tests
-
-```bash
-nosetests  -s -v
-```
-
-## KNOWN ISSUES
-
-- Not work yet
+See https://sprocket.document/index.html
 
 ## REPORTING BUGS
 
@@ -50,8 +54,12 @@ https://github.com/k2kobayashi/sprocket/issues
 
 ## COPYRIGHT
 
-Copyright  2017
+Copyright (c) 2017 Kazuhiro KOBAYASHI
 
 Released under the MIT license
 
 https://opensource.org/licenses/mit-license.php
+
+## ACKNOWLEDGEMENTS
+Thank you, thank you.
+
