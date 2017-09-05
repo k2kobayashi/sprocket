@@ -22,7 +22,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "src")) # isort:skip
 from src import initialize_speaker  # isort:skip # pylint: disable=C0413
 
 
-def create_configure(dest, base, exist_ok=False):
+def create_configure(dest, base, exist_ok=True):
     """Creates a configuration file based on a template file.
 
     Parameters
@@ -41,14 +41,17 @@ def create_configure(dest, base, exist_ok=False):
         You can catch both of them by:
         >>> except IOError:
     """
-    if not exist_ok and os.path.exists(dest):
-        raise (IOError if six.PY2 else FileExistsError)(
-            "The configuration file {} already exists.".format(dest))
+    if os.path.exists(dest):
+        message = "The configuration file {} already exists.".format(dest)
+        if exist_ok:
+            print(message)
+        else:
+            raise (IOError if six.PY2 else FileExistsError)(message)
     print("Generate {}".format(dest), file=sys.stderr)
     shutil.copy(base, dest)
 
 
-def create_list(dest, wav_dir, exist_ok=False):
+def create_list(dest, wav_dir, exist_ok=True):
     """Create an audio list file based on a template.
 
     Parameters
@@ -67,9 +70,12 @@ def create_list(dest, wav_dir, exist_ok=False):
         You can catch both of them by:
         >>> except IOError:
     """
-    if not exist_ok and os.path.exists(dest):
-        raise (IOError if six.PY2 else FileExistsError)(
-            "The list file {} already exists.".format(dest))
+    if os.path.exists(dest):
+        message = "The list file {} already exists.".format(dest)
+        if exist_ok:
+            print(message)
+        else:
+            raise (IOError if six.PY2 else FileExistsError)(message)
     print("Generate {}".format(dest))
     speaker_label = os.path.basename(wav_dir)
     lines = (os.path.join(speaker_label, os.path.splitext(wav_file_name)[0]) for wav_file_name in os.listdir(
