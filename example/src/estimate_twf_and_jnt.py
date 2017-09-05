@@ -30,7 +30,7 @@ def main(*argv):
                         help='List file of target speaker')
     parser.add_argument('pair_dir', type=str,
                         help='Directory path of h5 files')
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     # read pair-dependent yml file
     pconf = PairYML(args.pair_yml)
