@@ -127,7 +127,7 @@ if __name__ == "__main__":
     # create speaker-dependent configure file
     for part, speaker in LABELS.items():
         create_configure(
-            SPEAKER_CONF_FILES[part][use],
+            SPEAKER_CONF_FILES[part],
             os.path.join(
                 CONF_DIR, "default",
                 "speaker_default_{}{}".format(
