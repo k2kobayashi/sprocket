@@ -156,8 +156,6 @@ if __name__ == "__main__":
 ##############################################################""")
         # Estimate speaker-dependent statistics for F0 and mcep
         for speaker_part, speaker_label in LABELS.items():
-            LIST_FILE = os.path.join(
-                LIST_DIR, "{}_train.list".format(speaker_label))
             estimate_feature_statistics.main(
                 speaker_label, LIST_FILES[speaker_part]["train"],
                 PAIR_DIR)
