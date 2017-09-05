@@ -170,7 +170,8 @@ if __name__ == "__main__":
         estimate_twf_and_jnt.main(
             PAIR_CONF_FILE,
             LIST_FILES["source"]["train"],
-            LIST_FILES["target"]["train"])
+            LIST_FILES["target"]["train"],
+            PAIR_DIR)
 
     if execute_steps[4]:
         print("""\
@@ -193,11 +194,13 @@ if __name__ == "__main__":
             SPEAKER_CONF_FILES["source"],
             PAIR_CONF_FILE,
             EVAL_LIST_FILE,
-            WAV_DIR)
+            WAV_DIR,
+            PAIR_DIR)
         convert.main(
             "-gmmmode", "diff",
             LABELS["source"], LABELS["target"],
             SPEAKER_CONF_FILES["source"],
             PAIR_CONF_FILE,
             EVAL_LIST_FILE,
-            WAV_DIR)
+            WAV_DIR,
+            PAIR_DIR)
