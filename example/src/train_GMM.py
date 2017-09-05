@@ -15,18 +15,19 @@ train GMM based on joint feature vector
 
 """
 
-from __future__ import division, print_function, absolute_import
+from __future__ import absolute_import, division, print_function
 
-import os
 import argparse
+import os
+import sys
 
 from sprocket.model.GMM import GMMTrainer
 from sprocket.util.hdf5 import HDF5
-
 from yml import PairYML
 
 
-def main():
+def main(*argv):
+    argv = argv if argv else sys.argv[1:]
     # Options for python
     description = 'estimate joint feature of source and target speakers'
     parser = argparse.ArgumentParser(description=description)
