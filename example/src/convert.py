@@ -22,7 +22,7 @@ from sprocket.model.GMM import GMMConvertor
 from sprocket.stats.f0statistics import F0statistics
 from sprocket.stats.gv import GV
 from sprocket.util.delta import delta
-from sprocket.util.hdf5 import HDF5, HDF5files
+from sprocket.util.hdf5 import HDF5
 from yml import PairYML, SpeakerYML
 
 
