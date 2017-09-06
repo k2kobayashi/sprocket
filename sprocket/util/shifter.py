@@ -10,8 +10,28 @@ from .wsola import WSOLA
 class Shifter:
 
     """Shifter class
+
     This class offers to transform f0 of input waveform
     based on WSOLA and resampling
+
+    Parameters
+    ----------
+    fs : int
+        Sampling frequency
+
+    speech_rate : float
+        Relative speech rate of duration modification speech to original speech
+
+    frame_ms : int, optional
+        length of frame
+
+    shift_ms : int, optional
+        length of shift
+
+    Attributes
+    ----------
+    win : array
+        Window vector
 
     """
 
