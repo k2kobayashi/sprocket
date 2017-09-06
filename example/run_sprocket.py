@@ -20,15 +20,12 @@ Note:
 from __future__ import division  # , unicode_literals
 from __future__ import absolute_import, print_function
 
-import operator
 import os
-import shutil
 import sys
 
 import six
 
 import docopt
-import yaml
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "src"))  # isort:skip
 from src import (convert, estimate_feature_statistics, estimate_twf_and_jnt,  # isort:skip # pylint: disable=C0413
@@ -37,7 +34,7 @@ from src import (convert, estimate_feature_statistics, estimate_twf_and_jnt,  # 
 if six.PY2:
     # pylint: disable=unused-import, redefined-builtin, import-error, line-too-long
     from future_builtins import ascii, filter, hex, map, oct, zip
-    # pylint: disable=unused-import, redefined-builtin, import-error, line-too-long
+    # pylint: disable=unused-import, redefined-builtin, import-error, line-too-long, ungrouped-imports
     from six.moves import range, input
 if six.PY3:
     # pylint: disable=unused-import, redefined-builtin, import-error, line-too-long
@@ -98,7 +95,7 @@ LIST_DIR = os.path.join(EXAMPLE_ROOT_DIR, "list")
 WAV_DIR = os.path.join(DATA_DIR, "wav")
 
 if __name__ == "__main__":
-    args = docopt.docopt(__doc__)
+    args = docopt.docopt(__doc__)  # pylint: disable=invalid-name
 
     LABELS = {label: args[label.upper()] for label in ("source", "target")}
     SOURCE_TARGET_PAIR = LABELS["source"] + "-" + LABELS["target"]
@@ -118,6 +115,7 @@ if __name__ == "__main__":
 
     # The first False is dummy for alignment
     #   between indexes of `args_execute_steps` and arguments
+    # pylint: disable=invalid-name
     execute_steps = [False] \
         + [args["--step{}".format(step_index)] for step_index in range(1, 6)]
 
@@ -148,7 +146,6 @@ if __name__ == "__main__":
                     speaker_label, SPEAKER_CONF_FILES[speaker_part],
                     LIST_FILES[speaker_part][use],
                     WAV_DIR, PAIR_DIR)
-        exit
 
     if execute_steps[2]:
         print("""\
