@@ -22,7 +22,7 @@ import sys
 import six
 from docopt import docopt
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "src")) # isort:skip
+sys.path.append(os.path.join(os.path.dirname(__file__), "src"))  # isort:skip
 from src import initialize_speaker  # isort:skip # pylint: disable=C0413
 
 
@@ -109,8 +109,8 @@ def create_list(dest, wav_dir, exist_ok=True):
         print("Generate {}".format(dest))
         speaker_label = os.path.basename(wav_dir)
         lines = (os.path.join(speaker_label, os.path.splitext(wav_file_name)[0])
-                for wav_file_name in os.listdir(wav_dir)
-                if os.path.splitext(wav_file_name)[1] == ".wav")
+                 for wav_file_name in os.listdir(wav_dir)
+                 if os.path.splitext(wav_file_name)[1] == ".wav")
         with open(dest, "w") as file_handler:
             for line in lines:
                 print(line, file=file_handler)
