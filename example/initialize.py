@@ -141,20 +141,14 @@ if __name__ == "__main__":
         CONF_DIR, "pair", SOURCE_TARGET_PAIR + YML_EXTENSION)
     SAMPLING_RATE = args["SAMPLING_RATE"]
 
-    print("""\
-##############################################################
-### 1. create initial list files                           ###
-##############################################################""")
+    print("### 1. create initial list files ###")
     # create list files for both the speakers
     for use in USES:
         for part, speaker in LABELS.items():
             create_list(LIST_FILES[part][use], os.path.join(WAV_DIR, speaker))
     print("# Please modify train and eval list files, if you want. #")
 
-    print("""\
-##############################################################
-### 2. create configure files                              ###
-##############################################################""")
+    print("### 2. create configure files ###")
     # create speaker-dependent configure file
     for part, speaker in LABELS.items():
         create_configure(
@@ -167,10 +161,7 @@ if __name__ == "__main__":
     create_configure(PAIR_CONF_FILE, os.path.join(
         CONF_DIR, "default", "pair_default.yml"))
 
-    print("""\
-##############################################################
-### 3. create figures to define F0 range                   ###
-##############################################################""")
+    print("### 3. create figures to define F0 range ###")
     # get F0 range in each speaker
     for part, speaker in LABELS.items():
         initialize_speaker.main(
