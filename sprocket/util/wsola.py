@@ -9,7 +9,27 @@ from skimage.util import view_as_windows
 class WSOLA:
 
     """WSOLA class
-    This class offers to modicy speech duration
+
+    This class offers to modify speech duration
+
+    Parameters
+    ----------
+    fs : int
+        Sampling frequency
+
+    speech_rate : float
+        Relative speech rate of duration modification speech to original speech
+
+    frame_ms : int, optional
+        length of frame
+
+    shift_ms : int, optional
+        length of shift
+
+    Attributes
+    ----------
+    win : array
+        Window vector
 
     """
 
