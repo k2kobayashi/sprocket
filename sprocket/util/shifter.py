@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
-from scipy.signal import resample
+from scipy.signal import resample, firwin, lfilter
 from scipy.interpolate import interp1d
 
 from .wsola import WSOLA
+from ..feature import FeatureExtractor
+from ..feature.synthesizer import Synthesizer
 
 
 class Shifter:
@@ -28,6 +30,12 @@ class Shifter:
     shift_ms : int, optional
         length of shift
 
+    completion : bool, optional
+        Completion of high frequency range of F0 transformed wavform based on
+        unvoiced analysis/synthesis voice of given voice and high-pass filter.
+        This is due to loose the high frequency range caused by resampling
+        when F0ratio setting to smaller than 1.0.
+
     Attributes
     ----------
     win : array
@@ -35,7 +43,8 @@ class Shifter:
 
     """
 
-    def __init__(self, fs, f0rate, frame_ms=20, shift_ms=10):
+    def __init__(self, fs, f0rate, frame_ms=20, shift_ms=10,
+                 completion=False):
         self.fs = fs
         self.f0rate = f0rate
 
@@ -48,6 +57,7 @@ class Shifter:
 
         self.wsola = WSOLA(fs, 1 / f0rate,
                            frame_ms=self.frame_ms, shift_ms=self.shift_ms)
+        self.completion = completion
 
     def f0transform(self, data):
         """Transform F0 of given waveform signals using
@@ -71,6 +81,11 @@ class Shifter:
 
         # resampling
         transformed = resample(wsolaed, self.xlen)
+
+        # Frequency completion when decrease F0 of wavform
+        if self.completion:
+            assert self.f0rate < 1.0, "Do not need completion if f0rate > 1."
+            transformed = self._high_frequency_completion(data, transformed)
 
         return transformed
 
@@ -96,3 +111,20 @@ class Shifter:
         resampled = intpfunc(x_new)
 
         return resampled
+
+    def _high_frequency_completion(self, data, transformed):
+        # construct feature extractor and synthesis
+        feat = FeatureExtractor(data, fs=self.fs)
+        feat.analyze()
+        uf0 = np.zeros(len(feat.f0()))
+
+        # synthesis
+        synth = Synthesizer()
+        unvoice_anasyn = synth.synthesis_spc(uf0, feat.spc(),
+                                             feat.ap(), fs=self.fs)
+
+        # HPF for synthesized speech
+        fil = firwin(255, self.f0rate, pass_zero=False)
+        HPFed_unvoice_anasyn = lfilter(fil, 1, unvoice_anasyn)
+
+        return transformed + HPFed_unvoice_anasyn[:len(transformed)]
