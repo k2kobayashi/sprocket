@@ -29,6 +29,8 @@ from src import initialize_speaker  # isort:skip # pylint: disable=C0413
 def create_configure(dest, base, exist_ok=True):
     """Creates a configuration file based on a template file.
 
+    This does not overwrite the existing one.
+
     Parameters
     ----------
     dest : str or path-like
@@ -53,12 +55,15 @@ def create_configure(dest, base, exist_ok=True):
             print(message)
         else:
             raise (IOError if six.PY2 else FileExistsError)(message)
-    print("Generate {}".format(dest), file=sys.stderr)
-    shutil.copy(base, dest)
+    else:
+        print("Generate {}".format(dest), file=sys.stderr)
+        shutil.copy(base, dest)
 
 
 def create_list(dest, wav_dir, exist_ok=True):
     """Create an audio list file based on a template.
+
+    This does not overwrite the existing one.
 
     Parameters
     ----------
@@ -100,14 +105,15 @@ def create_list(dest, wav_dir, exist_ok=True):
             print(message)
         else:
             raise (IOError if six.PY2 else FileExistsError)(message)
-    print("Generate {}".format(dest))
-    speaker_label = os.path.basename(wav_dir)
-    lines = (os.path.join(speaker_label, os.path.splitext(wav_file_name)[0])
-             for wav_file_name in os.listdir(wav_dir)
-             if os.path.splitext(wav_file_name)[1] == ".wav")
-    with open(dest, "w") as file_handler:
-        for line in lines:
-            print(line, file=file_handler)
+    else:
+        print("Generate {}".format(dest))
+        speaker_label = os.path.basename(wav_dir)
+        lines = (os.path.join(speaker_label, os.path.splitext(wav_file_name)[0])
+                for wav_file_name in os.listdir(wav_dir)
+                if os.path.splitext(wav_file_name)[1] == ".wav")
+        with open(dest, "w") as file_handler:
+            for line in lines:
+                print(line, file=file_handler)
 
 
 LIST_EXTENSION = ".list"
