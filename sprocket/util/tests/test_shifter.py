@@ -1,11 +1,13 @@
 import unittest
 
 import os
+# import numpy as np
 from scipy.io import wavfile
 
 from sprocket.util.shifter import Shifter
 
 dirpath = os.path.dirname(os.path.realpath(__file__))
+
 
 class ShifterTest(unittest.TestCase):
 
@@ -16,3 +18,5 @@ class ShifterTest(unittest.TestCase):
             shifter = Shifter(fs, f0rate=f0rate)
             transformed_x = shifter.f0transform(x)
             assert len(x) == len(transformed_x)
+            # wavfile.write(path + str(f0rate) + '.wav', fs,
+            #               transformed_x.astype(np.int16))
