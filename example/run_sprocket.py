@@ -11,6 +11,9 @@ Options:
     -3, --step3  Execute step3 (Estimation of time warping function and jnt)
     -4, --step4  Execute step4 (Training of GMM)
     -5, --step5  Execute step5 (Conversion based on the trained models)
+    SOURCE         The name of speaker
+                   whose voice you would like to convert from
+    TARGET         The name of speaker whose voice you would like to convert to
 
 Note:
     At least one of the options that designates steps
