@@ -13,7 +13,8 @@ Options:
     -5, --step5  Execute step5 (Conversion based on the trained models)
 
 Note:
-    At least one of the options that designates steps that are to be executed is required.
+    At least one of the options that designates steps
+    that are to be executed is required.
 """
 
 from __future__ import division  # , unicode_literals
