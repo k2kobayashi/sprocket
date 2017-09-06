@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
-import skimage
 import numpy as np
-import scipy.signal
+from scipy.signal import resample
 from scipy.interpolate import interp1d
+
+from .wsola import WSOLA
 
 
 class Shifter:
@@ -25,6 +26,9 @@ class Shifter:
         self.epstep = int(self.sl / self.f0rate)  # step size for WSOLA
         self.win = np.hanning(self.fl)  # window function for a frame
 
+        self.wsola = WSOLA(fs, 1 / f0rate,
+                           frame_ms=self.frame_ms, shift_ms=self.shift_ms)
+
     def f0transform(self, data):
         """Transform F0 of given waveform signals using
 
@@ -43,64 +47,12 @@ class Shifter:
         self.xlen = len(data)
 
         # WSOLA
-        wsolaed = self.duration_modification(data)
+        wsolaed = self.wsola.duration_modification(data)
 
         # resampling
-        transformed = scipy.signal.resample(wsolaed, self.xlen)
+        transformed = resample(wsolaed, self.xlen)
 
         return transformed
-
-    def duration_modification(self, data):
-        """Duration modification based on WSOLA
-
-        Parameters
-        ---------
-        data : array, shape ('len(data)')
-            array of waveform sequence
-
-        Returns
-        ---------
-        wsolaed: array, shape (`int(len(data) * f0rate)`)
-            Array of WSOLAed waveform sequence
-
-        """
-
-        wlen = len(data)
-        wsolaed = np.zeros(int(wlen * self.f0rate), dtype='d')
-
-        # initialization
-        sp = self.sl
-        rp = sp + self.sl
-        ep = sp + self.epstep
-        outp = 0
-
-        while wlen > ep + self.fl:
-            if ep - self.fl < self.sl:
-                sp += self.epstep
-                rp = sp + self.sl
-                ep += self.epstep
-                continue
-
-            # copy wavform
-            ref = data[rp - self.sl:rp + self.sl]
-            buff = data[ep - self.fl:ep + self.fl]
-
-            # search minimum distance bepween ref and buff
-            delta = self._search_minimum_distance(ref, buff)
-            epd = ep + delta
-
-            # store WSOLAed waveform using over-lap add
-            spdata = data[sp:sp + self.sl] * self.win[self.sl:]
-            epdata = data[epd - self.sl: epd] * self.win[:self.sl]
-            wsolaed[outp:outp + self.sl] = spdata + epdata
-            outp += self.sl
-
-            # transtion to next frame
-            sp = epd
-            rp = sp + self.sl
-            ep += self.epstep
-
-        return wsolaed
 
     def resampling_by_interpolate(self, data):
         """Resampling base on 1st order interpolation
@@ -124,14 +76,3 @@ class Shifter:
         resampled = intpfunc(x_new)
 
         return resampled
-
-    def _search_minimum_distance(self, ref, buff):
-        if len(ref) < self.fl:
-            ref = np.r_[ref, np.zeros(self.fl - len(ref))]
-
-        # slicing and windowing one sample by one
-        buffmat = skimage.util.view_as_windows(buff, self.fl) * self.win
-        refwin = np.array(ref * self.win).reshape(1, self.fl)
-        corr = scipy.signal.correlate2d(buffmat, refwin, mode='valid')
-
-        return np.argmax(corr) - self.sl
