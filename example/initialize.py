@@ -6,7 +6,8 @@ Usage: initialize.py SOURCE TARGET SAMPLING_RATE
 
 Options:
     -h, --help     Show the help
-    SOURCE         The name of speaker whose voice you would like to convert from
+    SOURCE         The name of speaker
+                   whose voice you would like to convert from
     TARGET         The name of speaker whose voice you would like to convert to
     SAMPLING_RATE  The sampling rate of WAV files of voices
 """
@@ -35,7 +36,9 @@ def create_configure(dest, base, exist_ok=True):
     base : str or path-like
         The path of the template configure file.
     exist_ok : bool
-        If `False`, this function throws `IOError` (Python 2.7) or `FileExistsError` (Python 3 or later) when `dest` is already created.
+        If `False`, this function throws
+        `IOError` (Python 2.7) or `FileExistsError` (Python 3 or later)
+        when `dest` is already created.
 
     Raises
     ------
@@ -62,9 +65,12 @@ def create_list(dest, wav_dir, exist_ok=True):
     dest : str or path-like
         The path of the list file you are creating.
     wav_dir : str or path-like
-        The path of the directory of audio files.  The name of directory must be that of speaker.
+        The path of the directory of audio files.
+        The name of directory must be that of speaker.
     exist_ok : bool
-        If `False`, this function throws `IOError` (Python 2.7) or `FileExistsError` (Python 3 or later) when `dest` is already created.
+        If `False`, this function throws
+        `IOError` (Python 2.7) or `FileExistsError` (Python 3 or later)
+        when `dest` is already created.
 
     Raises
     ------
@@ -96,8 +102,9 @@ def create_list(dest, wav_dir, exist_ok=True):
             raise (IOError if six.PY2 else FileExistsError)(message)
     print("Generate {}".format(dest))
     speaker_label = os.path.basename(wav_dir)
-    lines = (os.path.join(speaker_label, os.path.splitext(wav_file_name)[0]) for wav_file_name in os.listdir(
-        wav_dir) if os.path.splitext(wav_file_name)[1] == ".wav")
+    lines = (os.path.join(speaker_label, os.path.splitext(wav_file_name)[0])
+             for wav_file_name in os.listdir(wav_dir)
+             if os.path.splitext(wav_file_name)[1] == ".wav")
     with open(dest, "w") as file_handler:
         for line in lines:
             print(line, file=file_handler)
@@ -167,5 +174,7 @@ if __name__ == "__main__":
     # get F0 range in each speaker
     for part, speaker in LABELS.items():
         initialize_speaker.main(
-            speaker, LIST_FILES[part]["train"], WAV_DIR, os.path.join(CONF_DIR, "figure"))
-    print("# Please modify f0 range values in speaker-dependent YAML files based on the figure #")
+            speaker, LIST_FILES[part]["train"],
+            WAV_DIR, os.path.join(CONF_DIR, "figure"))
+    print("# Please modify f0 range values"
+          " in speaker-dependent YAML files based on the figure #")
