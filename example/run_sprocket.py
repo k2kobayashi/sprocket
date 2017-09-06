@@ -135,10 +135,7 @@ if __name__ == "__main__":
     os.makedirs(PAIR_DIR, exist_ok=True)
 
     if execute_steps[1]:
-        print("""\
-##############################################################
-### 1. Extract acoustic features                           ###
-##############################################################""")
+        print("### 1. Extract acoustic features ###")
         # Extract acoustic features consisting of F0, spc, ap, mcep, npow
         for speaker_part, speaker_label in LABELS.items():
             for use in USES:
@@ -148,10 +145,7 @@ if __name__ == "__main__":
                     WAV_DIR, PAIR_DIR)
 
     if execute_steps[2]:
-        print("""\
-##############################################################
-### 2. Estimate acoustic feature statistics                ###
-##############################################################""")
+        print("### 2. Estimate acoustic feature statistics ###")
         # Estimate speaker-dependent statistics for F0 and mcep
         for speaker_part, speaker_label in LABELS.items():
             estimate_feature_statistics.main(
@@ -159,10 +153,7 @@ if __name__ == "__main__":
                 PAIR_DIR)
 
     if execute_steps[3]:
-        print("""\
-##############################################################
-### 3. Estimate time warping function and jnt              ###
-##############################################################""")
+        print("### 3. Estimate time warping function and jnt ###")
         estimate_twf_and_jnt.main(
             PAIR_CONF_FILE,
             LIST_FILES["source"]["train"],
@@ -170,19 +161,13 @@ if __name__ == "__main__":
             PAIR_DIR)
 
     if execute_steps[4]:
-        print("""\
-##############################################################
-### 4. Train GMM                                           ###
-##############################################################""")
+        print("### 4. Train GMM ###")
         # estimate GMM parameter using the joint feature vector
         train_GMM.main(PAIR_CONF_FILE,
                        PAIR_DIR)
 
     if execute_steps[5]:
-        print("""\
-##############################################################
-### 5. Conversion based on the trained models              ###
-##############################################################""")
+        print("### 5. Conversion based on the trained models ###")
         EVAL_LIST_FILE = LIST_FILES["source"]["eval"]
         # convertsion based on the trained GMM
         convert.main(
