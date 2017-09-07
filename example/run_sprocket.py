@@ -16,8 +16,7 @@ Options:
     TARGET         The name of speaker whose voice you would like to convert to
 
 Note:
-    At least one of the options that designates steps
-    that are to be executed is required.
+    All steps are executed if no options from -1 to -5 are given.
 """
 
 from __future__ import division  # , unicode_literals
@@ -121,12 +120,10 @@ if __name__ == "__main__":
     execute_steps = [False] \
         + [args["--step{}".format(step_index)] for step_index in range(1, 6)]
 
-    # At least one of the ptions --stepN required
-    if not any(execute_steps[1:]):
-        print("Error: At least one of the options "
-              "that designates steps that are to be executed is required.  "
-              "Show the help by the option --help.", file=sys.stderr)
-        exit(1)
+    # Execute all steps if no options on steps are given
+    # Keep index #0 False in case you create a hotbed for bugs.
+    if not any(execute_steps):
+        execute_steps[1:] = [True] * (len(execute_steps) - 1)
 
     # Check the lengchs of list files for each use (training / evaluation)
     for use in USES:
