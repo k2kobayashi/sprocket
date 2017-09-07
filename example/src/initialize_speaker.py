@@ -45,6 +45,7 @@ def create_f0_histogram(f0s, f0histogrampath):
         os.makedirs(figure_dir)
 
     plt.savefig(f0histogrampath)
+    plt.close() # savefig() doesn't reset figures unlike show()
 
 
 def main(*argv):
