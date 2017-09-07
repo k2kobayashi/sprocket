@@ -26,9 +26,8 @@ from __future__ import absolute_import, print_function
 import os
 import sys
 
-import six
-
 import docopt
+import six
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "src"))  # isort:skip
 from src import (convert, estimate_feature_statistics, estimate_twf_and_jnt,  # isort:skip # pylint: disable=C0413
