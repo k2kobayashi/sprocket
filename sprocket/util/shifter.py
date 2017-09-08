@@ -27,9 +27,6 @@ class Shifter:
     frame_ms : int, optional
         length of frame
 
-    shift_ms : int, optional
-        length of shift
-
     completion : bool, optional
         Completion of high frequency range of F0 transformed wavform based on
         unvoiced analysis/synthesis voice of given voice and high-pass filter.
@@ -43,13 +40,12 @@ class Shifter:
 
     """
 
-    def __init__(self, fs, f0rate, frame_ms=20, shift_ms=10,
-                 completion=False):
+    def __init__(self, fs, f0rate, frame_ms=20, completion=False):
         self.fs = fs
         self.f0rate = f0rate
 
         self.frame_ms = frame_ms  # frame length [ms]
-        self.shift_ms = shift_ms  # shift length [ms]
+        self.shift_ms = frame_ms // 2  # shift size for over-lap add
         self.sl = int(self.fs * self.shift_ms / 1000)  # of samples in a shift
         self.fl = int(self.fs * self.frame_ms / 1000)  # of samples in a frame
         self.epstep = int(self.sl / self.f0rate)  # step size for WSOLA
@@ -84,7 +80,8 @@ class Shifter:
 
         # Frequency completion when decrease F0 of wavform
         if self.completion:
-            assert self.f0rate < 1.0, "Do not need completion if f0rate > 1."
+            if self.f0rate < 1.0:
+                raise ValueError("Do not enable completion if f0rate > 1.")
             transformed = self._high_frequency_completion(data, transformed)
 
         return transformed
@@ -113,6 +110,15 @@ class Shifter:
         return resampled
 
     def _high_frequency_completion(self, data, transformed):
+        """
+        Please see Sect. 3.2 and 3.3 in the following paper to know why we complete the
+        unvoiced synthesized voice of the original voice into high frequency range
+        of F0 transformed voice.
+
+        - K. Kobayashi et al., "F0 transformation techniques for statistical voice
+        conversion with direct waveform modification with spectral differential,"
+        Proc. IEEE SLT 2016, pp. 693-700. 2016.
+        """
         # construct feature extractor and synthesis
         feat = FeatureExtractor(data, fs=self.fs)
         feat.analyze()
@@ -127,4 +133,8 @@ class Shifter:
         fil = firwin(255, self.f0rate, pass_zero=False)
         HPFed_unvoice_anasyn = lfilter(fil, 1, unvoice_anasyn)
 
-        return transformed + HPFed_unvoice_anasyn[:len(transformed)]
+        if HPFed_unvoice_anasyn > len(transformed):
+            return transformed + HPFed_unvoice_anasyn[:len(transformed)]
+        else:
+            transformed[:len(HPFed_unvoice_anasyn)] += HPFed_unvoice_anasyn
+            return transformed
