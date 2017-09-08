@@ -9,7 +9,7 @@ from ..feature import FeatureExtractor
 from ..feature.synthesizer import Synthesizer
 
 
-class Shifter:
+class Shifter(object):
 
     """Shifter class
 
