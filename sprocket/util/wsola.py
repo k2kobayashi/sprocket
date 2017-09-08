@@ -6,7 +6,7 @@ from scipy.signal import correlate2d
 from skimage.util import view_as_windows
 
 
-class WSOLA:
+class WSOLA(object):
 
     """WSOLA class
 
