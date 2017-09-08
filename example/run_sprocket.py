@@ -11,23 +11,22 @@ Options:
     -3, --step3  Execute step3 (Estimation of time warping function and jnt)
     -4, --step4  Execute step4 (Training of GMM)
     -5, --step5  Execute step5 (Conversion based on the trained models)
+    SOURCE         The name of speaker
+                   whose voice you would like to convert from
+    TARGET         The name of speaker whose voice you would like to convert to
 
 Note:
-    At least one of the options that designates steps that are to be executed is required.
+    All steps are executed if no options from -1 to -5 are given.
 """
 
 from __future__ import division  # , unicode_literals
 from __future__ import absolute_import, print_function
 
-import operator
 import os
-import shutil
 import sys
 
-import six
-
 import docopt
-import yaml
+import six
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "src"))  # isort:skip
 from src import (convert, estimate_feature_statistics, estimate_twf_and_jnt,  # isort:skip # pylint: disable=C0413
@@ -36,7 +35,7 @@ from src import (convert, estimate_feature_statistics, estimate_twf_and_jnt,  # 
 if six.PY2:
     # pylint: disable=unused-import, redefined-builtin, import-error, line-too-long
     from future_builtins import ascii, filter, hex, map, oct, zip
-    # pylint: disable=unused-import, redefined-builtin, import-error, line-too-long
+    # pylint: disable=unused-import, redefined-builtin, import-error, line-too-long, ungrouped-imports
     from six.moves import range, input
 if six.PY3:
     # pylint: disable=unused-import, redefined-builtin, import-error, line-too-long
@@ -97,7 +96,7 @@ LIST_DIR = os.path.join(EXAMPLE_ROOT_DIR, "list")
 WAV_DIR = os.path.join(DATA_DIR, "wav")
 
 if __name__ == "__main__":
-    args = docopt.docopt(__doc__)
+    args = docopt.docopt(__doc__)  # pylint: disable=invalid-name
 
     LABELS = {label: args[label.upper()] for label in ("source", "target")}
     SOURCE_TARGET_PAIR = LABELS["source"] + "-" + LABELS["target"]
@@ -117,15 +116,14 @@ if __name__ == "__main__":
 
     # The first False is dummy for alignment
     #   between indexes of `args_execute_steps` and arguments
+    # pylint: disable=invalid-name
     execute_steps = [False] \
         + [args["--step{}".format(step_index)] for step_index in range(1, 6)]
 
-    # At least one of the ptions --stepN required
-    if not any(execute_steps[1:]):
-        print("Error: At least one of the options "
-              "that designates steps that are to be executed is required.  "
-              "Show the help by the option --help.", file=sys.stderr)
-        exit(1)
+    # Execute all steps if no options on steps are given
+    # Keep index #0 False in case you create a hotbed for bugs.
+    if not any(execute_steps):
+        execute_steps[1:] = [True] * (len(execute_steps) - 1)
 
     # Check the lengchs of list files for each use (training / evaluation)
     for use in USES:
@@ -136,10 +134,7 @@ if __name__ == "__main__":
     os.makedirs(PAIR_DIR, exist_ok=True)
 
     if execute_steps[1]:
-        print("""\
-##############################################################
-### 1. Extract acoustic features                           ###
-##############################################################""")
+        print("### 1. Extract acoustic features ###")
         # Extract acoustic features consisting of F0, spc, ap, mcep, npow
         for speaker_part, speaker_label in LABELS.items():
             for use in USES:
@@ -147,45 +142,31 @@ if __name__ == "__main__":
                     speaker_label, SPEAKER_CONF_FILES[speaker_part],
                     LIST_FILES[speaker_part][use],
                     WAV_DIR, PAIR_DIR)
-        exit
 
     if execute_steps[2]:
-        print("""\
-##############################################################
-### 2. Estimate acoustic feature statistics                ###
-##############################################################""")
+        print("### 2. Estimate acoustic feature statistics ###")
         # Estimate speaker-dependent statistics for F0 and mcep
         for speaker_part, speaker_label in LABELS.items():
-            LIST_FILE = os.path.join(
-                LIST_DIR, "{}_train.list".format(speaker_label))
             estimate_feature_statistics.main(
                 speaker_label, LIST_FILES[speaker_part]["train"],
                 PAIR_DIR)
 
     if execute_steps[3]:
-        print("""\
-##############################################################
-### 3. Estimate time warping function and jnt              ###
-##############################################################""")
+        print("### 3. Estimate time warping function and jnt ###")
         estimate_twf_and_jnt.main(
             PAIR_CONF_FILE,
             LIST_FILES["source"]["train"],
-            LIST_FILES["target"]["train"])
+            LIST_FILES["target"]["train"],
+            PAIR_DIR)
 
     if execute_steps[4]:
-        print("""\
-##############################################################
-### 4. Train GMM                                           ###
-##############################################################""")
+        print("### 4. Train GMM ###")
         # estimate GMM parameter using the joint feature vector
         train_GMM.main(PAIR_CONF_FILE,
                        PAIR_DIR)
 
     if execute_steps[5]:
-        print("""\
-##############################################################
-### 5. Conversion based on the trained models              ###
-##############################################################""")
+        print("### 5. Conversion based on the trained models ###")
         EVAL_LIST_FILE = LIST_FILES["source"]["eval"]
         # convertsion based on the trained GMM
         convert.main(
@@ -193,11 +174,13 @@ if __name__ == "__main__":
             SPEAKER_CONF_FILES["source"],
             PAIR_CONF_FILE,
             EVAL_LIST_FILE,
-            WAV_DIR)
+            WAV_DIR,
+            PAIR_DIR)
         convert.main(
             "-gmmmode", "diff",
             LABELS["source"], LABELS["target"],
             SPEAKER_CONF_FILES["source"],
             PAIR_CONF_FILE,
             EVAL_LIST_FILE,
-            WAV_DIR)
+            WAV_DIR,
+            PAIR_DIR)

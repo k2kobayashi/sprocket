@@ -14,7 +14,7 @@ import sys
 
 from sprocket.stats.f0statistics import F0statistics
 from sprocket.stats.gv import GV
-from sprocket.util.hdf5 import HDF5files, read_feats
+from sprocket.util.hdf5 import read_feats
 
 
 def main(*argv):
@@ -28,7 +28,7 @@ def main(*argv):
                         help='List file of the input speaker')
     parser.add_argument('pair_dir', type=str,
                         help='Statistics directory of the speaker')
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     # open h5 files
     h5_dir = os.path.join(args.pair_dir, 'h5')

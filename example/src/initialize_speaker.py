@@ -27,10 +27,8 @@ from scipy.io import wavfile
 
 from sprocket.feature import FeatureExtractor
 
-matplotlib.use('Agg') #noqa #isort:skip
-import matplotlib.pyplot as plt #isort:skip
-
-
+matplotlib.use('Agg')  # noqa #isort:skip
+import matplotlib.pyplot as plt  # isort:skip
 
 
 def create_f0_histogram(f0s, f0histogrampath):
@@ -45,6 +43,7 @@ def create_f0_histogram(f0s, f0histogrampath):
         os.makedirs(figure_dir)
 
     plt.savefig(f0histogrampath)
+    plt.close()  # savefig() doesn't reset figures unlike show()
 
 
 def main(*argv):
@@ -59,7 +58,7 @@ def main(*argv):
                         help='Directory of wav file')
     parser.add_argument('figure_dir', type=str,
                         help='Directory for figure output')
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     # open list file
     with open(args.list_file, 'r') as fp:

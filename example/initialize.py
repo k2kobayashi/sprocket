@@ -5,7 +5,11 @@
 Usage: initialize.py SOURCE TARGET SAMPLING_RATE
 
 Options:
-    -h, --help   Show the help
+    -h, --help     Show the help
+    SOURCE         The name of speaker
+                   whose voice you would like to convert from
+    TARGET         The name of speaker whose voice you would like to convert to
+    SAMPLING_RATE  The sampling rate of WAV files of voices
 """
 
 from __future__ import division  # , unicode_literals
@@ -18,12 +22,14 @@ import sys
 import six
 from docopt import docopt
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "src")) # isort:skip
+sys.path.append(os.path.join(os.path.dirname(__file__), "src"))  # isort:skip
 from src import initialize_speaker  # isort:skip # pylint: disable=C0413
 
 
-def create_configure(dest, base, exist_ok=False):
+def create_configure(dest, base, exist_ok=True):
     """Creates a configuration file based on a template file.
+
+    This does not overwrite the existing one.
 
     Parameters
     ----------
@@ -32,7 +38,9 @@ def create_configure(dest, base, exist_ok=False):
     base : str or path-like
         The path of the template configure file.
     exist_ok : bool
-        If `False`, this function throws `IOError` (Python 2.7) or `FileExistsError` (Python 3 or later) when `dest` is already created.
+        If `False`, this function throws
+        `IOError` (Python 2.7) or `FileExistsError` (Python 3 or later)
+        when `dest` is already created.
 
     Raises
     ------
@@ -41,24 +49,33 @@ def create_configure(dest, base, exist_ok=False):
         You can catch both of them by:
         >>> except IOError:
     """
-    if not exist_ok and os.path.exists(dest):
-        raise (IOError if six.PY2 else FileExistsError)(
-            "The configuration file {} already exists.".format(dest))
-    print("Generate {}".format(dest), file=sys.stderr)
-    shutil.copy(base, dest)
+    if os.path.exists(dest):
+        message = "The configuration file {} already exists.".format(dest)
+        if exist_ok:
+            print(message)
+        else:
+            raise (IOError if six.PY2 else FileExistsError)(message)
+    else:
+        print("Generate {}".format(dest), file=sys.stderr)
+        shutil.copy(base, dest)
 
 
-def create_list(dest, wav_dir, exist_ok=False):
+def create_list(dest, wav_dir, exist_ok=True):
     """Create an audio list file based on a template.
+
+    This does not overwrite the existing one.
 
     Parameters
     ----------
     dest : str or path-like
         The path of the list file you are creating.
     wav_dir : str or path-like
-        The path of the directory of audio files.abs
+        The path of the directory of audio files.
+        The name of directory must be that of speaker.
     exist_ok : bool
-        If `False`, this function throws `IOError` (Python 2.7) or `FileExistsError` (Python 3 or later) when `dest` is already created.
+        If `False`, this function throws
+        `IOError` (Python 2.7) or `FileExistsError` (Python 3 or later)
+        when `dest` is already created.
 
     Raises
     ------
@@ -66,17 +83,37 @@ def create_list(dest, wav_dir, exist_ok=False):
         If `exist_ok` is `False` and `dest` is already exists.
         You can catch both of them by:
         >>> except IOError:
+
+    Notes
+    -----
+    List example of the speaker `SPEAKER`::
+
+        SPEAKER/001
+        SPEAKER/002
+        SPEAKER/003
+
+    when there is a audio directory of him/her named `SPEAKER` that contains:
+        * 001.wav
+        * 002.wav
+        * 003.wav
+        * other_file.txt (ignored)
+    Note that the delimiter `/` turns to `\\` in Windows.
     """
-    if not exist_ok and os.path.exists(dest):
-        raise (IOError if six.PY2 else FileExistsError)(
-            "The list file {} already exists.".format(dest))
-    print("Generate {}".format(dest))
-    speaker_label = os.path.basename(dest)
-    lines = (os.path.join(speaker_label, wav_file_name) for wav_file_name in os.listdir(
-        wav_dir) if os.path.splitext(wav_file_name)[1] == ".wav")
-    with open(dest, "w") as file_handler:
-        for line in lines:
-            print(line, file=file_handler)
+    if os.path.exists(dest):
+        message = "The list file {} already exists.".format(dest)
+        if exist_ok:
+            print(message)
+        else:
+            raise (IOError if six.PY2 else FileExistsError)(message)
+    else:
+        print("Generate {}".format(dest))
+        speaker_label = os.path.basename(wav_dir)
+        lines = (os.path.join(speaker_label, os.path.splitext(wav_file_name)[0])
+                 for wav_file_name in os.listdir(wav_dir)
+                 if os.path.splitext(wav_file_name)[1] == ".wav")
+        with open(dest, "w") as file_handler:
+            for line in lines:
+                print(line, file=file_handler)
 
 
 LIST_EXTENSION = ".list"
@@ -110,24 +147,18 @@ if __name__ == "__main__":
         CONF_DIR, "pair", SOURCE_TARGET_PAIR + YML_EXTENSION)
     SAMPLING_RATE = args["SAMPLING_RATE"]
 
-    print("""\
-##############################################################
-### 1. create initial list files                           ###
-##############################################################""")
+    print("### 1. create initial list files ###")
     # create list files for both the speakers
     for use in USES:
         for part, speaker in LABELS.items():
             create_list(LIST_FILES[part][use], os.path.join(WAV_DIR, speaker))
     print("# Please modify train and eval list files, if you want. #")
 
-    print("""\
-##############################################################
-### 2. create configure files                              ###
-##############################################################""")
+    print("### 2. create configure files ###")
     # create speaker-dependent configure file
     for part, speaker in LABELS.items():
         create_configure(
-            SPEAKER_CONF_FILES[part][use],
+            SPEAKER_CONF_FILES[part],
             os.path.join(
                 CONF_DIR, "default",
                 "speaker_default_{}{}".format(
@@ -136,12 +167,11 @@ if __name__ == "__main__":
     create_configure(PAIR_CONF_FILE, os.path.join(
         CONF_DIR, "default", "pair_default.yml"))
 
-    print("""\
-##############################################################
-### 3. create figures to define F0 range                   ###
-##############################################################""")
+    print("### 3. create figures to define F0 range ###")
     # get F0 range in each speaker
     for part, speaker in LABELS.items():
         initialize_speaker.main(
-            speaker, LIST_FILES[part]["train"], WAV_DIR, os.path.join(CONF_DIR, "figure"))
-    print("# Please modify f0 range values in speaker-dependent YAML files based on the figure #")
+            speaker, LIST_FILES[part]["train"],
+            WAV_DIR, os.path.join(CONF_DIR, "figure"))
+    print("# Please modify f0 range values"
+          " in speaker-dependent YAML files based on the figure #")

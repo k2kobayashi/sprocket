@@ -125,7 +125,7 @@ def main(*argv):
                         help='List file of the target speaker')
     parser.add_argument('wav_dir', type=str,
                         help='Wav file directory of the speaker')
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     # read parameters from speaker yml
     org_conf = SpeakerYML(args.org_yml)
