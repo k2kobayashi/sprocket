@@ -2,21 +2,20 @@
 
 from __future__ import division, print_function, absolute_import
 
+import pysptk
+import pyworld
 import numpy as np
 
 from .analyzer import WORLD
 from .parameterizer import spgram2npow
-
-import pysptk
-import pyworld
 
 
 class FeatureExtractor(object):
 
     """Analysis and synthesize acoustic features from a given waveform
 
-    This class allows to extract several types of acoustic features such as F0, aperiodicity,
-    spectral envelope, from a given waveform.
+    This class allows to extract several types of acoustic features such as F0,
+    aperiodicity, spectral envelope, from a given waveform.
 
     Parameters
     ----------
@@ -63,7 +62,8 @@ class FeatureExtractor(object):
 
     """
 
-    def __init__(self, x, analyzer='world', fs=16000, shiftms=5, minf0=30, maxf0=700):
+    def __init__(self, x, analyzer='world', fs=16000, shiftms=5,
+                 minf0=50, maxf0=500):
         self.x = np.array(x, dtype=np.float)
         self.analyzer = analyzer
         self.fs = fs
@@ -190,5 +190,4 @@ class FeatureExtractor(object):
 
     def _analyzed_check(self):
         if self._f0 is None and self._spc is None and self._ap is None:
-            raise(
-                'Please call FeatureExtractor.analyze() before get acoustic features.')
+            raise('Call FeatureExtractor.analyze() before get features.')

@@ -75,12 +75,17 @@ def transform_f0_from_list(f0rate, wav_fs, list_file, wav_dir):
         transformed_wavpath = os.path.join(
             transformed_wavdir, os.path.basename(wavf))
 
+        # flag for completion of high frequency range
+        if f0rate < 1.0:
+            completion = True
+        else:
+            completion = False
         if not os.path.exists(transformed_wavpath):
             # transform F0 of waveform
             fs, x = wavfile.read(wavf)
             x = np.array(x, dtype=np.float)
             assert fs == wav_fs
-            transformed_x = shifter.f0transform(x)
+            transformed_x = shifter.f0transform(x, completion=completion)
 
             wavfile.write(transformed_wavpath, fs,
                           transformed_x.astype(np.int16))
