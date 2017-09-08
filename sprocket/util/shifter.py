@@ -27,11 +27,6 @@ class Shifter:
     frame_ms : int, optional
         length of frame
 
-    completion : bool, optional
-        Completion of high frequency range of F0 transformed wavform based on
-        unvoiced analysis/synthesis voice of given voice and high-pass filter.
-        This is due to loose the high frequency range caused by resampling
-        when F0ratio setting to smaller than 1.0.
 
     Attributes
     ----------
@@ -40,7 +35,7 @@ class Shifter:
 
     """
 
-    def __init__(self, fs, f0rate, frame_ms=20, completion=False):
+    def __init__(self, fs, f0rate, frame_ms=20):
         self.fs = fs
         self.f0rate = f0rate
 
@@ -53,15 +48,20 @@ class Shifter:
 
         self.wsola = WSOLA(fs, 1 / f0rate,
                            frame_ms=self.frame_ms, shift_ms=self.shift_ms)
-        self.completion = completion
 
-    def f0transform(self, data):
+    def f0transform(self, data, completion=False):
         """Transform F0 of given waveform signals using
 
         Parameters
         ---------
         data : array, shape ('len(data)')
             array of waveform sequence
+
+        completion : bool, optional
+        Completion of high frequency range of F0 transformed wavform based on
+        unvoiced analysis/synthesis voice of given voice and high-pass filter.
+        This is due to loose the high frequency range caused by resampling
+        when F0ratio setting to smaller than 1.0.
 
         Returns
         ---------
@@ -79,8 +79,8 @@ class Shifter:
         transformed = resample(wsolaed, self.xlen)
 
         # Frequency completion when decrease F0 of wavform
-        if self.completion:
-            if self.f0rate < 1.0:
+        if completion:
+            if self.f0rate > 1.0:
                 raise ValueError("Do not enable completion if f0rate > 1.")
             transformed = self._high_frequency_completion(data, transformed)
 
@@ -133,7 +133,7 @@ class Shifter:
         fil = firwin(255, self.f0rate, pass_zero=False)
         HPFed_unvoice_anasyn = lfilter(fil, 1, unvoice_anasyn)
 
-        if HPFed_unvoice_anasyn > len(transformed):
+        if len(HPFed_unvoice_anasyn) > len(transformed):
             return transformed + HPFed_unvoice_anasyn[:len(transformed)]
         else:
             transformed[:len(HPFed_unvoice_anasyn)] += HPFed_unvoice_anasyn
