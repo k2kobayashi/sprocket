@@ -72,14 +72,6 @@ if __name__ == "__main__":
 
     print("### 1. F0 transformation of original waveform ###")
     # transform F0 of waveform of original speaker
-    # python $SRC_DIR / f0_transformation.py \
-    # $ORG \
-    # $CONF_DIR / speaker /${ORG}.yml \
-    # $CONF_DIR / speaker /${TAR}.yml \
-    # $LIST_DIR /${ORG}_train.list \
-    # $LIST_DIR /${ORG}_eval.list \
-    # $LIST_DIR /${TAR}_train.list \
-    # $DATA_DIR / wav
     main(LABELS["source"], os.path.join(SPEAKER_CONF_FILES["source"]),
          os.path.join(SPEAKER_CONF_FILES["target"]),
          LIST_FILES["source"]["train"],
