@@ -38,11 +38,8 @@ if six.PY3:
     # pylint: disable=unused-import, redefined-builtin, import-error, line-too-long
     from six.moves import reduce
 
-LIST_EXTENSION = ".list"
-USES = ("train", "eval")
 LIST_SUFFIXES = {
-    use: "_" + use + LIST_EXTENSION for use in USES}
-YML_EXTENSION = ".yml"
+    use: "_" + use + ".list" for use in ("train", "eval")}
 
 EXAMPLE_ROOT_DIR = os.path.dirname(__file__)
 CONF_DIR = os.path.join(EXAMPLE_ROOT_DIR, "conf")
@@ -59,17 +56,17 @@ if __name__ == "__main__":
     LIST_FILES = {
         speaker_part: {
             use: os.path.join(LIST_DIR, speaker_label + LIST_SUFFIXES[use])
-            for use in USES}
+            for use in ("train", "eval")}
         for speaker_part, speaker_label in LABELS.items()}
     SPEAKER_CONF_FILES = {
         part: os.path.join(
-            CONF_DIR, "speaker", label + YML_EXTENSION)
+            CONF_DIR, "speaker", label + ".yml")
         for part, label in LABELS.items()}
     PAIR_CONF_FILE = os.path.join(
-        CONF_DIR, "pair", SOURCE_TARGET_PAIR + YML_EXTENSION)
+        CONF_DIR, "pair", SOURCE_TARGET_PAIR + ".yml")
 
     # check list file
-    for use in USES:
+    for use in ("train", "eval"):
         list_lengths_are_all_same(
             LIST_FILES["source"][use], LIST_FILES["target"][use])
 
