@@ -6,7 +6,7 @@
 
 # data files
 /example/data/pair
-/example/data/wav
+/example/data/wav/*
 
 # for wercker
 /.wercker
