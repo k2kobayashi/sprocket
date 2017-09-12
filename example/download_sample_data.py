@@ -20,14 +20,18 @@ Arguments:
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
+import errno
 import os
 import shutil
 import sys
 from glob import iglob
-from tempfile import TemporaryDirectory
+from tempfile import mkdtemp
+from zipfile import ZipFile
 
+import six
 from docopt import docopt
-from six.moves import urllib, filter
+
+from six.moves import filter, urllib
 
 
 def download(url, dest=None):
@@ -50,7 +54,11 @@ def download(url, dest=None):
     urllib.error.HTTPError
         When `the status code is not 200 or 30*.
     """
-    with urllib.request.urlopen(url) as request_obj:
+    # Support for 2.7
+    try:
+        request_obj = urllib.request.urlopen(url)
+    # end
+    # with urllib.request.urlopen(url) as request_obj:
         real_file_name = os.path.basename(
             urllib.parse.urlparse(request_obj.geturl()).path)
         if dest is None:
@@ -59,6 +67,13 @@ def download(url, dest=None):
             dest = os.path.join(dest, real_file_name)
         with open(dest, "wb") as file_obj:
             shutil.copyfileobj(request_obj, file_obj)
+    # SUpport for 2.7
+    except:
+        raise
+    finally:
+        if not six.PY2:
+            request_obj.close()
+    # end
     return dest
 
 
@@ -102,6 +117,38 @@ def stem(path):
     """
     return os.path.splitext(os.path.basename(path))[0]
 
+def makedirs(path, exist_ok=False):
+    """Backport of os.makedirs for Python 2.7"""
+    if six.PY2:
+        try:
+            os.makedirs(path)
+        except OSError as exception:
+            if exist_ok and exception.errno == errno.EEXIST and os.path.isdir(path):
+                pass
+            else:
+                raise
+    else:
+        os.makedirs(path, exist_ok=exist_ok)
+
+def unpack_archive(archive_path, dest=None):
+    """Backport of shutil.unpack_archive for Python 2.7
+
+    Parameters
+    ----------
+    archive_path : str or path-like
+        The path of the archive file
+    dest : str or path-like or None
+        The directory where `archive_path` is extracted
+
+    Notes
+    -----
+    This function supports only ZIP archives provisionally.
+    """
+    
+    if os.path.splitext(archive_path)[1].lower() != ".zip":
+        raise ValueError("{} is not a ZIP file".format(archive_path))
+    with ZipFile(archive_path) as archive_obj:
+        archive_obj.extractall(dest)
 
 if __name__ == "__main__":
     args = docopt(__doc__)
@@ -117,7 +164,11 @@ if __name__ == "__main__":
             print("There are some directories in:", wav_root_dir)
         exit(0)
 
-    with TemporaryDirectory() as working_dir:
+    # If support of 2.7 is dropped, replace the folloing 2 linee with:
+    # with TemporaryDirectory() as working_dir:
+    try:
+        working_dir = mkdtemp()
+        # end of replacement
         if is_verbose:
             print("Downloading the evaluation data...")
         eval_archive_path = download(
@@ -125,14 +176,14 @@ if __name__ == "__main__":
             "evaluation_all.zip?sequence=7&isAllowed=y", working_dir)
         if is_verbose:
             print("Unpack:", eval_archive_path)
-        shutil.unpack_archive(eval_archive_path, working_dir)
+        unpack_archive(eval_archive_path, working_dir)
         for directory in filter(
                 os.path.isdir, iterdir(os.path.join(
                     working_dir, stem(eval_archive_path)))):
             if is_verbose:
                 print("Move:", directory)
             dest_dir = os.path.join(wav_root_dir, os.path.basename(directory))
-            os.makedirs(dest_dir, exist_ok=does_by_force)
+            makedirs(dest_dir, exist_ok=does_by_force)
             for wav_file in iglob(os.path.join(directory, "*.wav")):
                 dest_path = os.path.join(dest_dir, os.path.basename(wav_file))
                 if os.path.exists(dest_path) and does_by_force:
@@ -146,7 +197,7 @@ if __name__ == "__main__":
             "vcc2016_training.zip?sequence=8&isAllowed=y", working_dir)
         if is_verbose:
             print("Unpack:", train_archive_path)
-        shutil.unpack_archive(train_archive_path, working_dir)
+        unpack_archive(train_archive_path, working_dir)
         for directory in filter(
                 os.path.isdir, iterdir(os.path.join(working_dir, stem(
                     train_archive_path)))):
@@ -155,9 +206,14 @@ if __name__ == "__main__":
             dest_dir = os.path.join(wav_root_dir, os.path.basename(directory))
             # exist_ok is always True because we have to append wav files in
             # existing directories
-            os.makedirs(dest_dir, exist_ok=True)
+            makedirs(dest_dir, exist_ok=True)
             for wav_file in iglob(os.path.join(directory, "*.wav")):
                 dest_path = os.path.join(dest_dir, os.path.basename(wav_file))
                 if os.path.exists(dest_path) and does_by_force:
                     os.remove(dest_path)
                 os.rename(wav_file, dest_path)
+    # If support of 2.7 dropped, remove all of the following lines
+    except:
+        raise
+    finally:
+        shutil.rmtree(working_dir)
