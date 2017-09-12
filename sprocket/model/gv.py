@@ -10,12 +10,12 @@ class GV (object):
 
     """A global variance (GV) statistics class
     This class offers the estimation of GV statistics and
-    postfiltering based on the GV statistics
+    performing postfilter based on the GV statistics
 
     Attributes
     ---------
-    gvstats : shape (`2`, `dim`)
-        Array of mean and standard deviation of GV
+    gvstats : shape (`[mean, var]`, `dim`)
+        Array of mean and variance of GV in each feature dimension
 
     """
 
@@ -58,7 +58,6 @@ class GV (object):
         ---------
         fpath: str,
             File path of GV statistics
-
         gvstats: array, shape (`2`, `dim`)
             GV statistics
 
@@ -96,7 +95,6 @@ class GV (object):
         ---------
         data : array, shape (`T`, `dim`)
             Array of data sequence
-
         startdim : int, optional
             Start dimension to perform GV postfilter
 
