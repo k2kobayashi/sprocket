@@ -12,12 +12,10 @@ def extfrm(npow, data, threshold=-20):
     ----------
     npow : array, shape (`T`)
         Vector of normalized power sequence.
-
     data: array, shape (`T`, `dim`)
         Array of input data
-
     threshold: scala, optional
-        Scala of power threshold
+        Scala of power threshold [dB]
 
     Returns
     -------

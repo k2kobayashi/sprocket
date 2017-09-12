@@ -7,11 +7,11 @@ from dtw import dtw
 
 
 import pysptk
-from sprocket.util.distance import melcd, normalized_melcd
+from sprocket.util.distance import melcd
 
 
-def get_random_peseudo_mcep(order=24, alpha=0.41):
-    T, N = 10, 512
+def get_random_peseudo_mcep(order=24, alpha=0.42):
+    T, N = 100, 513
     frames = np.random.rand(T, N) * pysptk.blackman(N)
     mc = pysptk.mcep(frames, order=order, alpha=alpha)
     return mc
@@ -24,7 +24,7 @@ class DistanceTest(unittest.TestCase):
         tar = get_random_peseudo_mcep()
 
         # perform dtw for mel-cd function test
-        def distance_func(x, y): return melcd(x, y)
+        def distance_func(x, y): return melcd(x, y, vector=True)
         dist, cost, acost, twf = dtw(org, tar, dist=distance_func)
 
         # align org and tar
@@ -36,8 +36,8 @@ class DistanceTest(unittest.TestCase):
         flen = len(twf[0])
         mcd = 0
         for t in range(flen):
-            mcd += melcd(orgmod[t], tarmod[t])
-        norm_mcd1 = mcd / flen
-        norm_mcd2 = normalized_melcd(orgmod, tarmod)
+            mcd += melcd(orgmod[t], tarmod[t], vector=True)
+        mcd1 = mcd / flen
+        mcd2 = melcd(orgmod, tarmod)
 
-        assert norm_mcd1 - norm_mcd2 < np.exp(-10)
+        assert mcd1 - mcd2 < np.exp(-10)
