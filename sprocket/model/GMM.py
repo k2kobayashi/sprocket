@@ -23,11 +23,9 @@ class GMMTrainer(object):
     n_mix: int, optional
         The number of mixture components of the GMM
         Default set to 32.
-
     n_iter: int, optional
         THe number of iteration for EM algorithm.
         Default set to 100.
-
     covtype: str, optional
         The type of covariance matrix of the GMM
         full: full-covariance matrix
@@ -37,13 +35,10 @@ class GMMTrainer(object):
     ---------
     param :
         Sklean-based model parameters of the GMM
-
     w : shape (`n_mix`)
         Vector of mixture component weight of the GMM
-
     jmean : shape (`n_mix`, `jnt.shape[0]`)
         Array of joint mean vector of the GMM
-
     jcov: shape (`n_mix`, `jnt.shape[0]`, `jnt.shape[0]`)
         Array of joint covariance matrix of the GMM
 
@@ -59,6 +54,9 @@ class GMMTrainer(object):
             n_components=self.n_mix,
             covariance_type=self.covtype,
             max_iter=self.n_iter)
+
+        if self.covtype == 'block_diag':
+            raise NotImplementedError()
 
     def open(self, fpath):
         """Open GMM from file
@@ -128,7 +126,6 @@ class GMMTrainer(object):
         variable of `jnt` and `reference_jnt` is equals.
         For E-step :
             Estimate occupancy based on `param` and `jnt`
-            P (m | param, jnt)
         For M-step :
             Update parameter using reference_jnt
         EM-algorithm is performed only one time.
@@ -145,14 +142,17 @@ class GMMTrainer(object):
 
         """
 
-        self._deploy_parameters()
+        raise NotImplementedError()
 
+        self._deploy_parameters()
         pass
 
     def _train_block_diag(self, jnt):
         # perform E-step using sklearn
 
         # update parameter of weigh, mean, and block diagonal covariance
+
+        raise NotImplementedError()
 
         self._deploy_parameters()
         pass
@@ -177,18 +177,15 @@ class GMMConvertor(object):
     n_mix : int, optional
         The number of mixture components of the GMM
         Default set to 32.
-
     covtype : str, optional
         The type of covariance matrix of the GMM
         `full` : full-covariance matrix
         `block_diag : block-diagonal matrix
-
     gmmmode: str, optional
         The type of the GMM for opening
         `None` : Normal JD-GMM
         `diff` : Differential GMM
         `intra` : Intra-speaker GMM
-
     cvtype: str, optional
         The type of the conversion algorithm
         `mlgp` : MLPG
@@ -198,13 +195,10 @@ class GMMConvertor(object):
     ---------
     param :
         Sklean-based model parameters of the GMM
-
     w : shape (`n_mix`)
         Vector of mixture component weight of the GMM
-
     jmean : shape (`n_mix`, `jnt.shape[0]`)
         Array of joint mean vector of the GMM
-
     jcov: shape (`n_mix`, `jnt.shape[0]`, `jnt.shape[0]`)
         Array of joint covariance matrix of the GMM
 
