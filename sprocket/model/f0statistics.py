@@ -6,7 +6,7 @@ import os
 import numpy as np
 
 
-class F0statistics (object):
+class F0statistics(object):
 
     """F0 statistics class
     This class offers the estimation of F0 statistics and
@@ -16,7 +16,6 @@ class F0statistics (object):
     ---------
     orgf0stats, shape (`[mean, std]`)
         Vector of mean and standard deviation of logarithmic F0 for original speaker
-
     tarf0stats, shape (`[mean, std]`)
         Vector of mean and standard deviation of logarithmic F0 for target speaker
 
@@ -66,26 +65,6 @@ class F0statistics (object):
             os.makedirs(os.path.dirname(fpath))
         self.f0stats.tofile(fpath)
 
-    def read(self, orgf0stats, tarf0stats):
-        """read F0 statistics from array
-
-        Parameters
-        ---------
-        orgstats : array, shape (`2`)
-            Vector of F0 statistics for original speaker
-
-        tarstats : array, shape (`2`)
-            Vector of F0 statistics for target speaker
-
-        """
-        self.orgf0stats = orgf0stats
-        self.tarf0stats = tarf0stats
-
-        self.omean = orgf0stats[0]
-        self.ostd = orgf0stats[1]
-        self.tmean = tarf0stats[0]
-        self.tstd = tarf0stats[1]
-
     def open_from_file(self, orgfile, tarfile):
         """Open F0 statistics from file
 
@@ -93,7 +72,6 @@ class F0statistics (object):
         ---------
         orgfile : str
             File path of F0 statistics for original speaker
-
         tarfile : str
             File path of F0 statistics for target speaker
 
@@ -102,11 +80,6 @@ class F0statistics (object):
         # read f0 statistics of source and target from binary
         self.orgf0stats = np.fromfile(orgfile)
         self.tarf0stats = np.fromfile(tarfile)
-
-        self.omean = self.orgf0stats[0]
-        self.ostd = self.orgf0stats[1]
-        self.tmean = self.tarf0stats[0]
-        self.tstd = self.tarf0stats[1]
 
     def convert(self, f0):
         """Convert F0 based on F0 statistics
@@ -123,9 +96,6 @@ class F0statistics (object):
 
         """
 
-        assert self.omean, self.ostd is not None
-        assert self.tmean, self.tstdis is not None
-
         # get length and dimension
         T = len(f0)
 
@@ -133,7 +103,8 @@ class F0statistics (object):
         cvf0 = np.zeros(T)
 
         nonzero_indices = f0 > 0
-        cvf0[nonzero_indices] = np.exp((self.tstd / self.ostd) *
-                                       (np.log(f0[nonzero_indices]) - self.omean) + self.tmean)
+        cvf0[nonzero_indices] = np.exp((self.tarf0stats[1] / self.orgf0stats[1]) *
+                                       (np.log(f0[nonzero_indices]) -
+                                        self.orgf0stats[0]) + self.tarf0stats[0])
 
         return cvf0
