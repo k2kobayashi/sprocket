@@ -23,22 +23,16 @@ class Synthesizer(object):
         ----------
         f0: array, shape (T, `1`)
           array of F0 sequence
-
         mcep: array, shape (T, `self.conf.dim`)
           array of mel-cepstrum sequence
-
         aperiodicity: array, shape (T, `fftlen / 2 + 1`)
           array of aperiodicity
-
         dim: int, optional
           Dimension of the mel-cepstrum sequence
-
         alpha: int, optional
           Parameter of all-path fileter for frequency transformation
-
         fs: int, optional
           Sampling frequency
-
         shiftms: int, optional
           Shift size for STFT
 
@@ -66,22 +60,16 @@ class Synthesizer(object):
         ----------
         f0: array, shape (T, `1`)
           array of F0 sequence
-
         mcep: array, shape (T, `self.conf.dim`)
           array of mel-cepstrum sequence
-
         aperiodicity: array, shape (T, `fftlen / 2 + 1`)
           array of aperiodicity
-
         dim: int, optional
           Dimension of the mel-cepstrum sequence
-
         alpha: int, optional
           Parameter of all-path fileter for frequency transformation
-
         fs: int, optional
           Sampling frequency
-
         shiftms: int, optional
           Shift size for STFT
 
