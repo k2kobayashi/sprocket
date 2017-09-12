@@ -29,7 +29,7 @@ class GMMTrainer(object):
     covtype: str, optional
         The type of covariance matrix of the GMM
         full: full-covariance matrix
-        block_diag: block-diagonal matrix
+        block_diag (not implemeted) : block-diagonal matrix
 
     Attributes
     ---------
@@ -180,7 +180,7 @@ class GMMConvertor(object):
     covtype : str, optional
         The type of covariance matrix of the GMM
         `full` : full-covariance matrix
-        `block_diag : block-diagonal matrix
+        `block_diag (not implemented) : block-diagonal matrix
     gmmmode: str, optional
         The type of the GMM for opening
         `None` : Normal JD-GMM
@@ -188,8 +188,8 @@ class GMMConvertor(object):
         `intra` : Intra-speaker GMM
     cvtype: str, optional
         The type of the conversion algorithm
-        `mlgp` : MLPG
-        `mmse` : MMSE
+        `mlgp` : Maximum likelihood parameger generation
+        `mmse` : Menimum mean square error
 
     Attributes
     ---------

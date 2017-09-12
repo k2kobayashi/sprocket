@@ -9,8 +9,8 @@ import numpy as np
 class GV (object):
 
     """A global variance (GV) statistics class
-    This class offers the estimation of GV statistics and
-    performing postfilter based on the GV statistics
+    Estimate statistics and perform postfilter based on
+    the GV statistics
 
     Attributes
     ---------

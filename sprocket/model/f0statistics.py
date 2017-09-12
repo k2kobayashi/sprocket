@@ -9,8 +9,7 @@ import numpy as np
 class F0statistics(object):
 
     """F0 statistics class
-    This class offers the estimation of F0 statistics and
-    convert F0
+    Estimate F0 statistics and convert F0
 
     Attributes
     ---------
@@ -61,6 +60,7 @@ class F0statistics(object):
             File path of F0 statistics
 
         """
+
         if not os.path.exists(os.path.dirname(fpath)):
             os.makedirs(os.path.dirname(fpath))
         self.f0stats.tofile(fpath)
