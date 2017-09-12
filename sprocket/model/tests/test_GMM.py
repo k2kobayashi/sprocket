@@ -4,8 +4,8 @@ import unittest
 
 import os
 import numpy as np
-from sprocket.model.GMM import GMMTrainer, GMMConvertor
-from sprocket.util.delta import delta
+from sprocket.model import GMMTrainer, GMMConvertor
+from sprocket.util import delta
 
 dirpath = os.path.dirname(os.path.realpath(__file__))
 tmppath = dirpath + '/test_tmp_gmm.pkl'
