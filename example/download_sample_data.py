@@ -191,7 +191,7 @@ if __name__ == "__main__":
                 os.rename(wav_file, dest_path)
 
         if is_verbose:
-            print("Download the training data...")
+            print("Downloading the training data...")
         train_archive_path = download(
             "http://datashare.is.ed.ac.uk/bitstream/handle/10283/2211/"
             "vcc2016_training.zip?sequence=8&isAllowed=y", working_dir)
