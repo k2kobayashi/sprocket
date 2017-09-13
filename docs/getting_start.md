@@ -1,5 +1,5 @@
 # Getting start with VC example
-You can easily try voice conversion (VC) example scripts in "/sprocket/example"
+After installation finished, you can easily try voice conversion (VC) example scripts in "/sprocket/example"
 
 ```
 cd example
@@ -142,19 +142,20 @@ Next, to generate configure files of speakers, run following command.
 python initialize.py -2 SM1 TF1 16000
 ```
 where "-2" option indicates a flag to generate configure files for source and target speakers.
-By executing this scripts, speaker-dependent YAML file (e.g., conf/speaker/SM1.yml) and speaker-pair dependet YAML file (e.g., conf/pair/SM1-TF1.yml) are generated. 
+By executing this scripts, speaker-dependent YAML file (e.g., conf/speaker/SM1.yml) and speaker-pair dependent YAML file (e.g., conf/pair/SM1-TF1.yml) are generated. 
 
 ### 3. Modify F0 extraction range
-In order to achive better sound quality and conversion accuracy of the converted voice, it is necessary to designate appropreate parameters. 
+In order to achieve better sound quality and conversion accuracy of the converted voice, it is necessary to designate appropriate parameters. 
 In this step, we describe about how to define the F0 ranges.
-First you run following command to generated F0 histgrams.
+First you run following command to generated F0 histograms.
 
 ```
 python initialize.py -3 SM1 TF1 16000
 ```
-where "-3" option indicates a flag to generate F0 histgrams of the source and target speakers.
-After finishing this commands, you can find the histgrams in "conf/figure" directory.
-Here is a example figure in "conf/figure/SM1_f0histgram.png".
+where "-3" option indicates a flag to generate F0 histograms of the source and target speakers.
+After finishing this commands, you can find the histograms in "conf/figure" directory.
+Here is a example figure in "conf/figure/SM1_f0histogram.png".
+
 ![Example](./png/f0histogram_example.png)
 
 Based on this figure, you manually modify "minf0" and "maxf0" in speaker-dependent YAML file (e.g., conf/speaker/TF1.yml) in each speaker.
@@ -171,7 +172,7 @@ This command perform based on following figure step by step.
 
 
 ## Run DIFFVC
-If you want to perfor DIFFVC with F0 transformation, you need to perform F0 transformation of speech samples of source speaker.
+If you want to perform DIFFVC with F0 transformation, you need to perform F0 transformation of speech samples of source speaker.
 To perform F0 transformation, you run following command
 
 ```
@@ -179,4 +180,4 @@ python run_f0_transformation.py SM1 TF1
 ```
 After command finished, you can find F0 transformed wav files in "data/wav" directory.
 Using this wav file as a new source speaker, you can perform DIFFVC with F0 transformation.
-Note that you need to perform initialization and run VC steps again.
+Note that you need to perform initialization and run VC steps for F0 transformed source speaker and target speaker again.
