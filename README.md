@@ -42,7 +42,7 @@ python setup.py develop
 
 ### Run example
 
-See https://sprocket.document/index.html
+See [Voice Conversion Example](docs/vc_example.md)
 
 ## REPORTING BUGS
 

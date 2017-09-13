@@ -156,7 +156,7 @@ where "-3" option indicates a flag to generate F0 histograms of the source and t
 After finishing this commands, you can find the histograms in "conf/figure" directory.
 Here is a example figure in "conf/figure/SM1_f0histogram.png".
 
-![Example](./png/f0histogram_example.png)
+![Example](png/f0histogram_example.png)
 
 Based on this figure, you manually modify "minf0" and "maxf0" in speaker-dependent YAML file (e.g., conf/speaker/TF1.yml) in each speaker.
 
@@ -168,7 +168,7 @@ python run_sprocket.py -1 -2 -3 -4 -5 SM1 TF1
 ```
 This command perform based on following figure step by step.
 
-![VCflow](./png/vc_flow.png)
+![VCflow](png/vc_flow.png)
 
 
 ## Run DIFFVC
