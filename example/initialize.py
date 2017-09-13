@@ -115,7 +115,7 @@ def create_list(dest, wav_dir, exist_ok=True):
                  for wav_file_name in os.listdir(wav_dir)
                  if os.path.splitext(wav_file_name)[1] == ".wav")
         with open(dest, "w") as file_handler:
-            for line in lines:
+            for line in sorted(lines):
                 print(line, file=file_handler)
 
 
@@ -159,7 +159,7 @@ if __name__ == "__main__":
     # Execute all steps if no options on steps are given
     # Keep index #0 False in case you create a hotbed for bugs.
     if not any(execute_steps):
-        execute_steps[1:] = [True] * (len(execute_steps) - 1)
+        raise("Please specify steps with options")
 
     if execute_steps[1]:
         print("### 1. create initial list files ###")
