@@ -83,7 +83,13 @@ class WSOLA(object):
             # store WSOLAed waveform using over-lap add
             spdata = x[sp:sp + self.sl] * self.win[self.sl:]
             epdata = x[epd - self.sl: epd] * self.win[:self.sl]
-            wsolaed[outp:outp + self.sl] = spdata + epdata
+            if len(spdata) == len(wsolaed[outp:outp + self.sl]):
+                wsolaed[outp:outp + self.sl] = spdata + epdata
+            else:
+                wsolaed_len = len(wsolaed[outp:outp + self.sl])
+                wsolaed[outp:outp + self.sl] = spdata[:wsolaed_len] + \
+                    epdata[:wsolaed_len]
+
             outp += self.sl
 
             # transtion to next frame
