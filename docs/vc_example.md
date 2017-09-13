@@ -35,53 +35,53 @@ You can change the number of speech samples to be used in the training and evalu
 In this example, we make lists shorter by manually modification
 We change the number of training speech samples to 30 and the number of evaluation speech samples to 10 as below.
 
-list/SM1_train.list: 
+list/SF1_train.list: 
 
 ``` 
-SM1/100001
-SM1/100002
-SM1/100003
-SM1/100004
-SM1/100005
-SM1/100006
-SM1/100007
-SM1/100008
-SM1/100009
-SM1/100010
-SM1/100011
-SM1/100012
-SM1/100013
-SM1/100014
-SM1/100015
-SM1/100016
-SM1/100017
-SM1/100018
-SM1/100019
-SM1/100020
-SM1/100021
-SM1/100022
-SM1/100023
-SM1/100024
-SM1/100025
-SM1/100026
-SM1/100027
-SM1/100028
-SM1/100029
-SM1/100030
+SF1/100001
+SF1/100002
+SF1/100003
+SF1/100004
+SF1/100005
+SF1/100006
+SF1/100007
+SF1/100008
+SF1/100009
+SF1/100010
+SF1/100011
+SF1/100012
+SF1/100013
+SF1/100014
+SF1/100015
+SF1/100016
+SF1/100017
+SF1/100018
+SF1/100019
+SF1/100020
+SF1/100021
+SF1/100022
+SF1/100023
+SF1/100024
+SF1/100025
+SF1/100026
+SF1/100027
+SF1/100028
+SF1/100029
+SF1/100030
 ```
-list/SM1_eval.list: 
+list/SF1_eval.list: 
 
 ```
-SM1/100031
-SM1/100032
-SM1/100033
-SM1/100034
-SM1/100035
-SM1/100036
-SM1/100037
-SM1/100038
-SM1/100039
-SM1/100040
+SF1/100031
+SF1/100032
+SF1/100033
+SF1/100034
+SF1/100035
+SF1/100036
+SF1/100037
+SF1/100038
+SF1/100039
+SF1/100040
 ```
 
 list/TF1_train.list:
@@ -139,10 +139,10 @@ Note that you have to coincidence the length and order of the lists between the 
 Next, to generate configure files of speakers, run following command.
 
 ```
-python initialize.py -2 SM1 TF1 16000
+python initialize.py -2 SF1 TF1 16000
 ```
 where "-2" option indicates a flag to generate configure files for source and target speakers.
-By executing this scripts, speaker-dependent YAML file (e.g., conf/speaker/SM1.yml) and speaker-pair dependent YAML file (e.g., conf/pair/SM1-TF1.yml) are generated. 
+By executing this scripts, speaker-dependent YAML file (e.g., conf/speaker/SF1.yml) and speaker-pair dependent YAML file (e.g., conf/pair/SF1-TF1.yml) are generated. 
 
 ### 3. Modify F0 extraction range
 In order to achieve better sound quality and conversion accuracy of the converted voice, it is necessary to designate appropriate parameters. 
@@ -150,11 +150,11 @@ In this step, we describe about how to define the F0 ranges.
 First you run following command to generated F0 histograms.
 
 ```
-python initialize.py -3 SM1 TF1 16000
+python initialize.py -3 SF1 TF1 16000
 ```
 where "-3" option indicates a flag to generate F0 histograms of the source and target speakers.
 After finishing this commands, you can find the histograms in "conf/figure" directory.
-Here is a example figure in "conf/figure/SM1_f0histogram.png".
+Here is a example figure in "conf/figure/SF1_f0histogram.png".
 
 ![Example](png/f0histogram_example.png)
 
@@ -164,7 +164,7 @@ Based on this figure, you manually modify "minf0" and "maxf0" in speaker-depende
 Now you can perform VC using "run_sprocket.py"
 
 ```
-python run_sprocket.py -1 -2 -3 -4 -5 SM1 TF1
+python run_sprocket.py -1 -2 -3 -4 -5 SF1 TF1
 ```
 This command perform based on following figure step by step.
 
@@ -176,7 +176,7 @@ If you want to perform DIFFVC with F0 transformation, you need to perform F0 tra
 To perform F0 transformation, you run following command
 
 ```
-python run_f0_transformation.py SM1 TF1
+python run_f0_transformation.py SF1 TF1
 ```
 After command finished, you can find F0 transformed wav files in "data/wav" directory.
 Using this wav file as a new source speaker, you can perform DIFFVC with F0 transformation.
