@@ -8,7 +8,7 @@ Article of VCC 2016:
     http://www.cstr.ed.ac.uk/downloads/publications/2016/toda2016voice.pdf
 
 Usage:
-    download_sample_data.py [-h] [-q] [-f] [-m]
+    download_vcc2016data.py [-h] [-q] [-f] [-m]
 
 Arguments:
     -h, --help      Show this help and exit
