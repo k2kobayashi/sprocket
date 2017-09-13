@@ -117,18 +117,21 @@ def stem(path):
     """
     return os.path.splitext(os.path.basename(path))[0]
 
+
 def makedirs(path, exist_ok=False):
     """Backport of os.makedirs for Python 2.7"""
     if six.PY2:
         try:
             os.makedirs(path)
         except OSError as exception:
-            if exist_ok and exception.errno == errno.EEXIST and os.path.isdir(path):
+            if exist_ok and exception.errno == errno.EEXIST\
+                    and os.path.isdir(path):
                 pass
             else:
                 raise
     else:
         os.makedirs(path, exist_ok=exist_ok)
+
 
 def unpack_archive(archive_path, dest=None):
     """Backport of shutil.unpack_archive for Python 2.7
@@ -149,6 +152,7 @@ def unpack_archive(archive_path, dest=None):
         raise ValueError("{} is not a ZIP file".format(archive_path))
     with ZipFile(archive_path) as archive_obj:
         archive_obj.extractall(dest)
+
 
 if __name__ == "__main__":
     args = docopt(__doc__)
