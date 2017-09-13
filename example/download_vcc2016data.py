@@ -144,7 +144,7 @@ def unpack_archive(archive_path, dest=None):
     -----
     This function supports only ZIP archives provisionally.
     """
-    
+
     if os.path.splitext(archive_path)[1].lower() != ".zip":
         raise ValueError("{} is not a ZIP file".format(archive_path))
     with ZipFile(archive_path) as archive_obj:
@@ -188,7 +188,7 @@ if __name__ == "__main__":
                 dest_path = os.path.join(dest_dir, os.path.basename(wav_file))
                 if os.path.exists(dest_path) and does_by_force:
                     os.remove(dest_path)
-                os.rename(wav_file, dest_path)
+                shutil.move(wav_file, dest_path)
 
         if is_verbose:
             print("Downloading the training data...")
@@ -211,7 +211,7 @@ if __name__ == "__main__":
                 dest_path = os.path.join(dest_dir, os.path.basename(wav_file))
                 if os.path.exists(dest_path) and does_by_force:
                     os.remove(dest_path)
-                os.rename(wav_file, dest_path)
+                shutil.move(wav_file, dest_path)
     # If support of 2.7 dropped, remove all of the following lines
     except:
         raise
