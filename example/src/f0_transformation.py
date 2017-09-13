@@ -53,7 +53,7 @@ def get_f0s_from_list(conf, list_file, wav_dir):
     return f0s
 
 
-def transform_f0_from_list(f0rate, wav_fs, list_file, wav_dir):
+def transform_f0_from_list(speaker, f0rate, wav_fs, list_file, wav_dir):
     # open list file
     with open(list_file, 'r') as fp:
         files = fp.readlines()
@@ -62,7 +62,7 @@ def transform_f0_from_list(f0rate, wav_fs, list_file, wav_dir):
     shifter = Shifter(wav_fs, f0rate=f0rate)
 
     # check output directory
-    transformed_wavdir = os.path.join(wav_dir + '_' + str(f0rate))
+    transformed_wavdir = os.path.join(wav_dir, speaker + '_' + str(f0rate))
     if not os.path.exists(transformed_wavdir):
         os.makedirs(transformed_wavdir)
 
@@ -132,6 +132,8 @@ def main(*argv):
                         help='Wav file directory of the speaker')
     args = parser.parse_args(argv)
 
+    print(args.speaker)
+
     # read parameters from speaker yml
     org_conf = SpeakerYML(args.org_yml)
     tar_conf = SpeakerYML(args.tar_yml)
@@ -152,9 +154,9 @@ def main(*argv):
     print('F0 transformation ratio: ' + str(f0rate))
 
     # F0 transformation of original waveform in both train and eval list files
-    transform_f0_from_list(
+    transform_f0_from_list(args.speaker,
         f0rate, org_conf.wav_fs, args.org_train_list, args.wav_dir)
-    transform_f0_from_list(
+    transform_f0_from_list(args.speaker,
         f0rate, org_conf.wav_fs, args.org_eval_list, args.wav_dir)
 
     # create list files for F0 transformed original
