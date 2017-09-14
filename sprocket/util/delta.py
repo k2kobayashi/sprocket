@@ -44,6 +44,28 @@ def delta(data, win=[-0.5, 0, 0.5]):
     return delta
 
 
+def sddata(data, win=[-0.5, 0, 0.5]):
+    """Calculate delta component
+
+    Parameters
+    ----------
+    data : array, shape (`T`, `dim`)
+        Array of static matrix sequence.
+    win: array, optional, shape (`3`)
+        The shape of window matrix.
+        Default set to [-0.5, 0, 0.5].
+
+    Returns
+    -------
+    sddata: array, shape (`T`, `dim*2`)
+        Array static and delta matrix sequence.
+
+    """
+
+    sddata = np.c_[data, delta(data, win)]
+    return sddata
+
+
 def construct_static_and_delta_matrix(T, D):
     """Calculate static and delta transformation matrix
 
