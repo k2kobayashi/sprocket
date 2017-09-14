@@ -12,10 +12,11 @@ import argparse
 import os
 import sys
 import numpy as np
+from sklearn.externals import joblib
 
+from .misc import read_feats
 from yml import PairYML
-
-from sprocket.util import read_feats, sddata, extfrm, estimate_twf, melcd
+from sprocket.util import static_delta, extfrm, estimate_twf, melcd
 from sprocket.model.GMM import GMMTrainer, GMMConvertor
 
 
@@ -96,7 +97,7 @@ def main(*argv):
         cvgmm = GMMConvertor(n_mix=pconf.GMM_mcep_n_mix,
                              covtype=pconf.GMM_mcep_covtype,
                              cvtype=pconf.GMM_mcep_cvtype)
-        cvgmm.open_from_trainer(trgmm)
+        cvgmm.open_from_param(trgmm.param)
         twfs = []
         for i in range(num_files):
             cvmcep = cvgmm.convert(sddata(org_mceps[i][:, sd:]))
@@ -117,6 +118,9 @@ def main(*argv):
     # save files in final steps
     # save jnt
     # save GMM
+    gmmpath =
+    joblib.dump(trgmm.param, gmmpath)
+
     # save twf
 
 

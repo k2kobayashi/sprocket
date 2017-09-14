@@ -12,9 +12,9 @@ import argparse
 import os
 import sys
 
+from .misc import read_feats
 from sprocket.stats.f0statistics import F0statistics
 from sprocket.stats.gv import GV
-from sprocket.util.hdf5 import read_feats
 
 
 def main(*argv):
@@ -49,6 +49,7 @@ def main(*argv):
     f0statspath = os.path.join(statspath + '.f0stats')
     f0stats.save(f0statspath)
     print(f0statspath)
+
 
 if __name__ == '__main__':
     main()
