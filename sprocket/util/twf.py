@@ -9,7 +9,7 @@ from fastdtw import fastdtw
 from sprocket.util import melcd
 
 
-def estimate_twf(orgdata, tardata, distance='melcd', normalflag=False):
+def estimate_twf(orgdata, tardata, distance='melcd', fast=True):
     """time warping function estimator
 
     Parameters
@@ -21,8 +21,9 @@ def estimate_twf(orgdata, tardata, distance='melcd', normalflag=False):
     distance : str, optional
         distance function
         `melcd` : mel-cepstrum distortion
-    fastflag : bool, optional
+    fast : bool, optional
         Use fastdtw instead of dtw
+        Default set to `True`
 
     Returns
     ---------
@@ -31,14 +32,14 @@ def estimate_twf(orgdata, tardata, distance='melcd', normalflag=False):
     """
 
     if distance == 'melcd':
-        def distance_func(x, y): return melcd(x, y, vector=True)
+        def distance_func(x, y): return melcd(x, y)
     else:
         raise('other distance metrics does not support.')
 
-    if normalflag:
-        _, _, _, path = dtw(orgdata, tardata, distance_func)
-    else:
+    if fast:
         _, path = fastdtw(orgdata, tardata, dist=distance_func)
         twf = np.array(path).T
+    else:
+        _, _, _, twf = dtw(orgdata, tardata, distance_func)
 
     return twf

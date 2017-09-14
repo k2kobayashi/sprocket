@@ -44,8 +44,8 @@ def delta(data, win=[-0.5, 0, 0.5]):
     return delta
 
 
-def sddata(data, win=[-0.5, 0, 0.5]):
-    """Calculate delta component
+def static_delta(data, win=[-0.5, 0, 0.5]):
+    """Calculate static and delta component
 
     Parameters
     ----------

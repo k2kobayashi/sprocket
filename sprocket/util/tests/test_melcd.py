@@ -3,11 +3,9 @@ from __future__ import division, print_function, absolute_import
 import unittest
 
 import numpy as np
-from dtw import dtw
-
-
 import pysptk
-from sprocket.util.distance import melcd
+
+from sprocket.util import melcd, estimate_twf
 
 
 def get_random_peseudo_mcep(order=24, alpha=0.42):
@@ -24,8 +22,9 @@ class DistanceTest(unittest.TestCase):
         tar = get_random_peseudo_mcep()
 
         # perform dtw for mel-cd function test
-        def distance_func(x, y): return melcd(x, y, vector=True)
-        dist, cost, acost, twf = dtw(org, tar, dist=distance_func)
+        def distance_func(x, y): return melcd(x, y)
+        twf = estimate_twf(org, tar, fast=True)
+        twf = estimate_twf(org, tar, fast=False)
 
         # align org and tar
         orgmod = org[twf[0]]
@@ -36,8 +35,7 @@ class DistanceTest(unittest.TestCase):
         flen = len(twf[0])
         mcd = 0
         for t in range(flen):
-            mcd += melcd(orgmod[t], tarmod[t], vector=True)
+            mcd += melcd(orgmod[t], tarmod[t])
         mcd1 = mcd / flen
         mcd2 = melcd(orgmod, tarmod)
-
         assert mcd1 - mcd2 < np.exp(-10)

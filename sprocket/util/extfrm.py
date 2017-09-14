@@ -16,6 +16,7 @@ def extfrm(data, npow, threshold=-20):
         Vector of normalized power sequence.
     threshold: scala, optional
         Scala of power threshold [dB]
+        Default set to -20
 
     Returns
     -------
