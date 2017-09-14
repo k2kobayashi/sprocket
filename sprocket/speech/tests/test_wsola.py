@@ -7,7 +7,7 @@ from scipy.io import wavfile
 from sprocket.speech import WSOLA
 
 dirpath = os.path.dirname(os.path.realpath(__file__))
-saveflag = True
+saveflag = False
 
 
 class WSOLATest(unittest.TestCase):
