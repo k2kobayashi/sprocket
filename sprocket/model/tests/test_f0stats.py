@@ -2,31 +2,25 @@ from __future__ import division, print_function, absolute_import
 
 import unittest
 
-import os
 import numpy as np
 from sprocket.model import F0statistics
-
-dirpath = os.path.dirname(os.path.realpath(__file__))
-orgpath = dirpath + '/test_org.f0stats'
-tarpath = dirpath + '/test_tar.f0stats'
-tmppath = dirpath + '/test_tmp.f0stats'
 
 
 class F0statisticsTest(unittest.TestCase):
 
-    def test_f0_convert(self):
-        f0stats = F0statistics()
-        f0stats.open_from_file(orgpath, tarpath)
-        f0 = np.r_[200 * np.random.rand(50), np.zeros(50)]
-        cvf0 = f0stats.convert(f0)
-        assert len(f0) == len(cvf0)
-
     def test_estimate_F0statistics(self):
         f0stats = F0statistics()
-        f0s = []
+        orgf0s = []
         for i in range(1, 4):
-            f0s.append(200 * np.r_[np.random.rand(100 * i), np.zeros(100)])
+            orgf0s.append(200 * np.r_[np.random.rand(100 * i), np.zeros(100)])
+        orgf0stats = f0stats.estimate(orgf0s)
 
-        f0stats.estimate(f0s)
-        f0stats.save(tmppath)
-        os.remove(tmppath)
+        tarf0s = []
+        for i in range(1, 8):
+            tarf0s.append(300 * np.r_[np.random.rand(100 * i), np.zeros(100)])
+        tarf0stats = f0stats.estimate(tarf0s)
+
+        orgf0 = 200 * np.r_[np.random.rand(100 * i), np.zeros(100)]
+        cvf0 = f0stats.convert(orgf0, orgf0stats, tarf0stats)
+
+        assert len(orgf0) == len(cvf0)

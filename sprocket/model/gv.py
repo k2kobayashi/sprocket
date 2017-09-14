@@ -2,20 +2,13 @@
 
 from __future__ import division, print_function, absolute_import
 
-import os
 import numpy as np
 
 
 class GV (object):
-
     """A global variance (GV) statistics class
     Estimate statistics and perform postfilter based on
     the GV statistics
-
-    Attributes
-    ---------
-    gvstats : shape (`[mean, var]`, `dim`)
-        Array of mean and variance of GV in each feature dimension
 
     """
 
@@ -47,48 +40,11 @@ class GV (object):
         vm = np.mean(np.array(var), axis=0)
         vv = np.var(np.array(var), axis=0)
         gvstats = np.r_[vm, vv]
-        self.gvstats = gvstats.reshape(2, len(vm))
+        gvstats = gvstats.reshape(2, len(vm))
 
-        return
+        return gvstats
 
-    def save(self, fpath):
-        """Save GV statistics into fpath as binary
-
-        Parameters
-        ---------
-        fpath: str,
-            File path of GV statistics
-        gvstats: array, shape (`2`, `dim`)
-            GV statistics
-
-        """
-
-        if self.gvstats is None:
-            raise('gvstats does not calculated')
-
-        if not os.path.exists(os.path.dirname(fpath)):
-            os.makedirs(os.path.dirname(fpath))
-
-        self.gvstats.tofile(fpath)
-
-    def open_from_file(self, fpath):
-        """Open GV statistics from binary file
-
-        Parameters
-        ---------
-        fpath: str,
-            File path of GV statistics
-
-        """
-
-        # read gv from binary
-        gv = np.fromfile(fpath)
-        dim = len(gv) // 2
-        self.gvstats = gv.reshape(2, dim)
-
-        return
-
-    def postfilter(self, data, startdim=1):
+    def postfilter(self, data, gvstats, startdim=1):
         """Perform postfilter based on GV statistics into data
 
         Parameters
@@ -107,15 +63,15 @@ class GV (object):
 
         # get length and dimension
         T, dim = data.shape
-        assert self.gvstats is not None
-        assert dim == self.gvstats.shape[1]
+        assert gvstats is not None
+        assert dim == gvstats.shape[1]
 
         # calculate statics of input data
         datamean = np.mean(data, axis=0)
         datavar = np.var(data, axis=0)
 
         # perform GV postfilter
-        filtered = np.sqrt(self.gvstats[0, startdim:] / datavar[startdim:]) * \
+        filtered = np.sqrt(gvstats[0, startdim:] / datavar[startdim:]) * \
             (data[:, startdim:] - datamean[startdim:]) + datamean[startdim:]
 
         filtered_data = np.c_[data[:, :startdim], filtered]

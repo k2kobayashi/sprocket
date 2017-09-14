@@ -2,21 +2,12 @@
 
 from __future__ import division, print_function, absolute_import
 
-import os
 import numpy as np
 
 
 class F0statistics(object):
-
     """F0 statistics class
     Estimate F0 statistics and convert F0
-
-    Attributes
-    ---------
-    orgf0stats, shape (`[mean, std]`)
-        Vector of mean and standard deviation of logarithmic F0 for original speaker
-    tarf0stats, shape (`[mean, std]`)
-        Vector of mean and standard deviation of logarithmic F0 for target speaker
 
     """
 
@@ -47,47 +38,20 @@ class F0statistics(object):
             else:
                 f0s = np.r_[f0s, np.log(f0[nonzero_indices])]
 
-        self.f0stats = np.array([np.mean(f0s), np.std(f0s)])
+        f0stats = np.array([np.mean(f0s), np.std(f0s)])
+        return f0stats
 
-        return
-
-    def save(self, fpath):
-        """Save f0 statistics into fpath as binary
-
-        Parameters
-        ---------
-        fpath : str,
-            File path of F0 statistics
-
-        """
-
-        if not os.path.exists(os.path.dirname(fpath)):
-            os.makedirs(os.path.dirname(fpath))
-        self.f0stats.tofile(fpath)
-
-    def open_from_file(self, orgfile, tarfile):
-        """Open F0 statistics from file
-
-        Parameters
-        ---------
-        orgfile : str
-            File path of F0 statistics for original speaker
-        tarfile : str
-            File path of F0 statistics for target speaker
-
-        """
-
-        # read f0 statistics of source and target from binary
-        self.orgf0stats = np.fromfile(orgfile)
-        self.tarf0stats = np.fromfile(tarfile)
-
-    def convert(self, f0):
+    def convert(self, f0, orgf0stats, tarf0stats):
         """Convert F0 based on F0 statistics
 
         Parameters
         ---------
         f0 : array, shape(`T`, `1`)
             Array of F0 sequence
+        orgf0stats, shape (`[mean, std]`)
+            Vector of mean and standard deviation of logarithmic F0 for original speaker
+        tarf0stats, shape (`[mean, std]`)
+            Vector of mean and standard deviation of logarithmic F0 for target speaker
 
         Returns
         ---------
@@ -103,8 +67,8 @@ class F0statistics(object):
         cvf0 = np.zeros(T)
 
         nonzero_indices = f0 > 0
-        cvf0[nonzero_indices] = np.exp((self.tarf0stats[1] / self.orgf0stats[1]) *
+        cvf0[nonzero_indices] = np.exp((tarf0stats[1] / orgf0stats[1]) *
                                        (np.log(f0[nonzero_indices]) -
-                                        self.orgf0stats[0]) + self.tarf0stats[0])
+                                        orgf0stats[0]) + tarf0stats[0])
 
         return cvf0
