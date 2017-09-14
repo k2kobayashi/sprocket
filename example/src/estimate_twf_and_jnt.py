@@ -16,14 +16,14 @@ from sklearn.externals import joblib
 
 from .misc import read_feats
 from yml import PairYML
-from sprocket.util import static_delta, extfrm, estimate_twf, melcd
+from sprocket.util import static_delta, extfrm, estimate_twf, melcd, HDF5
 from sprocket.model.GMM import GMMTrainer, GMMConvertor
 
 
 def get_aligned_jointdata(orgdata, orgnpow, tardata, tarnpow, cvdata=None):
     # extract extsddata
-    org_extsddata = extfrm(sddata(orgdata), orgnpow)
-    tar_extsddata = extfrm(sddata(tardata), tarnpow)
+    org_extsddata = extfrm(static_delta(orgdata), orgnpow)
+    tar_extsddata = extfrm(static_delta(tardata), tarnpow)
 
     if cvdata is None:
         # calculate twf and mel-cd
@@ -31,7 +31,7 @@ def get_aligned_jointdata(orgdata, orgnpow, tardata, tarnpow, cvdata=None):
         mcd = melcd(org_extsddata[twf[0]], tar_extsddata[twf[1]])
     else:
         # calculate twf and mel-cd with converted data
-        cv_extsddata = extfrm(sddata(cvdata), orgnpow)
+        cv_extsddata = extfrm(static_delta(cvdata), orgnpow)
         twf = estimate_twf(cv_extsddata, tar_extsddata, distance='melcd')
         mcd = melcd(cv_extsddata[twf[0]], tar_extsddata[twf[1]])
 
@@ -95,12 +95,12 @@ def main(*argv):
         trgmm.train(jnt)
 
         cvgmm = GMMConvertor(n_mix=pconf.GMM_mcep_n_mix,
-                             covtype=pconf.GMM_mcep_covtype,
-                             cvtype=pconf.GMM_mcep_cvtype)
+                             covtype=pconf.GMM_mcep_covtype)
         cvgmm.open_from_param(trgmm.param)
         twfs = []
         for i in range(num_files):
-            cvmcep = cvgmm.convert(sddata(org_mceps[i][:, sd:]))
+            cvmcep = cvgmm.convert(static_delta(org_mceps[i][:, sd:]),
+                                   cvtype=pconf.GMM_mcep_cvtype)
             jdata, twf, mcd = get_aligned_jointdata(org_mceps[i][:, sd:],
                                                     org_npows[i],
                                                     tar_mceps[i][:, sd:],
@@ -117,11 +117,30 @@ def main(*argv):
 
     # save files in final steps
     # save jnt
+    jnt_dir = os.path.join(args.pair_dir, 'jnt')
+    os.makedirs(jnt_dir, exist_ok=True)
+    jntpath = os.path.join(jnt_dir, 'it' + str(itnum) + '_jnt.h5')
+    jnth5 = HDF5(jntpath, mode='w')
+    jnth5.save(jnt, ext='jnt')
+    jnth5.close()
+
     # save GMM
-    gmmpath =
+    gmm_dir = os.path.join(args.pair_dir, 'GMM')
+    os.makedirs(gmm_dir, exist_ok=True)
+    gmmpath = os.path.join(gmm_dir, 'it' + str(itnum) + '_gmm.pkl')
     joblib.dump(trgmm.param, gmmpath)
 
     # save twf
+    twf_dir = os.path.join(args.pair_dir, 'twf')
+    os.makedirs(twf_dir, exist_ok=True)
+    with open(args.org_list_file, 'r') as fp:
+        for line, twf in zip(fp, twfs):
+            f = os.path.basename(line.rstrip())
+            twfpath = os.path.join(
+                twf_dir, 'it' + str(itnum) + '_' + f + '.h5')
+            twfh5 = HDF5(twfpath, mode='w')
+            twfh5.save(twf, ext='twf')
+            twfh5.close()
 
 
 if __name__ == '__main__':

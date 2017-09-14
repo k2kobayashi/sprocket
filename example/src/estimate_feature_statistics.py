@@ -13,8 +13,8 @@ import os
 import sys
 
 from .misc import read_feats
-from sprocket.stats.f0statistics import F0statistics
-from sprocket.stats.gv import GV
+from sprocket.model import F0statistics, GV
+from sprocket.util import HDF5
 
 
 def main(*argv):
@@ -32,23 +32,24 @@ def main(*argv):
 
     # open h5 files
     h5_dir = os.path.join(args.pair_dir, 'h5')
-    statspath = os.path.join(args.pair_dir, 'stats', args.speaker)
+    statspath = os.path.join(args.pair_dir, 'stats', args.speaker + '.h5')
+    h5 = HDF5(statspath, mode='w')
+
+    # estimate and save F0 statistics
+    f0stats = F0statistics()
+    f0s = read_feats(args.list_file, h5_dir, ext='f0')
+    f0stats = f0stats.estimate(f0s)
+    h5.save(f0stats, ext='f0stats')
+    print("f0stats save into " + statspath)
 
     # estimate and save GV of orginal and target speakers
     gv = GV()
     mceps = read_feats(args.list_file, h5_dir, ext='mcep')
-    gv.estimate(mceps)
-    gvpath = os.path.join(statspath + '.gv')
-    gv.save(gvpath)
-    print(gvpath)
+    gvstats = gv.estimate(mceps)
+    h5.save(gvstats, ext='gv')
+    print("gvstats save into " + statspath)
 
-    # estimate and save F0 statistics of original and target speakers
-    f0stats = F0statistics()
-    f0s = read_feats(args.list_file, h5_dir, ext='f0')
-    f0stats.estimate(f0s)
-    f0statspath = os.path.join(statspath + '.f0stats')
-    f0stats.save(f0statspath)
-    print(f0statspath)
+    h5.close()
 
 
 if __name__ == '__main__':
