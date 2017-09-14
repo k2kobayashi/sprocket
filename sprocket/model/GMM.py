@@ -15,8 +15,7 @@ from sprocket.util.delta import construct_static_and_delta_matrix
 class GMMTrainer(object):
 
     """GMM trainer
-    This class offers the training of GMM with several types of
-    covariance matrix.
+    This class offers the training of GMM with several types of covariance matrix.
 
     Parameters
     ---------
@@ -167,7 +166,6 @@ class GMMTrainer(object):
 
 
 class GMMConvertor(object):
-
     """A GMM Convertor
     This class offers the several conversion techniques such as Maximum Likelihood
     Parameter Generation (MLPG) and Mimimum Mean Square Error (MMSE).
@@ -227,19 +225,20 @@ class GMMConvertor(object):
         self.param = joblib.load(fpath)
         self._deploy_parameters()
 
-        # change model paramter of GMM into that of gmmmode
-        if self.gmmmode is None:
-            pass
-        elif self.gmmmode == 'diff':
-            self._transform_gmm_into_diffgmm()
-        elif self.gmmmode == 'intra':
-            self._transform_gmm_into_intragmm()
-        else:
-            raise('please choose GMM mode in [None, diff, intra]')
+        return
 
-        # estimate parameters for conversion
-        self._set_Ab()
-        self._set_pX()
+    def open_from_trainer(self, trainer):
+        """Open GMM from GMMTrainer
+
+        Parameters
+        ---------
+        trainer: GMMTrainer
+            GMMTrainer class
+
+        """
+
+        self.param = trainer.param
+        self._deploy_parameters()
 
         return
 
@@ -351,6 +350,20 @@ class GMMConvertor(object):
         self.covXY = self.jcov[:, :sddim, sddim:]
         self.covYX = self.jcov[:, sddim:, :sddim]
         self.covYY = self.jcov[:, sddim:, sddim:]
+
+        # change model paramter of GMM into that of gmmmode
+        if self.gmmmode is None:
+            pass
+        elif self.gmmmode == 'diff':
+            self._transform_gmm_into_diffgmm()
+        elif self.gmmmode == 'intra':
+            self._transform_gmm_into_intragmm()
+        else:
+            raise('please choose GMM mode in [None, diff, intra]')
+
+        # estimate parameters for conversion
+        self._set_Ab()
+        self._set_pX()
 
         return
 
