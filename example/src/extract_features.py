@@ -13,8 +13,8 @@ import sys
 import numpy as np
 from scipy.io import wavfile
 
-from sprocket.feature import FeatureExtractor
-from sprocket.util.hdf5 import HDF5
+from sprocket.speech import FeatureExtractor
+from sprocket.util import HDF5
 from yml import SpeakerYML
 
 
@@ -42,6 +42,13 @@ def main(*argv):
     h5_dir = os.path.join(args.pair_dir, 'h5')
     os.makedirs(h5_dir, exist_ok=True)
 
+    # constract FeatureExtractor class
+    feat = FeatureExtractor(analyzer=sconf.analyzer,
+                            fs=sconf.wav_fs,
+                            shiftms=sconf.wav_shiftms,
+                            minf0=sconf.f0_minf0,
+                            maxf0=sconf.f0_maxf0)
+
     # open list file
     with open(args.list_file, 'r') as fp:
         for line in fp:
@@ -55,19 +62,9 @@ def main(*argv):
                 assert fs == sconf.wav_fs
 
                 print("Extract acoustic features: " + wavf)
-                # constract FeatureExtractor class
-                feat = FeatureExtractor(x,
-                                        analyzer=sconf.analyzer,
-                                        fs=sconf.wav_fs,
-                                        shiftms=sconf.wav_shiftms,
-                                        minf0=sconf.f0_minf0,
-                                        maxf0=sconf.f0_maxf0)
 
                 # analyze F0, spc, ap and bandap
-                feat.analyze()
-                f0 = feat.f0()
-                spc = feat.spc()
-                ap = feat.ap()
+                f0, spc, ap = feat.analyze(x)
                 bandap = feat.bandap()
                 mcep = feat.mcep(dim=sconf.mcep_dim, alpha=sconf.mcep_alpha)
                 npow = feat.npow()
