@@ -32,7 +32,7 @@ class HDF5(object):
         self.flbl, _ = os.path.splitext(self.filename)
 
         if mode is None:
-            raise("Please specify the mode.")
+            raise ValueError("Please specify the mode.")
         else:
             self.mode = mode
 
@@ -45,7 +45,8 @@ class HDF5(object):
                 print("overwrite: " + self.fpath)
         elif self.mode == 'r':
             if not os.path.exists(self.fpath):
-                raise "h5 file does not exist in " + self.fpath
+                raise FileNotFoundError(
+                    "h5 file does not exist in " + self.fpath)
 
         # open hdf5 file to fpath
         self.h5 = h5py.File(self.fpath, self.mode)
@@ -65,10 +66,10 @@ class HDF5(object):
         """
 
         if ext is None:
-            raise("Please specify an extention.")
+            raise ValueError("Please specify an extention.")
 
         if self.mode != 'r':
-            raise("mode should be 'r'")
+            raise ValueError("mode should be 'r'")
 
         return self.h5[ext].value
 
@@ -86,9 +87,9 @@ class HDF5(object):
         """
 
         if ext is None:
-            raise("Please specify an extention.")
+            raise ValueError("Please specify an extention.")
         if self.mode != 'w':
-            raise("mode should be 'w'")
+            raise ValueError("mode should be 'w'")
 
         self.h5.create_dataset(ext, data=data)
         self.h5.flush()

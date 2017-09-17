@@ -6,7 +6,11 @@ import numpy as np
 
 
 def melcd(array1, array2):
-    """Normalized mel-cepstrum distortion over time
+    """Calculate mel-cepstrum distortion
+
+    Calculate mel-cepstrum distortion between the arrays
+    or vectors. This function assumes the shapes of arrays
+    or vectors are same.
 
     Parameters
     ----------
@@ -30,6 +34,6 @@ def melcd(array1, array2):
         diff = array1 - array2
         mcd = 10.0 / np.log(10) * np.sqrt(2.0 * np.sum(diff ** 2))
     else:
-        raise("Dimension mismatsh")
+        raise ValueError("Dimension mismatch")
 
     return mcd

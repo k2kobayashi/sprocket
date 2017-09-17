@@ -267,7 +267,7 @@ class GMMConvertor(object):
             # minimum mean square error based parameter generation
             odata = self._mmse(wseq, data)
         else:
-            raise('please choose conversion mode in [mlpg, mmse]')
+            raise ValueError('please choose conversion mode in `mlpg`, `mmse`')
 
         return odata
 
@@ -359,7 +359,7 @@ class GMMConvertor(object):
         elif self.gmmmode == 'intra':
             self._transform_gmm_into_intragmm()
         else:
-            raise('please choose GMM mode in [None, diff, intra]')
+            raise ValueError('please choose GMM mode in [None, diff, intra]')
 
         # estimate parameters for conversion
         self._set_Ab()
