@@ -164,6 +164,10 @@ class GMMConvertor(object):
         ---------
         data : array, shape(`T`, `dim`)
             Original data will be converted
+        cvtype: str, optional
+            Type of conversion technique
+            `mlpg` : maximum likelihood parameter generation
+            `mmse` : minimum mean square error
 
         Returns
         ---------
