@@ -8,13 +8,12 @@ import numpy as np
 def melcd(array1, array2):
     """Calculate mel-cepstrum distortion
 
-    Calculate mel-cepstrum distortion between the arrays
-    or vectors. This function assumes the shapes of arrays
-    or vectors are same.
+    Calculate mel-cepstrum distortion between the arrays.
+    This function assumes the shapes of arrays are same.
 
     Parameters
     ----------
-    array1, array2 : array, shape (`T`, `dim`)
+    array1, array2 : array, shape (`T`, `dim`) or shape (`dim`)
         Arrays of original and target.
 
     Returns
@@ -23,7 +22,10 @@ def melcd(array1, array2):
         Scala of mel-cepstrum distortion
 
     """
-    assert array1.shape == array2.shape
+    if array1.shape != array2.shape:
+        raise ValueError(
+            "The shapes of both arrays are different \
+            : {} / {}".format(array1.shape, array2.shape))
 
     if array1.ndim == 2:
         # array based melcd calculation
