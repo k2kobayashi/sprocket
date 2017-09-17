@@ -118,7 +118,8 @@ def main(*argv):
     # save files in final steps
     # save jnt
     jnt_dir = os.path.join(args.pair_dir, 'jnt')
-    os.makedirs(jnt_dir, exist_ok=True)
+    if not os.path.exists(jnt_dir):
+        os.makedirs(jnt_dir)
     jntpath = os.path.join(jnt_dir, 'it' + str(itnum) + '_jnt.h5')
     jnth5 = HDF5(jntpath, mode='w')
     jnth5.save(jnt, ext='jnt')
@@ -126,13 +127,15 @@ def main(*argv):
 
     # save GMM
     gmm_dir = os.path.join(args.pair_dir, 'GMM')
-    os.makedirs(gmm_dir, exist_ok=True)
+    if not os.path.exists(gmm_dir):
+        os.makedirs(gmm_dir)
     gmmpath = os.path.join(gmm_dir, 'it' + str(itnum) + '_gmm.pkl')
     joblib.dump(trgmm.param, gmmpath)
 
     # save twf
     twf_dir = os.path.join(args.pair_dir, 'twf')
-    os.makedirs(twf_dir, exist_ok=True)
+    if not os.path.exists(twf_dir):
+        os.makedirs(twf_dir)
     with open(args.org_list_file, 'r') as fp:
         for line, twf in zip(fp, twfs):
             f = os.path.basename(line.rstrip())

@@ -40,7 +40,8 @@ def main(*argv):
     # read parameters from speaker yml
     sconf = SpeakerYML(args.ymlf)
     h5_dir = os.path.join(args.pair_dir, 'h5')
-    os.makedirs(h5_dir, exist_ok=True)
+    if not os.path.exists(h5_dir):
+        os.makedirs(h5_dir)
 
     # constract FeatureExtractor class
     feat = FeatureExtractor(analyzer=sconf.analyzer,
@@ -80,7 +81,6 @@ def main(*argv):
                 h5.close()
             else:
                 print("Acoustic features already exist: " + h5f)
-
 
 
 if __name__ == '__main__':

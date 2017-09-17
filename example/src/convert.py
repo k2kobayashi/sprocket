@@ -92,7 +92,8 @@ def main(*argv):
 
     # test directory
     test_dir = os.path.join(args.pair_dir, 'test')
-    os.makedirs(os.path.join(test_dir, args.org), exist_ok=True)
+    if not os.path.exists(os.path.join(test_dir, args.org)):
+        os.makedirs(os.path.join(test_dir, args.org))
 
     # conversion in each evaluation file
     with open(args.eval_list_file, 'r') as fp:

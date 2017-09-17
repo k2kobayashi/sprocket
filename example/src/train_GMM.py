@@ -45,7 +45,8 @@ def main(*argv):
 
     # save GMM
     gmm_dir = os.path.join(args.pair_dir, 'model')
-    os.makedirs(gmm_dir, exist_ok=True)
+    if not os.path.exists(gmm_dir):
+        os.makedirs(gmm_dir)
     gmmpath = os.path.join(gmm_dir, 'GMM.pkl')
     joblib.dump(gmm.param, gmmpath)
     print(gmmpath)
