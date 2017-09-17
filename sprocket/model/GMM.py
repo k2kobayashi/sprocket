@@ -2,11 +2,9 @@
 
 from __future__ import division, print_function, absolute_import
 
-import os
 import numpy as np
 import scipy.sparse
 import sklearn.mixture
-from sklearn.externals import joblib
 from sklearn.mixture.gaussian_mixture import _compute_precision_cholesky
 
 from sprocket.util.delta import construct_static_and_delta_matrix
@@ -34,12 +32,6 @@ class GMMTrainer(object):
     ---------
     param :
         Sklean-based model parameters of the GMM
-    w : shape (`n_mix`)
-        Vector of mixture component weight of the GMM
-    jmean : shape (`n_mix`, `jnt.shape[0]`)
-        Array of joint mean vector of the GMM
-    jcov: shape (`n_mix`, `jnt.shape[0]`, `jnt.shape[0]`)
-        Array of joint covariance matrix of the GMM
 
     """
 
@@ -57,46 +49,6 @@ class GMMTrainer(object):
         if self.covtype == 'block_diag':
             raise NotImplementedError()
 
-    def open(self, fpath):
-        """Open GMM from file
-
-        Parameters
-        ---------
-        fpath : str
-            File path of the pkl file of the GMM
-
-        """
-
-        # read GMM from pkl file
-        if not os.path.exists(fpath):
-            raise('pkl file of the GMM does not exists.')
-
-        # read model and parse
-        self.param = joblib.load(fpath)
-        self._deploy_parameters()
-
-        return
-
-    def save(self, fpath):
-        """Save GMM parameters as pkl file
-
-        Parameters
-        ---------
-        fpath : str
-            File path to save pkl file
-
-        """
-
-        # save GMM intp pkl file
-        dirname = os.path.dirname(fpath)
-        if not os.path.exists(dirname):
-            os.makedirs(dirname)
-
-        # save model parameter file as pkl
-        joblib.dump(self.param, fpath)
-
-        return
-
     def train(self, jnt):
         """Fit GMM parameter from given joint feature vector
 
@@ -112,7 +64,6 @@ class GMMTrainer(object):
             self.param.fit(jnt)
         elif self.covtype == 'block_diag':
             self._train_block_diag(jnt)
-        self._deploy_parameters()
 
         return
 
@@ -142,8 +93,6 @@ class GMMTrainer(object):
         """
 
         raise NotImplementedError()
-
-        self._deploy_parameters()
         pass
 
     def _train_block_diag(self, jnt):
@@ -152,17 +101,7 @@ class GMMTrainer(object):
         # update parameter of weigh, mean, and block diagonal covariance
 
         raise NotImplementedError()
-
-        self._deploy_parameters()
         pass
-
-    def _deploy_parameters(self):
-        # read JD-GMM parameters from self.param
-        self.w = self.param.weights_
-        self.jmean = self.param.means_
-        self.jcov = self.param.covariances_
-
-        return
 
 
 class GMMConvertor(object):
@@ -184,10 +123,6 @@ class GMMConvertor(object):
         `None` : Normal JD-GMM
         `diff` : Differential GMM
         `intra` : Intra-speaker GMM
-    cvtype: str, optional
-        The type of the conversion algorithm
-        `mlgp` : Maximum likelihood parameger generation
-        `mmse` : Menimum mean square error
 
     Attributes
     ---------
@@ -202,32 +137,12 @@ class GMMConvertor(object):
 
     """
 
-    def __init__(self, n_mix=32, covtype='full', gmmmode=None, cvtype='mlpg'):
+    def __init__(self, n_mix=32, covtype='full', gmmmode=None):
         self.n_mix = n_mix
         self.covtype = covtype
         self.gmmmode = gmmmode
-        self.cvtype = cvtype
 
-    def open(self, fpath):
-        """Open GMM from file
-
-        Parameters
-        ---------
-        fpath: str
-            File path of the pkl of the GMM
-
-        """
-
-        # read GMM from pkl file
-        if not os.path.exists(fpath):
-            raise('pkl file of GMM does not exists.')
-        # read model parameter file
-        self.param = joblib.load(fpath)
-        self._deploy_parameters()
-
-        return
-
-    def open_from_trainer(self, trainer):
+    def open_from_param(self, param):
         """Open GMM from GMMTrainer
 
         Parameters
@@ -237,12 +152,12 @@ class GMMConvertor(object):
 
         """
 
-        self.param = trainer.param
+        self.param = param
         self._deploy_parameters()
 
         return
 
-    def convert(self, data):
+    def convert(self, data, cvtype='mlpg'):
         """Convert data based on conditional probability densify function
 
         Parameters
@@ -260,10 +175,10 @@ class GMMConvertor(object):
         # estimate parameter sequence
         cseq, wseq, mseq, covseq = self._gmmmap(data)
 
-        if self.cvtype == 'mlpg':
+        if cvtype == 'mlpg':
             # maximum likelihood parameter generation
             odata = self._mlpg(mseq, covseq)
-        elif self.cvtype == 'mmse':
+        elif cvtype == 'mmse':
             # minimum mean square error based parameter generation
             odata = self._mmse(wseq, data)
         else:
