@@ -26,7 +26,7 @@ class GV (object):
         Returns
         ---------
         gvstats : array, shape (`2`, `dim`)
-            Array of mean and standard deviation fo GV
+            Array of mean and standard deviation for GV
         """
 
         n_files = len(datalist)
@@ -51,6 +51,8 @@ class GV (object):
         ---------
         data : array, shape (`T`, `dim`)
             Array of data sequence
+        gvstats: array,shape (`2`, `dim`)
+            Array of mean and standard deviation for target GV
         startdim : int, optional
             Start dimension to perform GV postfilter
 
