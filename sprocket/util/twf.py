@@ -34,7 +34,7 @@ def estimate_twf(orgdata, tardata, distance='melcd', fast=True):
     if distance == 'melcd':
         def distance_func(x, y): return melcd(x, y)
     else:
-        raise ValueError('other distance metrics does not support.')
+        raise ValueError('other distance metrics than melcd does not support.')
 
     if fast:
         _, path = fastdtw(orgdata, tardata, dist=distance_func)

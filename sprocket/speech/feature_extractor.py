@@ -63,7 +63,7 @@ class FeatureExtractor(object):
         Parameters
         ----------
         x : array
-            Vector of waveform samples
+            Array of waveform samples
 
         Returns
         -------
