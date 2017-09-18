@@ -44,7 +44,7 @@ class GV (object):
 
         return gvstats
 
-    def postfilter(self, data, gvstats, startdim=1):
+    def postfilter(self, data, gvstats, alpha=1.0, startdim=1):
         """Perform postfilter based on GV statistics into data
 
         Parameters
@@ -53,6 +53,10 @@ class GV (object):
             Array of data sequence
         gvstats: array,shape (`2`, `dim`)
             Array of mean and standard deviation for target GV
+        alpha : float, optional
+            Morphing coefficient between GV transformed data and data.
+            .. math::
+               alpha * gvpf(data) + (1 - alpha) * data
         startdim : int, optional
             Start dimension to perform GV postfilter
 
@@ -78,4 +82,4 @@ class GV (object):
 
         filtered_data = np.c_[data[:, :startdim], filtered]
 
-        return filtered_data
+        return alpha * filtered_data + (1 - alpha) * data
