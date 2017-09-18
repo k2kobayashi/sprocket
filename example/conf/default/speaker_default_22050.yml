@@ -1,13 +1,13 @@
 wav:
-  fs: 16000
+  fs: 22050
   bit: 16
   shiftms: 5
 f0:
   minf0: 40
   maxf0: 700
 mcep:
-  dim: 24
-  alpha: 0.410
+  dim: 34
+  alpha: 0.455
 power:
   threshold: -15
 analyzer: world
