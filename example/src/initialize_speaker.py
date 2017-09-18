@@ -1,17 +1,8 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# init_spkr.py
-#   First ver.: 2017-06-05
-#
-#   Copyright 2017
-#       Kazuhiro KOBAYASHI <kobayashi.kazuhiro@g.sp.m.is.nagoya-u.ac.jp>
-#
-#   Distributed under terms of the MIT license.
-#
 
 """
-Generate F0 histgram for defining F0 range of the speaker
+Generate F0 histogram to decide F0 range of the speaker
 
 """
 
@@ -37,6 +28,7 @@ def create_f0_histogram(f0s, f0histogrampath):
              normed=True, histtype="stepfilled")
     plt.xlabel("Fundamental frequency")
     plt.ylabel("Probability")
+    plt.xticks(np.arange(0, 750, 50))
 
     figure_dir = os.path.dirname(f0histogrampath)
     if not os.path.exists(figure_dir):
