@@ -50,11 +50,6 @@ class PairYML(object):
         self.GMM_mcep_covtype = conf['GMM']['mcep']['covtype']
         self.GMM_mcep_cvtype = conf['GMM']['mcep']['cvtype']
 
-        self.GMM_bandap_n_mix = conf['GMM']['bandap']['n_mix']
-        self.GMM_bandap_n_iter = conf['GMM']['bandap']['n_iter']
-        self.GMM_bandap_covtype = conf['GMM']['bandap']['covtype']
-        self.GMM_bandap_cvtype = conf['GMM']['bandap']['cvtype']
-
     def _read_training_list(self):
         if not os.path.exists(self.trlist):
             raise('training file list does not exists.')
