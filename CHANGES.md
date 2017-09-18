@@ -1,7 +1,7 @@
 Changelog
 =========
 
-0.0.0 (2013/10/09)
+0.2.0 (2017/09/31)
 ------------------
 
- - <Change the version, date, and this text.>
+ - Release first ver.

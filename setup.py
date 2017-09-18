@@ -11,11 +11,10 @@ CHANGES = open('CHANGES.md').read()
 
 setup(
     name="sprocket",
-    version="0.0.0",
-
-    description="TODO",
-    url='TODO',
-    author='TODO',
+    version="0.2.0",
+    description="Voice conversion tool kit",
+    url='https://github.com/k2kobayashi/sprocket',
+    author='Kazuhiro Kobayashi',
     packages=find_packages(),
     long_description=(README + '\n' + CHANGES),
     license='MIT',
