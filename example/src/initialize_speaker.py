@@ -25,7 +25,7 @@ import matplotlib
 import numpy as np
 from scipy.io import wavfile
 
-from sprocket.feature import FeatureExtractor
+from sprocket.speech import FeatureExtractor
 
 matplotlib.use('Agg')  # noqa #isort:skip
 import matplotlib.pyplot as plt  # isort:skip
@@ -74,11 +74,11 @@ def main(*argv):
         print("Extract f0: " + wavf)
 
         # constract FeatureExtractor clas
-        feat = FeatureExtractor(x, analyzer='world', fs=fs)
-        feat.analyze()
+        feat = FeatureExtractor(analyzer='world', fs=fs)
+        f0, _, _ = feat.analyze(x)
 
         # f0 extraction
-        f0s.append(feat.f0())
+        f0s.append(f0)
 
     # create a figure to visualize F0 range of the speaker
     f0histogrampath = os.path.join(

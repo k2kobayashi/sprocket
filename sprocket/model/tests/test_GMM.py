@@ -2,13 +2,9 @@ from __future__ import division, print_function, absolute_import
 
 import unittest
 
-import os
 import numpy as np
-from sprocket.model.GMM import GMMTrainer, GMMConvertor
-from sprocket.util.delta import delta
-
-dirpath = os.path.dirname(os.path.realpath(__file__))
-tmppath = dirpath + '/test_tmp_gmm.pkl'
+from sprocket.model import GMMTrainer, GMMConvertor
+from sprocket.util import delta
 
 
 class ModelGMMTest(unittest.TestCase):
@@ -18,16 +14,13 @@ class ModelGMMTest(unittest.TestCase):
         gmm_tr = GMMTrainer(n_mix=4, n_iter=100, covtype='full')
         gmm_tr.train(jnt)
 
-        gmm_tr.save(tmppath)
-        gmm_tr.open(tmppath)
-
         data = np.random.rand(200, 5)
         sddata = np.c_[data, delta(data)]
         gmm_cv = GMMConvertor(
-            n_mix=4, covtype='full', gmmmode=None, cvtype='mlpg')
-        gmm_cv.open(tmppath)
-        os.remove(tmppath)
+            n_mix=4, covtype='full', gmmmode=None)
+        gmm_cv.open_from_param(gmm_tr.param)
 
-        odata = gmm_cv.convert(sddata)
+        odata = gmm_cv.convert(sddata, cvtype='mlpg')
+        odata = gmm_cv.convert(sddata, cvtype='mmse')
 
         assert data.shape == odata.shape

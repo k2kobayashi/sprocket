@@ -10,19 +10,16 @@ class WSOLA(object):
 
     """WSOLA class
 
-    This class offers to modify speech duration
+    Modify speech rate of a given waveform
 
     Parameters
     ----------
     fs : int
         Sampling frequency
-
     speech_rate : float
-        Relative speech rate of duration modification speech to original speech
-
+        Relative speech rate of duration modified speech to original speech
     frame_ms : int, optional
-        length of frame
-
+        length of frame size for windowing
     shift_ms : int, optional
         length of shift
 
@@ -44,22 +41,22 @@ class WSOLA(object):
         self.epstep = int(self.sl * self.speech_rate)  # step size for WSOLA
         self.win = np.hanning(self.fl)  # window function for a frame
 
-    def duration_modification(self, data):
+    def duration_modification(self, x):
         """Duration modification based on WSOLA
 
         Parameters
         ---------
-        data : array, shape ('len(data)')
+        x : array, shape ('len(x)')
             array of waveform sequence
 
         Returns
         ---------
-        wsolaed: array, shape (`int(len(data) / speech_rate)`)
+        wsolaed: array, shape (`int(len(x) / speech_rate)`)
             Array of WSOLAed waveform sequence
 
         """
 
-        wlen = len(data)
+        wlen = len(x)
         wsolaed = np.zeros(int(wlen / self.speech_rate), dtype='d')
 
         # initialization
@@ -76,17 +73,23 @@ class WSOLA(object):
                 continue
 
             # copy wavform
-            ref = data[rp - self.sl:rp + self.sl]
-            buff = data[ep - self.fl:ep + self.fl]
+            ref = x[rp - self.sl:rp + self.sl]
+            buff = x[ep - self.fl:ep + self.fl]
 
             # search minimum distance bepween ref and buff
             delta = self._search_minimum_distance(ref, buff)
             epd = ep + delta
 
             # store WSOLAed waveform using over-lap add
-            spdata = data[sp:sp + self.sl] * self.win[self.sl:]
-            epdata = data[epd - self.sl: epd] * self.win[:self.sl]
-            wsolaed[outp:outp + self.sl] = spdata + epdata
+            spdata = x[sp:sp + self.sl] * self.win[self.sl:]
+            epdata = x[epd - self.sl: epd] * self.win[:self.sl]
+            if len(spdata) == len(wsolaed[outp:outp + self.sl]):
+                wsolaed[outp:outp + self.sl] = spdata + epdata
+            else:
+                wsolaed_len = len(wsolaed[outp:outp + self.sl])
+                wsolaed[outp:outp + self.sl] = spdata[:wsolaed_len] + \
+                    epdata[:wsolaed_len]
+
             outp += self.sl
 
             # transtion to next frame

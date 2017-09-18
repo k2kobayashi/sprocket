@@ -1,14 +1,5 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# train_GMM.py
-#   First ver.: 2017-06-09
-#
-#   Copyright 2017
-#       Kazuhiro KOBAYASHI <kobayashi.kazuhiro@g.sp.m.is.nagoya-u.ac.jp>
-#
-#   Distributed under terms of the MIT license.
-#
 
 """
 train GMM based on joint feature vector
@@ -20,6 +11,7 @@ from __future__ import absolute_import, division, print_function
 import argparse
 import os
 import sys
+from sklearn.externals import joblib
 
 from sprocket.model.GMM import GMMTrainer
 from sprocket.util.hdf5 import HDF5
@@ -42,22 +34,22 @@ def main(*argv):
 
     # read joint feature vector
     jntf = os.path.join(args.pair_dir, 'jnt',
-                        'it' + str(pconf.jnt_n_iter) + '.h5')
+                        'it' + str(pconf.jnt_n_iter + 1) + '_jnt.h5')
     h5 = HDF5(jntf, mode='r')
     jnt = h5.read(ext='jnt')
 
     # train GMM for mcep using joint feature vector
-    model_dir = os.path.join(args.pair_dir, 'model')
-    if not os.path.exists(model_dir):
-        os.makedirs(model_dir)
-    GMMpath = os.path.join(model_dir, 'GMM.pkl')
     gmm = GMMTrainer(n_mix=pconf.GMM_mcep_n_mix, n_iter=pconf.GMM_mcep_n_iter,
                      covtype=pconf.GMM_mcep_covtype)
     gmm.train(jnt)
-    gmm.save(GMMpath)
-    print(GMMpath)
 
-    # train GMM for bandap using criating joint feature vector
+    # save GMM
+    gmm_dir = os.path.join(args.pair_dir, 'model')
+    if not os.path.exists(gmm_dir):
+        os.makedirs(gmm_dir)
+    gmmpath = os.path.join(gmm_dir, 'GMM.pkl')
+    joblib.dump(gmm.param, gmmpath)
+    print(gmmpath)
 
 
 if __name__ == '__main__':

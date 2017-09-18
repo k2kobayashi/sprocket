@@ -4,7 +4,7 @@ import os
 import unittest
 
 import numpy as np
-from sprocket.util.hdf5 import HDF5, read_feats
+from sprocket.util.hdf5 import HDF5
 
 dirpath = os.path.dirname(os.path.realpath(__file__))
 listf = os.path.join(dirpath, '/data/test.h5')
@@ -32,13 +32,5 @@ class hdf5FunctionsTest(unittest.TestCase):
         assert np.allclose(tmp1d, data1d)
         assert np.allclose(tmp2d, data2d)
 
-        # tset read_feats function
-        listpath = os.path.join(dirpath, 'data/test.list')
-        with open(listpath, 'w') as fp:
-            fp.write('data/test')
-        list1d = read_feats(listpath, dirpath, ext='1d')
-        assert np.allclose(list1d[0], data1d)
-
         # remove files
         os.remove(path)
-        os.remove(listpath)

@@ -4,7 +4,7 @@ import os
 import numpy as np
 from scipy.io import wavfile
 
-from sprocket.util.wsola import WSOLA
+from sprocket.speech import WSOLA
 
 dirpath = os.path.dirname(os.path.realpath(__file__))
 saveflag = False
@@ -22,4 +22,4 @@ class WSOLATest(unittest.TestCase):
 
         if saveflag:
             fpath = path + str(speech_rate) + '.wav'
-            wavfile.write(fpath, self.fs, wsolaed_x.astype(np.int16))
+            wavfile.write(fpath, fs, wsolaed_x.astype(np.int16))

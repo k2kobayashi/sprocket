@@ -2,28 +2,20 @@
 
 from __future__ import division, print_function, absolute_import
 
-
 import pyworld
 
 
 class WORLD(object):
-
     """WORLD-based speech analyzer & synthesizer
-
-    TODO:
-        support platinum
 
     Attributes
     ----------
     period : float
         frame period (default: 5.0)
-
     fs : int
         sampling frequency (default: 44100)
-
     f0_floor : float
         floor in f0 estimation
-
     f0_ceil : float
         ceil in f0 estimation
     """
@@ -44,15 +36,22 @@ class WORLD(object):
     def analyze(self, x):
         """Analyze acoustic features based on WORLD
 
-        analyze decomposes a speech signal into three parameters:
-          1. Fundamental frequency
-          2. Spectrum envelope
-          3. Aperiodicity ratio
+        analyze F0, spectral envelope, aperiodicity
 
         Paramters
         ---------
         x : array, shape (`T`)
             monoral speech signal in time domain
+
+        Returns
+        ---------
+        f0 : array, shape (`T`,)
+            F0 sequence
+        spc : array, shape (`T`, `fftl / 2 + 1`)
+            Spectral envelope sequence
+        ap: array, shape (`T`, `fftl / 2 + 1`)
+            aperiodicity sequence
+
         """
         f0, time_axis = pyworld.harvest(x, self.fs, f0_floor=self.f0_floor,
                                         f0_ceil=self.f0_ceil,
@@ -70,6 +69,12 @@ class WORLD(object):
         ---------
         x: array, shape (`T`)
             monoral speech signal in time domain
+
+        Returns
+        ---------
+        f0 : array, shape (`T`,)
+            F0 sequence
+
         """
         f0, time_axis = pyworld.harvest(x, self.fs, f0_floor=self.f0_floor,
                                         f0_ceil=self.f0_ceil,
@@ -83,13 +88,11 @@ class WORLD(object):
         ----------
         f0 : array, shape (`T`)
             F0 sequence
-
         spc : array, shape (`T`, `dim`)
             Spectral envelope sequence
-
         ap: array, shape (`T`, `dim`)
             Aperiodicity sequence
 
         """
-        y = pyworld.synthesize(f0, spc, ap, self.fs, frame_period=self.period)
-        return y
+
+        return pyworld.synthesize(f0, spc, ap, self.fs, frame_period=self.period)

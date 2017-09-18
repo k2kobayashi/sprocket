@@ -137,11 +137,10 @@ if __name__ == "__main__":
         print("### 1. Extract acoustic features ###")
         # Extract acoustic features consisting of F0, spc, ap, mcep, npow
         for speaker_part, speaker_label in LABELS.items():
-            for use in USES:
-                extract_features.main(
-                    speaker_label, SPEAKER_CONF_FILES[speaker_part],
-                    LIST_FILES[speaker_part][use],
-                    WAV_DIR, PAIR_DIR)
+            extract_features.main(
+                speaker_label, SPEAKER_CONF_FILES[speaker_part],
+                LIST_FILES[speaker_part]['train'],
+                WAV_DIR, PAIR_DIR)
 
     if execute_steps[2]:
         print("### 2. Estimate acoustic feature statistics ###")

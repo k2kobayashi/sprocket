@@ -5,7 +5,7 @@ import numpy as np
 from scipy.io import wavfile
 from scipy.fftpack import fft
 
-from sprocket.util.shifter import Shifter
+from sprocket.speech import Shifter
 
 dirpath = os.path.dirname(os.path.realpath(__file__))
 saveflag = False

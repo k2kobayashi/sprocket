@@ -2,10 +2,13 @@
 
 """An example script to initialize audio lists and speaker configurations.
 
-Usage: initialize.py SOURCE TARGET SAMPLING_RATE
+Usage: initialize.py [-h] [-1] [-2] [-3] SOURCE TARGET SAMPLING_RATE
 
 Options:
     -h, --help     Show the help
+    -1, --step1    Execute step1 (Generation of initial list files)
+    -2, --step2    Execute step2 (Generation of configure files)
+    -3, --step3    Execute step3 (Estimation of F0 ranges)
     SOURCE         The name of speaker
                    whose voice you would like to convert from
     TARGET         The name of speaker whose voice you would like to convert to
@@ -112,7 +115,7 @@ def create_list(dest, wav_dir, exist_ok=True):
                  for wav_file_name in os.listdir(wav_dir)
                  if os.path.splitext(wav_file_name)[1] == ".wav")
         with open(dest, "w") as file_handler:
-            for line in lines:
+            for line in sorted(lines):
                 print(line, file=file_handler)
 
 
@@ -147,31 +150,46 @@ if __name__ == "__main__":
         CONF_DIR, "pair", SOURCE_TARGET_PAIR + YML_EXTENSION)
     SAMPLING_RATE = args["SAMPLING_RATE"]
 
-    print("### 1. create initial list files ###")
-    # create list files for both the speakers
-    for use in USES:
+    # The first False is dummy for alignment
+    #   between indexes of `args_execute_steps` and arguments
+    # pylint: disable=invalid-name
+    execute_steps = [False] \
+        + [args["--step{}".format(step_index)] for step_index in range(1, 4)]
+
+    # Execute all steps if no options on steps are given
+    # Keep index #0 False in case you create a hotbed for bugs.
+    if not any(execute_steps):
+        raise("Please specify steps with options")
+
+    if execute_steps[1]:
+        print("### 1. create initial list files ###")
+        # create list files for both the speakers
+        for use in USES:
+            for part, speaker in LABELS.items():
+                create_list(LIST_FILES[part][use],
+                            os.path.join(WAV_DIR, speaker))
+        print("# Please modify train and eval list files, if you want. #")
+
+    if execute_steps[2]:
+        print("### 2. create configure files ###")
+        # create speaker-dependent configure file
         for part, speaker in LABELS.items():
-            create_list(LIST_FILES[part][use], os.path.join(WAV_DIR, speaker))
-    print("# Please modify train and eval list files, if you want. #")
+            create_configure(
+                SPEAKER_CONF_FILES[part],
+                os.path.join(
+                    CONF_DIR, "default",
+                    "speaker_default_{}{}".format(
+                        SAMPLING_RATE, YML_EXTENSION)))
+        # create pair-dependent configure file
+        create_configure(PAIR_CONF_FILE, os.path.join(
+            CONF_DIR, "default", "pair_default.yml"))
 
-    print("### 2. create configure files ###")
-    # create speaker-dependent configure file
-    for part, speaker in LABELS.items():
-        create_configure(
-            SPEAKER_CONF_FILES[part],
-            os.path.join(
-                CONF_DIR, "default",
-                "speaker_default_{}{}".format(
-                    SAMPLING_RATE, YML_EXTENSION)))
-    # create pair-dependent configure file
-    create_configure(PAIR_CONF_FILE, os.path.join(
-        CONF_DIR, "default", "pair_default.yml"))
-
-    print("### 3. create figures to define F0 range ###")
-    # get F0 range in each speaker
-    for part, speaker in LABELS.items():
-        initialize_speaker.main(
-            speaker, LIST_FILES[part]["train"],
-            WAV_DIR, os.path.join(CONF_DIR, "figure"))
-    print("# Please modify f0 range values"
-          " in speaker-dependent YAML files based on the figure #")
+    if execute_steps[3]:
+        print("### 3. create figures to define F0 range ###")
+        # get F0 range in each speaker
+        for part, speaker in LABELS.items():
+            initialize_speaker.main(
+                speaker, LIST_FILES[part]["train"],
+                WAV_DIR, os.path.join(CONF_DIR, "figure"))
+        print("# Please modify f0 range values"
+              " in speaker-dependent YAML files based on the figure #")

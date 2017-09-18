@@ -2,11 +2,9 @@
 
 from __future__ import division, print_function, absolute_import
 
-import os
 import numpy as np
 import scipy.sparse
 import sklearn.mixture
-from sklearn.externals import joblib
 from sklearn.mixture.gaussian_mixture import _compute_precision_cholesky
 
 from sprocket.util.delta import construct_static_and_delta_matrix
@@ -15,37 +13,25 @@ from sprocket.util.delta import construct_static_and_delta_matrix
 class GMMTrainer(object):
 
     """GMM trainer
-    This class offers the training of GMM with several types of
-    covariance matrix.
+    This class offers the training of GMM with several types of covariance matrix.
 
     Parameters
     ---------
     n_mix: int, optional
         The number of mixture components of the GMM
         Default set to 32.
-
     n_iter: int, optional
         THe number of iteration for EM algorithm.
         Default set to 100.
-
     covtype: str, optional
         The type of covariance matrix of the GMM
         full: full-covariance matrix
-        block_diag: block-diagonal matrix
+        block_diag (not implemeted) : block-diagonal matrix
 
     Attributes
     ---------
     param :
         Sklean-based model parameters of the GMM
-
-    w : shape (`n_mix`)
-        Vector of mixture component weight of the GMM
-
-    jmean : shape (`n_mix`, `jnt.shape[0]`)
-        Array of joint mean vector of the GMM
-
-    jcov: shape (`n_mix`, `jnt.shape[0]`, `jnt.shape[0]`)
-        Array of joint covariance matrix of the GMM
 
     """
 
@@ -60,45 +46,8 @@ class GMMTrainer(object):
             covariance_type=self.covtype,
             max_iter=self.n_iter)
 
-    def open(self, fpath):
-        """Open GMM from file
-
-        Parameters
-        ---------
-        fpath : str
-            File path of the pkl file of the GMM
-
-        """
-
-        # read GMM from pkl file
-        if not os.path.exists(fpath):
-            raise('pkl file of the GMM does not exists.')
-
-        # read model and parse
-        self.param = joblib.load(fpath)
-        self._deploy_parameters()
-
-        return
-
-    def save(self, fpath):
-        """Save GMM parameters as pkl file
-
-        Parameters
-        ---------
-        fpath : str
-            File path to save pkl file
-
-        """
-
-        # save GMM intp pkl file
-        dirname = os.path.dirname(fpath)
-        if not os.path.exists(dirname):
-            os.makedirs(dirname)
-
-        # save model parameter file as pkl
-        joblib.dump(self.param, fpath)
-
-        return
+        if self.covtype == 'block_diag':
+            raise NotImplementedError()
 
     def train(self, jnt):
         """Fit GMM parameter from given joint feature vector
@@ -115,7 +64,6 @@ class GMMTrainer(object):
             self.param.fit(jnt)
         elif self.covtype == 'block_diag':
             self._train_block_diag(jnt)
-        self._deploy_parameters()
 
         return
 
@@ -128,7 +76,6 @@ class GMMTrainer(object):
         variable of `jnt` and `reference_jnt` is equals.
         For E-step :
             Estimate occupancy based on `param` and `jnt`
-            P (m | param, jnt)
         For M-step :
             Update parameter using reference_jnt
         EM-algorithm is performed only one time.
@@ -145,8 +92,7 @@ class GMMTrainer(object):
 
         """
 
-        self._deploy_parameters()
-
+        raise NotImplementedError()
         pass
 
     def _train_block_diag(self, jnt):
@@ -154,20 +100,11 @@ class GMMTrainer(object):
 
         # update parameter of weigh, mean, and block diagonal covariance
 
-        self._deploy_parameters()
+        raise NotImplementedError()
         pass
-
-    def _deploy_parameters(self):
-        # read JD-GMM parameters from self.param
-        self.w = self.param.weights_
-        self.jmean = self.param.means_
-        self.jcov = self.param.covariances_
-
-        return
 
 
 class GMMConvertor(object):
-
     """A GMM Convertor
     This class offers the several conversion techniques such as Maximum Likelihood
     Parameter Generation (MLPG) and Mimimum Mean Square Error (MMSE).
@@ -177,85 +114,60 @@ class GMMConvertor(object):
     n_mix : int, optional
         The number of mixture components of the GMM
         Default set to 32.
-
     covtype : str, optional
         The type of covariance matrix of the GMM
         `full` : full-covariance matrix
-        `block_diag : block-diagonal matrix
-
+        `block_diag (not implemented) : block-diagonal matrix
     gmmmode: str, optional
         The type of the GMM for opening
         `None` : Normal JD-GMM
         `diff` : Differential GMM
         `intra` : Intra-speaker GMM
 
-    cvtype: str, optional
-        The type of the conversion algorithm
-        `mlgp` : MLPG
-        `mmse` : MMSE
-
     Attributes
     ---------
     param :
         Sklean-based model parameters of the GMM
-
     w : shape (`n_mix`)
         Vector of mixture component weight of the GMM
-
     jmean : shape (`n_mix`, `jnt.shape[0]`)
         Array of joint mean vector of the GMM
-
     jcov: shape (`n_mix`, `jnt.shape[0]`, `jnt.shape[0]`)
         Array of joint covariance matrix of the GMM
 
     """
 
-    def __init__(self, n_mix=32, covtype='full', gmmmode=None, cvtype='mlpg'):
+    def __init__(self, n_mix=32, covtype='full', gmmmode=None):
         self.n_mix = n_mix
         self.covtype = covtype
         self.gmmmode = gmmmode
-        self.cvtype = cvtype
 
-    def open(self, fpath):
-        """Open GMM from file
+    def open_from_param(self, param):
+        """Open GMM from GMMTrainer
 
         Parameters
         ---------
-        fpath: str
-            File path of the pkl of the GMM
+        trainer: GMMTrainer
+            GMMTrainer class
 
         """
 
-        # read GMM from pkl file
-        if not os.path.exists(fpath):
-            raise('pkl file of GMM does not exists.')
-        # read model parameter file
-        self.param = joblib.load(fpath)
+        self.param = param
         self._deploy_parameters()
-
-        # change model paramter of GMM into that of gmmmode
-        if self.gmmmode is None:
-            pass
-        elif self.gmmmode == 'diff':
-            self._transform_gmm_into_diffgmm()
-        elif self.gmmmode == 'intra':
-            self._transform_gmm_into_intragmm()
-        else:
-            raise('please choose GMM mode in [None, diff, intra]')
-
-        # estimate parameters for conversion
-        self._set_Ab()
-        self._set_pX()
 
         return
 
-    def convert(self, data):
+    def convert(self, data, cvtype='mlpg'):
         """Convert data based on conditional probability densify function
 
         Parameters
         ---------
         data : array, shape(`T`, `dim`)
             Original data will be converted
+        cvtype: str, optional
+            Type of conversion technique
+            `mlpg` : maximum likelihood parameter generation
+            `mmse` : minimum mean square error
 
         Returns
         ---------
@@ -267,14 +179,14 @@ class GMMConvertor(object):
         # estimate parameter sequence
         cseq, wseq, mseq, covseq = self._gmmmap(data)
 
-        if self.cvtype == 'mlpg':
+        if cvtype == 'mlpg':
             # maximum likelihood parameter generation
             odata = self._mlpg(mseq, covseq)
-        elif self.cvtype == 'mmse':
+        elif cvtype == 'mmse':
             # minimum mean square error based parameter generation
             odata = self._mmse(wseq, data)
         else:
-            raise('please choose conversion mode in [mlpg, mmse]')
+            raise ValueError('please choose conversion mode in `mlpg`, `mmse`')
 
         return odata
 
@@ -357,6 +269,20 @@ class GMMConvertor(object):
         self.covXY = self.jcov[:, :sddim, sddim:]
         self.covYX = self.jcov[:, sddim:, :sddim]
         self.covYY = self.jcov[:, sddim:, sddim:]
+
+        # change model paramter of GMM into that of gmmmode
+        if self.gmmmode is None:
+            pass
+        elif self.gmmmode == 'diff':
+            self._transform_gmm_into_diffgmm()
+        elif self.gmmmode == 'intra':
+            self._transform_gmm_into_intragmm()
+        else:
+            raise ValueError('please choose GMM mode in [None, diff, intra]')
+
+        # estimate parameters for conversion
+        self._set_Ab()
+        self._set_pX()
 
         return
 

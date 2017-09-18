@@ -5,19 +5,18 @@ from __future__ import division, print_function, absolute_import
 import numpy as np
 
 
-def extfrm(npow, data, threshold=-20):
-    """Extract frame under the threshold
+def extfrm(data, npow, threshold=-20):
+    """Extract frame over the power threshold
 
     Parameters
     ----------
-    npow : array, shape (`T`)
-        Vector of normalized power sequence.
-
     data: array, shape (`T`, `dim`)
         Array of input data
-
+    npow : array, shape (`T`)
+        Vector of normalized power sequence.
     threshold: scala, optional
-        Scala of power threshold
+        Scala of power threshold [dB]
+        Default set to -20
 
     Returns
     -------

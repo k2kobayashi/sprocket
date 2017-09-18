@@ -2,11 +2,10 @@
 
 from __future__ import division, print_function, absolute_import
 
-
 import numpy as np
 
 
-def spgram2npow(spectrogram):
+def spc2npow(spectrogram):
     """Calculate normalized_melcd power sequence from spectrogram
 
     Parameters
@@ -25,7 +24,7 @@ def spgram2npow(spectrogram):
     npow = np.zeros(T)
 
     for t in range(T):
-        npow[t] = spvec2pow(spectrogram[t])
+        npow[t] = _spvec2pow(spectrogram[t])
     sumpow = sum(npow) / T
 
     for t in range(T):
@@ -34,7 +33,7 @@ def spgram2npow(spectrogram):
     return npow
 
 
-def spvec2pow(specvec):
+def _spvec2pow(specvec):
     """Convert vector of spectrum envelope into normalized power
 
     Parameters

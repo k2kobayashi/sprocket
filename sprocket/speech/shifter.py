@@ -5,28 +5,25 @@ from scipy.signal import resample, firwin, lfilter
 from scipy.interpolate import interp1d
 
 from .wsola import WSOLA
-from ..feature import FeatureExtractor
-from ..feature.synthesizer import Synthesizer
+from .feature_extractor import FeatureExtractor
+from .synthesizer import Synthesizer
 
 
 class Shifter(object):
 
     """Shifter class
 
-    This class offers to transform f0 of input waveform
-    based on WSOLA and resampling
+    Transform f0 of given waveform signal based on WSOLA and
+    resampling
 
     Parameters
     ----------
     fs : int
         Sampling frequency
-
     speech_rate : float
         Relative speech rate of duration modification speech to original speech
-
     frame_ms : int, optional
         length of frame
-
 
     Attributes
     ----------
@@ -49,12 +46,12 @@ class Shifter(object):
         self.wsola = WSOLA(fs, 1 / f0rate,
                            frame_ms=self.frame_ms, shift_ms=self.shift_ms)
 
-    def f0transform(self, data, completion=False):
+    def f0transform(self, x, completion=False):
         """Transform F0 of given waveform signals using
 
         Parameters
         ---------
-        data : array, shape ('len(data)')
+        x : array, shape ('len(x)')
             array of waveform sequence
 
         completion : bool, optional
@@ -65,15 +62,15 @@ class Shifter(object):
 
         Returns
         ---------
-        transformed : array, shape (`len(data)`)
+        transformed : array, shape (`len(x)`)
             Array of F0 transformed waveform sequence
 
         """
 
-        self.xlen = len(data)
+        self.xlen = len(x)
 
         # WSOLA
-        wsolaed = self.wsola.duration_modification(data)
+        wsolaed = self.wsola.duration_modification(x)
 
         # resampling
         transformed = resample(wsolaed, self.xlen)
@@ -82,34 +79,34 @@ class Shifter(object):
         if completion:
             if self.f0rate > 1.0:
                 raise ValueError("Do not enable completion if f0rate > 1.")
-            transformed = self._high_frequency_completion(data, transformed)
+            transformed = self._high_frequency_completion(x, transformed)
 
         return transformed
 
-    def resampling_by_interpolate(self, data):
+    def resampling_by_interpolate(self, x):
         """Resampling base on 1st order interpolation
 
         Parameters
         ---------
-        data : array, shape ('int(len(data) * f0rate)')
+        x : array, shape ('int(len(x) * f0rate)')
             array of wsolaed waveform
 
         Returns
         ---------
-        wsolaed: array, shape (`len(data)`)
+        wsolaed: array, shape (`len(x)`)
             Array of resampled (F0 transformed) waveform sequence
 
         """
 
         # interpolate
-        wedlen = len(data)
-        intpfunc = interp1d(np.arange(wedlen), data, kind=1)
+        wedlen = len(x)
+        intpfunc = interp1d(np.arange(wedlen), x, kind=1)
         x_new = np.arange(0.0, wedlen - 1, self.f0rate)
         resampled = intpfunc(x_new)
 
         return resampled
 
-    def _high_frequency_completion(self, data, transformed):
+    def _high_frequency_completion(self, x, transformed):
         """
         Please see Sect. 3.2 and 3.3 in the following paper to know why we complete the
         unvoiced synthesized voice of the original voice into high frequency range
@@ -120,14 +117,13 @@ class Shifter(object):
         Proc. IEEE SLT 2016, pp. 693-700. 2016.
         """
         # construct feature extractor and synthesis
-        feat = FeatureExtractor(data, fs=self.fs)
-        feat.analyze()
-        uf0 = np.zeros(len(feat.f0()))
+        feat = FeatureExtractor(fs=self.fs)
+        f0, spc, ap = feat.analyze(x)
+        uf0 = np.zeros(len(f0))
 
         # synthesis
         synth = Synthesizer()
-        unvoice_anasyn = synth.synthesis_spc(uf0, feat.spc(),
-                                             feat.ap(), fs=self.fs)
+        unvoice_anasyn = synth.synthesis_spc(uf0, spc, ap, fs=self.fs)
 
         # HPF for synthesized speech
         fil = firwin(255, self.f0rate, pass_zero=False)

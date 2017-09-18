@@ -1,14 +1,6 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# F0_transformation.py
-#   First ver.: 2017/07/20
-#
-#   Copyright 2017
-#       Kazuhiro KOBAYASHI <kobayashi.kazuhiro@g.sp.m.is.nagoya-u.ac.jp>
-#
-#   Distributed under terms of the MIT license.
-#
 
 """
 Transform F0 of original waveform
@@ -22,10 +14,9 @@ import sys
 import numpy as np
 from scipy.io import wavfile
 
-from sprocket.feature import FeatureExtractor
-from sprocket.stats.f0statistics import F0statistics
-from sprocket.util.shifter import Shifter
-from yml import SpeakerYML
+from .yml import SpeakerYML
+from sprocket.speech import FeatureExtractor, Shifter
+from sprocket.model import F0statistics
 
 
 def get_f0s_from_list(conf, list_file, wav_dir):
@@ -44,16 +35,16 @@ def get_f0s_from_list(conf, list_file, wav_dir):
 
         print("Extract F0: " + wavf)
         # constract FeatureExtractor clas
-        feat = FeatureExtractor(x, analyzer=conf.analyzer, fs=conf.wav_fs,
+        feat = FeatureExtractor(analyzer=conf.analyzer, fs=conf.wav_fs,
                                 shiftms=conf.wav_shiftms,
                                 minf0=conf.f0_minf0, maxf0=conf.f0_maxf0)
-        feat.analyze()
-        f0s.append(feat.f0())
+        f0, _, _ = feat.analyze(x)
+        f0s.append(f0)
 
     return f0s
 
 
-def transform_f0_from_list(f0rate, wav_fs, list_file, wav_dir):
+def transform_f0_from_list(speaker, f0rate, wav_fs, list_file, wav_dir):
     # open list file
     with open(list_file, 'r') as fp:
         files = fp.readlines()
@@ -62,7 +53,7 @@ def transform_f0_from_list(f0rate, wav_fs, list_file, wav_dir):
     shifter = Shifter(wav_fs, f0rate=f0rate)
 
     # check output directory
-    transformed_wavdir = os.path.join(wav_dir + '_' + str(f0rate))
+    transformed_wavdir = os.path.join(wav_dir, speaker + '_' + str(f0rate))
     if not os.path.exists(transformed_wavdir):
         os.makedirs(transformed_wavdir)
 
@@ -94,23 +85,6 @@ def transform_f0_from_list(f0rate, wav_fs, list_file, wav_dir):
             print('F0 transformed wav file already exists: ' + transformed_wavpath)
 
 
-def create_F0_transformed_list_file(speaker, f0rate, list_file):
-    # open list file
-    with open(list_file, 'r') as fp:
-        files = fp.readlines()
-
-    transformed_speaker = speaker + '_' + str(f0rate)
-
-    transformed_list = []
-    for f in files:
-        transformed_list.append(f.replace(speaker, transformed_speaker))
-
-    # write F0 transformed list file
-    listpath = list_file.replace(speaker, transformed_speaker)
-    with open(listpath, 'w') as fp:
-        fp.writelines(transformed_list)
-
-
 def main(*argv):
     argv = argv if argv else sys.argv[1:]
     # Options for python
@@ -132,6 +106,8 @@ def main(*argv):
                         help='Wav file directory of the speaker')
     args = parser.parse_args(argv)
 
+    print(args.speaker)
+
     # read parameters from speaker yml
     org_conf = SpeakerYML(args.org_yml)
     tar_conf = SpeakerYML(args.tar_yml)
@@ -142,24 +118,18 @@ def main(*argv):
 
     # calculate F0 statistics of original and target speaker
     f0stats = F0statistics()
-    f0stats.estimate(org_f0s)
-    org_f0stats = f0stats.f0stats
-    f0stats.estimate(tar_f0s)
-    tar_f0stats = f0stats.f0stats
+    orgf0stats = f0stats.estimate(org_f0s)
+    tarf0stats = f0stats.estimate(tar_f0s)
 
     # calculate F0 transformation ratio between original and target speakers
-    f0rate = np.round(np.exp(tar_f0stats[0] - org_f0stats[0]), decimals=2)
+    f0rate = np.round(np.exp(tarf0stats[0] - orgf0stats[0]), decimals=2)
     print('F0 transformation ratio: ' + str(f0rate))
 
     # F0 transformation of original waveform in both train and eval list files
-    transform_f0_from_list(
-        f0rate, org_conf.wav_fs, args.org_train_list, args.wav_dir)
-    transform_f0_from_list(
-        f0rate, org_conf.wav_fs, args.org_eval_list, args.wav_dir)
-
-    # create list files for F0 transformed original
-    create_F0_transformed_list_file(args.speaker, f0rate, args.org_train_list)
-    create_F0_transformed_list_file(args.speaker, f0rate, args.org_eval_list)
+    transform_f0_from_list(args.speaker, f0rate, org_conf.wav_fs,
+                           args.org_train_list, args.wav_dir)
+    transform_f0_from_list(args.speaker, f0rate, org_conf.wav_fs,
+                           args.org_eval_list, args.wav_dir)
 
 
 if __name__ == '__main__':

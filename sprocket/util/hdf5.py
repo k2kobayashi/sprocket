@@ -7,9 +7,8 @@ import h5py
 
 
 class HDF5(object):
-
     """HDF5 handler
-    This class offers the hdf5 format file for acoustic features
+    Offer the hdf5 format file handler
 
     Parameters
     ---------
@@ -32,8 +31,8 @@ class HDF5(object):
         self.dirname, self.filename = os.path.split(self.fpath)
         self.flbl, _ = os.path.splitext(self.filename)
 
-        if mode == None:
-            raise("Please specify the mode.")
+        if mode is None:
+            raise ValueError("Please specify the mode.")
         else:
             self.mode = mode
 
@@ -46,7 +45,8 @@ class HDF5(object):
                 print("overwrite: " + self.fpath)
         elif self.mode == 'r':
             if not os.path.exists(self.fpath):
-                raise "h5 file does not exist in " + self.fpath
+                raise FileNotFoundError(
+                    "h5 file does not exist in " + self.fpath)
 
         # open hdf5 file to fpath
         self.h5 = h5py.File(self.fpath, self.mode)
@@ -59,13 +59,17 @@ class HDF5(object):
         ext : str
             File extention including h5 file
 
+        Returns
+        -------
+        array : array,
+            Array of hdf5 packed data
         """
 
-        if ext == None:
-            raise("Please specify an extention.")
+        if ext is None:
+            raise ValueError("Please specify an extention.")
 
         if self.mode != 'r':
-            raise("mode should be 'r'")
+            raise ValueError("mode should be 'r'")
 
         return self.h5[ext].value
 
@@ -78,14 +82,14 @@ class HDF5(object):
             Vector or array will be wrote into h5 file
 
         ext: str
-            File extention or file label
+            File label of saved file
 
         """
 
         if ext is None:
-            raise("Please specify an extention.")
+            raise ValueError("Please specify an extention.")
         if self.mode != 'w':
-            raise("mode should be 'w'")
+            raise ValueError("mode should be 'w'")
 
         self.h5.create_dataset(ext, data=data)
         self.h5.flush()
@@ -96,37 +100,3 @@ class HDF5(object):
         self.h5.close()
 
         return
-
-
-def read_feats(listf, h5dir, ext='mcep'):
-    """HDF5 handler
-    Create list consisting of arrays listed in the list
-
-    Parameters
-    ---------
-    listf : str,
-        Path of list file
-
-    h5dir : str,
-        Path of hdf5 directory
-
-    ext : str,
-        `mcep` : mel-cepstrum
-        `f0` : F0
-
-    Returns
-    ---------
-    datalist : list of arrays
-
-    """
-
-    datalist = []
-    with open(listf, 'r') as fp:
-        for line in fp:
-            f = line.rstrip()
-            h5f = os.path.join(h5dir, f + '.h5')
-            h5 = HDF5(h5f, mode='r')
-            datalist.append(h5.read(ext))
-            h5.close()
-
-    return datalist
