@@ -1,6 +1,7 @@
 wav:
   fs: 44100
   bit: 16
+  shiftms: 5
 f0:
   minf0: 40
   maxf0: 700
