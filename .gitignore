@@ -2,7 +2,9 @@
 
 # list and conf
 /example/list
-/example/conf
+/example/conf/figure
+/example/conf/pair
+/example/conf/speaker
 
 # data files
 /example/data/pair
