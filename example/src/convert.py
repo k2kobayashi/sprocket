@@ -17,6 +17,7 @@ import pysptk
 from pysptk.synthesis import MLSADF
 from scipy.io import wavfile
 from sklearn.externals import joblib
+from pyworld import get_cheaptrick_fft_size
 
 from .yml import PairYML, SpeakerYML
 from sprocket.speech import FeatureExtractor, Synthesizer
@@ -83,6 +84,7 @@ def main(*argv):
                             shiftms=sconf.wav_shiftms,
                             minf0=sconf.f0_minf0,
                             maxf0=sconf.f0_maxf0)
+    fftl = get_cheaptrick_fft_size(sconf.wav_fs, sconf.f0_minf0)
 
     # open synthesizer
     synthesizer = Synthesizer()
@@ -126,7 +128,7 @@ def main(*argv):
                                             cvmcep_wGV,
                                             ap,
                                             alpha=sconf.mcep_alpha,
-                                            fftl=sconf.wav_fftl,
+                                            fftl=fftl,
                                             fs=sconf.wav_fs)
 
                 wav = np.clip(wav, -32768, 32767)
@@ -137,7 +139,8 @@ def main(*argv):
                 cvmcep[:, 0] = 0.0
                 cvmcep_wGV = mcepgv.postfilter(
                     mcep + cvmcep, gvstats, startdim=1) - mcep
-                b = np.apply_along_axis(pysptk.mc2b, 1, cvmcep_wGV, sconf.mcep_alpha)
+                b = np.apply_along_axis(pysptk.mc2b, 1,
+                                        cvmcep_wGV, sconf.mcep_alpha)
                 assert np.isfinite(b).all()
                 x = x.astype(np.float64)
                 wav = mlsa_fil.synthesis(x, b)
