@@ -6,8 +6,3 @@ GMM:
         n_iter: 100
         covtype: full
         cvtype: mlpg
-    bandap:
-        n_mix: 16
-        n_iter: 100
-        covtype: full
-        cvtype: mlpg
