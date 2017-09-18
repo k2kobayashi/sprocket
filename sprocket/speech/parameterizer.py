@@ -25,10 +25,9 @@ def spc2npow(spectrogram):
 
     for t in range(T):
         npow[t] = _spvec2pow(spectrogram[t])
-    sumpow = sum(npow) / T
 
-    for t in range(T):
-        npow[t] = 10.0 * np.log10(npow[t] / sumpow)
+    meanpow = np.mean(npow)
+    npow = 10.0 * np.log10(npow / meanpow)
 
     return npow
 

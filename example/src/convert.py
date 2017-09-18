@@ -20,7 +20,7 @@ from sklearn.externals import joblib
 from pyworld import get_cheaptrick_fft_size
 
 from .yml import PairYML, SpeakerYML
-from sprocket.speech import FeatureExtractor, Synthesizer
+from sprocket.speech import FeatureExtractor, Synthesizer, mod_power
 from sprocket.model import GMMConvertor, F0statistics, GV
 from sprocket.util import static_delta, HDF5
 
@@ -135,6 +135,7 @@ def main(*argv):
                                                targvstats,
                                                cvgvstats=cvgvstats,
                                                startdim=1)
+                cvmcep_wGV = mod_power(cvmcep, mcep, alpha=sconf.mcep_alpha)
                 wav = synthesizer.synthesis(cvf0,
                                             cvmcep_wGV,
                                             ap,
