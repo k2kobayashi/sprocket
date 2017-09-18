@@ -6,6 +6,8 @@ About data:
     http://datashare.is.ed.ac.uk/handle/10283/2211
 Article of VCC 2016:
     http://www.cstr.ed.ac.uk/downloads/publications/2016/toda2016voice.pdf
+License of VCC 2016 dataset :
+    http://datashare.is.ed.ac.uk/bitstream/handle/10283/2211/license_text?sequence=10&isAllowed=y
 
 Usage:
     download_vcc2016data.py [-h] [-q] [-f] [-m]
