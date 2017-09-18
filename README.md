@@ -26,11 +26,12 @@ For the details of the library, please see sprocket documents in https://hogehog
 
 ### Current stable version
 
-Ver. 0.00
+Ver. 0.20
 
 ### Install requirements
 
 ```
+pip install numpy # for dependency
 pip install -r requirements.txt
 ```
 
