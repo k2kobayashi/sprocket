@@ -20,15 +20,11 @@ def spc2npow(spectrogram):
 
     """
 
-    T = spectrogram.shape[0]
-    npow = np.zeros(T)
+    # frame based processing
+    npow = np.apply_along_axis(_spvec2pow, 1, spectrogram)
 
-    for t in range(T):
-        npow[t] = _spvec2pow(spectrogram[t])
-    sumpow = sum(npow) / T
-
-    for t in range(T):
-        npow[t] = 10.0 * np.log10(npow[t] / sumpow)
+    meanpow = np.mean(npow)
+    npow = 10.0 * np.log10(npow / meanpow)
 
     return npow
 

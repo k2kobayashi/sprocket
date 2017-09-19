@@ -2,6 +2,7 @@
 
 from __future__ import division, print_function, absolute_import
 
+import numpy as np
 import pyworld
 import pysptk
 
@@ -53,8 +54,7 @@ class Synthesizer(object):
         return wav
 
     def synthesis_spc(self, f0, spc, ap, fs=16000, shiftms=5):
-        """
-        synthesis generates waveform from F0, mcep, ap
+        """synthesis generates waveform from F0, mcep, ap
 
         Parameters
         ----------
@@ -85,3 +85,40 @@ class Synthesizer(object):
                                  fs, frame_period=shiftms)
 
         return wav
+
+
+def mod_power(cvmcep, rmcep, alpha=0.42):
+    """synthesis generates waveform from F0, mcep, ap
+
+    Parameters
+    ----------
+    cvmcep : array, shape (`T`, `dim`)
+        array of converted mel-cepstrum
+    rmcep : array, shape (`T`, `dim`)
+        array of reference mel-cepstrum
+    alpha : float, optional
+        All-path filter transfer function
+
+    Return
+    ------
+    modified_cvmcep : array, shape (`T`, `dim`)
+        array of power modified converted mel-cepstrum
+
+    """
+
+    if rmcep.shape != cvmcep.shape:
+        raise ValueError("The shapes of the converted and \
+                         reference mel-cepstrum are different: \
+                         {} / {}".format(cvmcep.shape, rmcep.shape))
+
+    r_spc = pysptk.mc2sp(rmcep, alpha, 513)
+    cv_spc = pysptk.mc2sp(cvmcep, alpha, 513)
+
+    r_pow = np.mean(np.log(np.sqrt(r_spc)), axis=1)
+    cv_pow = np.mean(np.log(np.sqrt(cv_spc)), axis=1)
+    dpow = r_pow - cv_pow
+
+    modified_cvmcep = cvmcep
+    modified_cvmcep[:, 0] += dpow
+
+    return modified_cvmcep
