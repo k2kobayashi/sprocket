@@ -95,8 +95,7 @@ def main(*argv):
     # open synthesizer
     synthesizer = Synthesizer(fs=sconf.wav_fs,
                               fftl=fftl,
-                              shiftms=sconf.wav_shiftms
-                              )
+                              shiftms=sconf.wav_shiftms)
 
     # test directory
     test_dir = os.path.join(args.pair_dir, 'test')
@@ -118,7 +117,6 @@ def main(*argv):
             mcep = feat.mcep(dim=sconf.mcep_dim, alpha=sconf.mcep_alpha)
             mcep_0th = mcep[:, 0]
 
-            print('convert ' + f)
             # convert F0
             cvf0 = f0stats.convert(f0, orgf0stats, tarf0stats)
 
@@ -139,8 +137,6 @@ def main(*argv):
                                             rmcep=mcep,
                                             alpha=sconf.mcep_alpha,
                                             )
-
-                wav = np.clip(wav, -32768, 32767)
                 wavpath = os.path.join(test_dir, f + '_VC.wav')
 
             # synthesis DIFFVC w/ GV
@@ -155,12 +151,12 @@ def main(*argv):
                                                  rmcep=mcep,
                                                  alpha=sconf.mcep_alpha,
                                                  )
-                wav = np.clip(wav, -32768, 32767)
                 wavpath = os.path.join(test_dir, f + '_DIFFVC.wav')
 
             # write waveform
-            wavfile.write(
-                wavpath, fs, np.array(wav, dtype=np.int16))
+            wav = np.clip(wav, -32768, 32767)
+            wavfile.write(wavpath, fs, np.array(wav, dtype=np.int16))
+            print(wavpath)
 
 
 if __name__ == '__main__':

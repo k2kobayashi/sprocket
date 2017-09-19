@@ -9,24 +9,23 @@ from pysptk.synthesis import MLSADF
 
 
 class Synthesizer(object):
+    """
+    Speech synthesizer with several acoustic features
+
+    Parameters
+    ----------
+    fs: int, optional
+        Sampling frequency
+        Default set to 16000
+    fftl: int, optional
+        Frame Length of STFT
+        Default set to 1024
+    shiftms: int, optional
+        Shift size for STFT
+        Default set to 5
+    """
 
     def __init__(self, fs=16000, fftl=1024, shiftms=5):
-        """
-        Speech synthesizer from several types of acoustic features
-
-        Parameters
-        ----------
-        fs: int, optional
-            Sampling frequency
-            Default set to 16000
-        fftl: int, optional
-            Frame Length of STFT
-            Default set to 1024
-        shiftms: int, optional
-            Shift size for STFT
-            Default set to 5
-        """
-
         self.fs = fs
         self.fftl = fftl
         self.shiftms = shiftms
@@ -44,7 +43,7 @@ class Synthesizer(object):
             array of mel-cepstrum sequence
         ap : array, shape (T, `fftlen / 2 + 1`)
             array of aperiodicity
-        rmcep : array, shape (`T`, `dim`)
+        rmcep : array, optional, shape (`T`, `dim`)
             array of reference mel-cepstrum sequence
             Default set to None
         alpha : int, optional
@@ -60,7 +59,7 @@ class Synthesizer(object):
 
         if rmcep is not None:
             # power modification
-            mcep = mod_power(mcep, rmcep, alpha=alpha)
+            mcep = mod_power(mcep, rmcep, alpha=alpha, fftl=self.fftl)
 
         # mcep into spc
         spc = pysptk.mc2sp(mcep, alpha, self.fftl)
@@ -100,7 +99,8 @@ class Synthesizer(object):
 
         if rmcep is not None:
             # power modification
-            diffmcep = mod_power(rmcep + diffmcep, rmcep, alpha=alpha) - rmcep
+            diffmcep = mod_power(rmcep + diffmcep, rmcep,
+                                 alpha=alpha, fftl=self.fftl) - rmcep
 
         b = np.apply_along_axis(pysptk.mc2b, 1, diffmcep, alpha)
         assert np.isfinite(b).all()
@@ -125,7 +125,7 @@ class Synthesizer(object):
 
         Return
         ------
-        wav: vector
+        wav: vector, shape (`samples`)
           Synethesized waveform
 
         """
@@ -137,7 +137,7 @@ class Synthesizer(object):
         return wav
 
 
-def mod_power(cvmcep, rmcep, alpha=0.42):
+def mod_power(cvmcep, rmcep, alpha=0.42, fftl=1024):
     """synthesis generates waveform from F0, mcep, ap
 
     Parameters
@@ -148,6 +148,10 @@ def mod_power(cvmcep, rmcep, alpha=0.42):
         array of reference mel-cepstrum
     alpha : float, optional
         All-path filter transfer function
+        Default set to 0.42
+    fftl : int , optional
+        Frame Length of STFT
+        Default set to 1024
 
     Return
     ------
@@ -161,8 +165,9 @@ def mod_power(cvmcep, rmcep, alpha=0.42):
                          reference mel-cepstrum are different: \
                          {} / {}".format(cvmcep.shape, rmcep.shape))
 
-    r_spc = pysptk.mc2sp(rmcep, alpha, 513)
-    cv_spc = pysptk.mc2sp(cvmcep, alpha, 513)
+    hfftl = fftl // 2 + 1
+    r_spc = pysptk.mc2sp(rmcep, alpha, hfftl)
+    cv_spc = pysptk.mc2sp(cvmcep, alpha, hfftl)
 
     r_pow = np.mean(np.log(np.sqrt(r_spc)), axis=1)
     cv_pow = np.mean(np.log(np.sqrt(cv_spc)), axis=1)
