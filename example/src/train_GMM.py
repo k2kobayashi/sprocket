@@ -21,26 +21,46 @@ from yml import PairYML
 
 
 def feature_conversion(pconf, org_mceps, gmm, gmmmode=None):
+    """Conversion of mel-cesptrums
+
+    Parameters
+    ---------
+    pconf : PairYAML,
+        Class of PairYAML
+    org_mceps : list, shape (`num_mceps`)
+        List of mel-cepstrums
+    gmm : sklean.mixture.GaussianMixture,
+        Parameters of sklearn-based Gaussian mixture
+    gmmmode : str, optional
+        Flag to parameter generation technique
+        `None` : Normal VC
+        `diff` : Differential VC
+        Default set to `None`
+
+    Returns
+    ---------
+    cv_mceps : list , shape(`num_mceps`)
+        List of converted mel-cespstrums
+
+    """
     cvgmm = GMMConvertor(n_mix=pconf.GMM_mcep_n_mix,
                          covtype=pconf.GMM_mcep_covtype,
                          gmmmode=gmmmode,
                          )
     cvgmm.open_from_param(gmm.param)
 
-    sd = 1
+    sd = 1  # start dimension to convert
     cv_mceps = []
     for mcep in org_mceps:
         mcep_0th = mcep[:, 0]
         cvmcep = cvgmm.convert(static_delta(mcep[:, sd:]),
                                cvtype=pconf.GMM_mcep_cvtype)
         cvmcep = np.c_[mcep_0th, cvmcep]
-        if gmmmode is None:
-            cv_mceps.append(cvmcep)
-        elif gmmmode == 'diff':
+        if gmmmode == 'diff':
             cvmcep[:, sd:] += mcep[:, sd:]
-            cv_mceps.append(cvmcep)
-        else:
-            raise ValueError('Please use `None` or `diff`')
+        elif gmmmode is not None:
+            raise ValueError('gmmmode must be `None` or `diff`.')
+        cv_mceps.append(cvmcep)
 
     return cv_mceps
 
