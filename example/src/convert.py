@@ -13,14 +13,12 @@ import os
 import sys
 import numpy as np
 
-import pysptk
-from pysptk.synthesis import MLSADF
 from scipy.io import wavfile
 from sklearn.externals import joblib
 from pyworld import get_cheaptrick_fft_size
 
 from .yml import PairYML, SpeakerYML
-from sprocket.speech import FeatureExtractor, Synthesizer, mod_power
+from sprocket.speech import FeatureExtractor, Synthesizer
 from sprocket.model import GMMConvertor, F0statistics, GV
 from sprocket.util import static_delta, HDF5
 
@@ -95,10 +93,10 @@ def main(*argv):
     fftl = get_cheaptrick_fft_size(sconf.wav_fs, sconf.f0_minf0)
 
     # open synthesizer
-    synthesizer = Synthesizer()
-    shiftl = int(sconf.wav_fs / 1000 * sconf.wav_shiftms)
-    mlsa_fil = pysptk.synthesis.Synthesizer(
-        MLSADF(order=sconf.mcep_dim, alpha=sconf.mcep_alpha), shiftl)
+    synthesizer = Synthesizer(fs=sconf.wav_fs,
+                              fftl=fftl,
+                              shiftms=sconf.wav_shiftms
+                              )
 
     # test directory
     test_dir = os.path.join(args.pair_dir, 'test')
@@ -135,13 +133,12 @@ def main(*argv):
                                                targvstats,
                                                cvgvstats=cvgvstats,
                                                startdim=1)
-                cvmcep_wGV = mod_power(cvmcep, mcep, alpha=sconf.mcep_alpha)
                 wav = synthesizer.synthesis(cvf0,
                                             cvmcep_wGV,
                                             ap,
+                                            rmcep=mcep,
                                             alpha=sconf.mcep_alpha,
-                                            fftl=fftl,
-                                            fs=sconf.wav_fs)
+                                            )
 
                 wav = np.clip(wav, -32768, 32767)
                 wavpath = os.path.join(test_dir, f + '_VC.wav')
@@ -153,12 +150,11 @@ def main(*argv):
                                                targvstats,
                                                cvgvstats=diffcvgvstats,
                                                startdim=1) - mcep
-                cvmcep_wGV = mod_power(mcep + cvmcep_wGV, mcep, alpha=sconf.mcep_alpha) - mcep
-                b = np.apply_along_axis(
-                    pysptk.mc2b, 1, cvmcep_wGV, sconf.mcep_alpha)
-                assert np.isfinite(b).all()
-                x = x.astype(np.float64)
-                wav = mlsa_fil.synthesis(x, b)
+                wav = synthesizer.synthesis_diff(x,
+                                                 cvmcep_wGV,
+                                                 rmcep=mcep,
+                                                 alpha=sconf.mcep_alpha,
+                                                 )
                 wav = np.clip(wav, -32768, 32767)
                 wavpath = os.path.join(test_dir, f + '_DIFFVC.wav')
 
