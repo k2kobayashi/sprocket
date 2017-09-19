@@ -153,6 +153,7 @@ def main(*argv):
                                                targvstats,
                                                cvgvstats=diffcvgvstats,
                                                startdim=1) - mcep
+                cvmcep_wGV = mod_power(mcep + cvmcep_wGV, mcep, alpha=sconf.mcep_alpha) - mcep
                 b = np.apply_along_axis(
                     pysptk.mc2b, 1, cvmcep_wGV, sconf.mcep_alpha)
                 assert np.isfinite(b).all()
