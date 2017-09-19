@@ -106,8 +106,6 @@ def main(*argv):
                         help='Wav file directory of the speaker')
     args = parser.parse_args(argv)
 
-    print(args.speaker)
-
     # read parameters from speaker yml
     org_conf = SpeakerYML(args.org_yml)
     tar_conf = SpeakerYML(args.tar_yml)
