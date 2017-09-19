@@ -20,10 +20,10 @@ class Shifter(object):
     ----------
     fs : int
         Sampling frequency
-    speech_rate : float
-        Relative speech rate of duration modification speech to original speech
-    frame_ms : int, optional
-        length of frame
+    f0rate: float
+        F0 transformation ratio
+    shift_ms : int, optional
+        length of shift size [ms]
 
     Attributes
     ----------
@@ -32,19 +32,12 @@ class Shifter(object):
 
     """
 
-    def __init__(self, fs, f0rate, frame_ms=20):
+    def __init__(self, fs, f0rate, shift_ms=10):
         self.fs = fs
         self.f0rate = f0rate
 
-        self.frame_ms = frame_ms  # frame length [ms]
-        self.shift_ms = frame_ms // 2  # shift size for over-lap add
-        self.sl = int(self.fs * self.shift_ms / 1000)  # of samples in a shift
-        self.fl = int(self.fs * self.frame_ms / 1000)  # of samples in a frame
-        self.epstep = int(self.sl / self.f0rate)  # step size for WSOLA
-        self.win = np.hanning(self.fl)  # window function for a frame
-
-        self.wsola = WSOLA(fs, 1 / f0rate,
-                           frame_ms=self.frame_ms, shift_ms=self.shift_ms)
+        self.shift_ms = shift_ms  # shift size for over-lap add
+        self.wsola = WSOLA(fs, 1 / f0rate, shift_ms=self.shift_ms)
 
     def f0transform(self, x, completion=False):
         """Transform F0 of given waveform signals using

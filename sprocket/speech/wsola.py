@@ -18,8 +18,6 @@ class WSOLA(object):
         Sampling frequency
     speech_rate : float
         Relative speech rate of duration modified speech to original speech
-    frame_ms : int, optional
-        length of frame size for windowing
     shift_ms : int, optional
         length of shift
 
@@ -30,14 +28,13 @@ class WSOLA(object):
 
     """
 
-    def __init__(self, fs, speech_rate, frame_ms=20, shift_ms=10):
+    def __init__(self, fs, speech_rate, shift_ms=10):
         self.fs = fs
         self.speech_rate = speech_rate
 
-        self.frame_ms = frame_ms  # frame length [ms]
         self.shift_ms = shift_ms  # shift length [ms]
         self.sl = int(self.fs * self.shift_ms / 1000)  # of samples in a shift
-        self.fl = int(self.fs * self.frame_ms / 1000)  # of samples in a frame
+        self.fl = self.sl * 2  # of samples in a frame
         self.epstep = int(self.sl * self.speech_rate)  # step size for WSOLA
         self.win = np.hanning(self.fl)  # window function for a frame
 
