@@ -106,7 +106,10 @@ def mod_power(cvmcep, rmcep, alpha=0.42):
 
     """
 
-    assert rmcep.shape == cvmcep.shape
+    if rmcep.shape != cvmcep.shape:
+        raise ValueError("The shapes of the converted and \
+                         reference mel-cepstrum are different: \
+                         {} / {}".format(cvmcep.shape, rmcep.shape))
 
     r_spc = pysptk.mc2sp(rmcep, alpha, 513)
     cv_spc = pysptk.mc2sp(cvmcep, alpha, 513)

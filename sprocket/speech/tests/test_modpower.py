@@ -13,7 +13,7 @@ dirpath = os.path.dirname(os.path.realpath(__file__))
 class ModifyPowerTest(unittest.TestCase):
 
     def test_mod_power(self):
-        path = dirpath + '/data/test16000.wav'
+        path = os.path.join(dirpath, 'data', 'test16000.wav')
         fs, x = wavfile.read(path)
         af = FeatureExtractor(analyzer='world', fs=fs, shiftms=5)
         f0, _, ap = af.analyze(x)
