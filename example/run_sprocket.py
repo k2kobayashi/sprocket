@@ -159,10 +159,12 @@ if __name__ == "__main__":
             PAIR_DIR)
 
     if execute_steps[4]:
-        print("### 4. Train GMM ###")
+        print("### 4. Train GMM and converted GV ###")
         # estimate GMM parameter using the joint feature vector
-        train_GMM.main(PAIR_CONF_FILE,
-                       PAIR_DIR)
+        train_GMM.main(
+            LIST_FILES["source"]["train"],
+            PAIR_CONF_FILE,
+            PAIR_DIR)
 
     if execute_steps[5]:
         print("### 5. Conversion based on the trained models ###")

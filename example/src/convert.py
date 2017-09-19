@@ -62,18 +62,26 @@ def main(*argv):
     mcepgmm.open_from_param(param)
     print("conversion mode: {}".format(args.gmmmode))
 
-    # read F0 statistics and GV
+    # read F0 statistics
     stats_dir = os.path.join(args.pair_dir, 'stats')
     orgstatspath = os.path.join(stats_dir,  args.org + '.h5')
     orgstats_h5 = HDF5(orgstatspath, mode='r')
     orgf0stats = orgstats_h5.read(ext='f0stats')
     orgstats_h5.close()
 
+    # read F0 and GV statistics for target
     tarstatspath = os.path.join(stats_dir,  args.tar + '.h5')
     tarstats_h5 = HDF5(tarstatspath, mode='r')
     tarf0stats = tarstats_h5.read(ext='f0stats')
-    gvstats = tarstats_h5.read(ext='gv')
+    targvstats = tarstats_h5.read(ext='gv')
     tarstats_h5.close()
+
+    # read GV statistics for converted
+    cvgvstatspath = os.path.join(args.pair_dir, 'model', 'cvgv.h5')
+    cvgvstats_h5 = HDF5(cvgvstatspath, mode='r')
+    cvgvstats = cvgvstats_h5.read(ext='cvgv')
+    diffcvgvstats = cvgvstats_h5.read(ext='diffcvgv')
+    cvgvstats_h5.close()
 
     mcepgv = GV()
     f0stats = F0statistics()
@@ -123,7 +131,10 @@ def main(*argv):
 
             # synthesis VC w/ GV
             if args.gmmmode is None:
-                cvmcep_wGV = mcepgv.postfilter(cvmcep, gvstats, startdim=1)
+                cvmcep_wGV = mcepgv.postfilter(cvmcep,
+                                               targvstats,
+                                               cvgvstats=cvgvstats,
+                                               startdim=1)
                 wav = synthesizer.synthesis(cvf0,
                                             cvmcep_wGV,
                                             ap,
@@ -137,10 +148,12 @@ def main(*argv):
             # synthesis DIFFVC w/ GV
             if args.gmmmode == 'diff':
                 cvmcep[:, 0] = 0.0
-                cvmcep_wGV = mcepgv.postfilter(
-                    mcep + cvmcep, gvstats, startdim=1) - mcep
-                b = np.apply_along_axis(pysptk.mc2b, 1,
-                                        cvmcep_wGV, sconf.mcep_alpha)
+                cvmcep_wGV = mcepgv.postfilter(mcep + cvmcep,
+                                               targvstats,
+                                               cvgvstats=diffcvgvstats,
+                                               startdim=1) - mcep
+                b = np.apply_along_axis(
+                    pysptk.mc2b, 1, cvmcep_wGV, sconf.mcep_alpha)
                 assert np.isfinite(b).all()
                 x = x.astype(np.float64)
                 wav = mlsa_fil.synthesis(x, b)
