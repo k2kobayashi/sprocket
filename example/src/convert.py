@@ -15,7 +15,6 @@ import numpy as np
 
 from scipy.io import wavfile
 from sklearn.externals import joblib
-from pyworld import get_cheaptrick_fft_size
 
 from .yml import PairYML, SpeakerYML
 from sprocket.speech import FeatureExtractor, Synthesizer
@@ -92,7 +91,7 @@ def main(*argv):
                             minf0=sconf.f0_minf0,
                             maxf0=sconf.f0_maxf0)
 
-    # open synthesizer
+    # constract Synthesizer class
     synthesizer = Synthesizer(fs=sconf.wav_fs,
                               fftl=sconf.wav_fftl,
                               shiftms=sconf.wav_shiftms)
@@ -116,6 +115,15 @@ def main(*argv):
             f0, spc, ap = feat.analyze(x)
             mcep = feat.mcep(dim=sconf.mcep_dim, alpha=sconf.mcep_alpha)
             mcep_0th = mcep[:, 0]
+
+            # output analysis synthesized voice of source
+            wav = synthesizer.synthesis(f0,
+                                        mcep,
+                                        ap,
+                                        alpha=sconf.mcep_alpha,
+                                        )
+            wavpath = os.path.join(test_dir, f + '_anasyn.wav')
+            wavfile.write(wavpath, fs, np.array(wav, dtype=np.int16))
 
             # convert F0
             cvf0 = f0stats.convert(f0, orgf0stats, tarf0stats)
