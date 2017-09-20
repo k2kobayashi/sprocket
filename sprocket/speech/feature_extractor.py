@@ -24,31 +24,42 @@ class FeatureExtractor(object):
     analyzer : str, optional
         Analyzer of acoustic feature
         'world' : WORLD analysis/synthesis framework
+        Default set to world
     fs : int, optional
         Sampling frequency of the waveform
+        Default set to 16000
+    fftl: int, optional
+        FFT length
+        Default set to 1024
     shiftms : int, optional
         Shift size for short-time Fourier transform [ms]
+        Default set to 5
     minf0 : float, optional
         Floor value for F0 estimation
+        Default set to 50
     maxf0 : float, optional
         Ceil value for F0 estimation
+        Default set to 500
 
     """
 
-    def __init__(self, analyzer='world', fs=16000, shiftms=5,
+    def __init__(self, analyzer='world', fs=16000, fftl=1024, shiftms=5,
                  minf0=50, maxf0=500):
         self.analyzer = analyzer
         self.fs = fs
+        self.fftl = fftl
         self.shiftms = shiftms
         self.minf0 = minf0
         self.maxf0 = maxf0
 
         # analyzer setting
         if self.analyzer == 'world':
-            self.analyzer = WORLD(period=self.shiftms,
-                                  fs=self.fs,
-                                  f0_floor=self.minf0,
-                                  f0_ceil=self.maxf0)
+            self.analyzer = WORLD(fs=self.fs,
+                                  fftl=self.fftl,
+                                  minf0=self.minf0,
+                                  maxf0=self.maxf0,
+                                  shiftms=self.shiftms
+                                  )
         else:
             raise(
                 'Other analyzer does not support, please use "world" instead')

@@ -17,7 +17,7 @@ class AnalysisSynthesisTest(unittest.TestCase):
     def test_anasyn_16000(self):
         path = dirpath + '/data/test16000.wav'
         fs, x = wavfile.read(path)
-        af = FeatureExtractor(analyzer='world', fs=fs, shiftms=5)
+        af = FeatureExtractor(analyzer='world', fs=fs, shiftms=5, fftl=1024)
         f0, spc, ap = af.analyze(x)
         mcep = af.mcep(dim=24, alpha=0.42)
 
@@ -30,14 +30,9 @@ class AnalysisSynthesisTest(unittest.TestCase):
         nun_check(wav)
 
     def test_anasyn_44100(self):
-        """
-        TODO: When minf0 is set to 50, the assertion for spc.shape and ap.shape
-        is fail.
-        """
-
         path = dirpath + '/data/test44100.wav'
         fs, x = wavfile.read(path)
-        af = FeatureExtractor(analyzer='world', fs=fs, shiftms=5, minf0=100)
+        af = FeatureExtractor(analyzer='world', fs=fs, shiftms=5, minf0=100, fftl=2048)
         f0, spc, ap = af.analyze(x)
         mcep = af.mcep(dim=40, alpha=0.50)
 

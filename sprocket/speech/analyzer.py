@@ -13,27 +13,24 @@ class WORLD(object):
     fs : int, optional
         Sampling frequency
         Default set to 16000
+    fftl : int, optional
+        FFT length
+        Default set to 1024
+    shiftms : int, optional
+        Shift lengs [ms]
+        Default set to 5.0
     minf0 : int, optional
         Floor in f0 estimation
         Default set to 50
     maxf0 : int, optional
         Ceil in f0 estimation
         Default set to 500
-    shiftms : int, optional
-        Shift lengs [ms]
-        Default set to 5.0
     """
 
-    def __init__(self,
-                 fs=44100,
-                 minf0=40.0,
-                 maxf0=700.0,
-                 shiftms=5.0,
-                 ):
-        super(WORLD, self).__init__()
-
-        self.shiftms = shiftms
+    def __init__(self, fs=16000, fftl=1024, shiftms=5.0, minf0=40.0, maxf0=500.0):
         self.fs = fs
+        self.fftl = fftl
+        self.shiftms = shiftms
         self.minf0 = minf0
         self.maxf0 = maxf0
 
@@ -57,21 +54,13 @@ class WORLD(object):
             aperiodicity sequence
 
         """
-        f0, time_axis = pyworld.harvest(x,
-                                        self.fs,
-                                        f0_floor=self.minf0,
-                                        f0_ceil=self.maxf0,
-                                        frame_period=self.shiftms)
-        spc = pyworld.cheaptrick(x,
-                                 f0,
-                                 time_axis,
-                                 self.fs,
-                                 f0_floor=self.minf0)
-        ap = pyworld.d4c(x,
-                         f0,
-                         time_axis,
-                         self.fs)
+        f0, time_axis = pyworld.harvest(x, self.fs, f0_floor=self.minf0,
+                                        f0_ceil=self.maxf0, frame_period=self.shiftms)
+        spc = pyworld.cheaptrick(x, f0, time_axis, self.fs,
+                                 fft_size=self.fftl)
+        ap = pyworld.d4c(x, f0, time_axis, self.fs, fft_size=self.fftl)
 
+        assert spc.shape == ap.shape
         return f0, spc, ap
 
     def analyze_f0(self, x):
@@ -88,11 +77,9 @@ class WORLD(object):
             F0 sequence
 
         """
-        f0, time_axis = pyworld.harvest(x,
-                                        self.fs,
-                                        f0_floor=self.minf0,
-                                        f0_ceil=self.maxf0,
-                                        frame_period=self.shiftms)
+
+        f0, time_axis = pyworld.harvest(x, self.fs, f0_floor=self.minf0,
+                                        f0_ceil=self.maxf0, frame_period=self.shiftms)
 
         return f0
 
