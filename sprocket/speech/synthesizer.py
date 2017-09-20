@@ -59,8 +59,7 @@ class Synthesizer(object):
 
         if rmcep is not None:
             # power modification
-            # mcep = mod_power(mcep, rmcep, alpha=alpha, fftl=self.fftl)
-            mcep = mod_power2(mcep, rmcep, alpha=alpha)
+            mcep = mod_power(mcep, rmcep, alpha=alpha)
 
         # mcep into spc
         spc = pysptk.mc2sp(mcep, alpha, self.fftl)
@@ -100,9 +99,7 @@ class Synthesizer(object):
 
         if rmcep is not None:
             # power modification
-            # diffmcep = mod_power(rmcep + diffmcep, rmcep,
-            #                       alpha=alpha, fftl=self.fftl) - rmcep
-            diffmcep = mod_power2(rmcep + diffmcep, rmcep, alpha=alpha) - rmcep
+            diffmcep = mod_power(rmcep + diffmcep, rmcep, alpha=alpha) - rmcep
 
         b = np.apply_along_axis(pysptk.mc2b, 1, diffmcep, alpha)
         assert np.isfinite(b).all()
@@ -139,49 +136,7 @@ class Synthesizer(object):
         return wav
 
 
-def mod_power(cvmcep, rmcep, alpha=0.42, fftl=1024):
-    """Power modification based on spectrogram
-
-    Parameters
-    ----------
-    cvmcep : array, shape (`T`, `dim`)
-        array of converted mel-cepstrum
-    rmcep : array, shape (`T`, `dim`)
-        array of reference mel-cepstrum
-    alpha : float, optional
-        All-path filter transfer function
-        Default set to 0.42
-    fftl : int , optional
-        Frame Length of STFT
-        Default set to 1024
-
-    Return
-    ------
-    modified_cvmcep : array, shape (`T`, `dim`)
-        array of power modified converted mel-cepstrum
-
-    """
-
-    if rmcep.shape != cvmcep.shape:
-        raise ValueError("The shapes of the converted and \
-                         reference mel-cepstrum are different: \
-                         {} / {}".format(cvmcep.shape, rmcep.shape))
-
-    hfftl = fftl // 2 + 1
-    cv_spc = pysptk.mc2sp(cvmcep, alpha, hfftl)
-    cv_pow = np.mean(np.log(np.sqrt(cv_spc)), axis=1)
-
-    r_spc = pysptk.mc2sp(rmcep, alpha, hfftl)
-    r_pow = np.mean(np.log(np.sqrt(r_spc)), axis=1)
-    dpow = r_pow - cv_pow
-
-    modified_cvmcep = np.copy(cvmcep)
-    modified_cvmcep[:, 0] += dpow
-
-    return modified_cvmcep
-
-
-def mod_power2(cvmcep, rmcep, alpha=0.42, irlen=256):
+def mod_power(cvmcep, rmcep, alpha=0.42, irlen=256):
     """Power modification based on inpulse responce
 
     Parameters
