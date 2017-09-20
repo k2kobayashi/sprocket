@@ -36,9 +36,9 @@ def get_f0s_from_list(conf, list_file, wav_dir):
         print("Extract F0: " + wavf)
         # constract FeatureExtractor clas
         feat = FeatureExtractor(analyzer=conf.analyzer, fs=conf.wav_fs,
-                                shiftms=conf.wav_shiftms,
+                                fftl=conf.wav_fftl, shiftms=conf.wav_shiftms,
                                 minf0=conf.f0_minf0, maxf0=conf.f0_maxf0)
-        f0, _, _ = feat.analyze(x)
+        f0 = feat.analyze_f0(x)
         f0s.append(f0)
 
     return f0s
