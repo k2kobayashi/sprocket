@@ -60,7 +60,7 @@ class Synthesizer(object):
         if rmcep is not None:
             # power modification
             # mcep = mod_power(mcep, rmcep, alpha=alpha, fftl=self.fftl)
-            mcep = mod_power2(mcep, rmcep, alpha=alpha, fftl=self.fftl)
+            mcep = mod_power2(mcep, rmcep, alpha=alpha)
 
         # mcep into spc
         spc = pysptk.mc2sp(mcep, alpha, self.fftl)
@@ -101,9 +101,8 @@ class Synthesizer(object):
         if rmcep is not None:
             # power modification
             # diffmcep = mod_power(rmcep + diffmcep, rmcep,
-            #                      alpha=alpha, fftl=self.fftl) - rmcep
-            diffmcep = mod_power2(rmcep + diffmcep, rmcep,
-                                  alpha=alpha, fftl=self.fftl) - rmcep
+            #                       alpha=alpha, fftl=self.fftl) - rmcep
+            diffmcep = mod_power2(rmcep + diffmcep, rmcep, alpha=alpha) - rmcep
 
         b = np.apply_along_axis(pysptk.mc2b, 1, diffmcep, alpha)
         assert np.isfinite(b).all()
@@ -182,7 +181,7 @@ def mod_power(cvmcep, rmcep, alpha=0.42, fftl=1024):
     return modified_cvmcep
 
 
-def mod_power2(cvmcep, rmcep, alpha=0.42, fftl=1024):
+def mod_power2(cvmcep, rmcep, alpha=0.42, irlen=256):
     """Power modification based on inpulse responce
 
     Parameters
@@ -194,9 +193,9 @@ def mod_power2(cvmcep, rmcep, alpha=0.42, fftl=1024):
     alpha : float, optional
         All-path filter transfer function
         Default set to 0.42
-    fftl : int , optional
-        Frame Length of STFT
-        Default set to 1024
+    irlen : int, optional
+        Length for IIR filter
+        Default set to 256
 
     Return
     ------
@@ -210,8 +209,8 @@ def mod_power2(cvmcep, rmcep, alpha=0.42, fftl=1024):
                          reference mel-cepstrum are different: \
                          {} / {}".format(cvmcep.shape, rmcep.shape))
 
-    cv_e = pysptk.mc2e(cvmcep, alpha=alpha, irlen=fftl)
-    r_e = pysptk.mc2e(cvmcep, alpha=alpha, irlen=fftl)
+    cv_e = pysptk.mc2e(cvmcep, alpha=alpha, irlen=irlen)
+    r_e = pysptk.mc2e(rmcep, alpha=alpha, irlen=irlen)
 
     dpow = np.log(r_e / cv_e) / 2
 
