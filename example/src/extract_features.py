@@ -75,7 +75,6 @@ def main(*argv):
 
                 # analyze F0, spc, ap and bandap
                 f0, spc, ap = feat.analyze(x)
-                bandap = feat.bandap()
                 mcep = feat.mcep(dim=sconf.mcep_dim, alpha=sconf.mcep_alpha)
                 npow = feat.npow()
 
@@ -84,7 +83,6 @@ def main(*argv):
                 h5.save(f0, ext='f0')
                 h5.save(spc, ext='spc')
                 h5.save(ap, ext='ap')
-                h5.save(bandap, ext='bandap')
                 h5.save(mcep, ext='mcep')
                 h5.save(npow, ext='npow')
                 h5.close()
