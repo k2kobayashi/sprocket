@@ -66,7 +66,6 @@ if __name__ == "__main__":
     PAIR_CONF_FILE = os.path.join(
         CONF_DIR, "pair", SOURCE_TARGET_PAIR + ".yml")
     f0rate = args['--f0rate']
-    print(f0rate)
 
     # check list file
     for use in ("train", "eval"):
