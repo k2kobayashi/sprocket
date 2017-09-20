@@ -2,10 +2,11 @@
 
 """An example script to transform F0
 
-Usage: f0_transformation.py [-h] SOURCE TARGET
+Usage: f0_transformation.py [-h] [--f0rate <f0rate>] SOURCE TARGET
 
 Options:
     -h, --help   Show the help
+    --f0rate <f0rate>  F0 transformation ratio, [default: -1]
     SOURCE         The name of speaker
                    whose voice you would like to convert from
     TARGET         The name of speaker whose voice you would like to convert to
@@ -64,6 +65,8 @@ if __name__ == "__main__":
         for part, label in LABELS.items()}
     PAIR_CONF_FILE = os.path.join(
         CONF_DIR, "pair", SOURCE_TARGET_PAIR + ".yml")
+    f0rate = args['--f0rate']
+    print(f0rate)
 
     # check list file
     for use in ("train", "eval"):
@@ -72,7 +75,8 @@ if __name__ == "__main__":
 
     print("### 1. F0 transformation of original waveform ###")
     # transform F0 of waveform of original speaker
-    main(LABELS["source"], os.path.join(SPEAKER_CONF_FILES["source"]),
+    main("--f0rate", f0rate,
+         LABELS["source"], os.path.join(SPEAKER_CONF_FILES["source"]),
          os.path.join(SPEAKER_CONF_FILES["target"]),
          LIST_FILES["source"]["train"],
          LIST_FILES["source"]["eval"], LIST_FILES["target"]["train"], WAV_DIR)
