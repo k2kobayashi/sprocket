@@ -87,14 +87,14 @@ def main(*argv):
     # constract FeatureExtractor class
     feat = FeatureExtractor(analyzer=sconf.analyzer,
                             fs=sconf.wav_fs,
+                            fftl=sconf.wav_fftl,
                             shiftms=sconf.wav_shiftms,
                             minf0=sconf.f0_minf0,
                             maxf0=sconf.f0_maxf0)
-    fftl = get_cheaptrick_fft_size(sconf.wav_fs, sconf.f0_minf0)
 
     # open synthesizer
     synthesizer = Synthesizer(fs=sconf.wav_fs,
-                              fftl=fftl,
+                              fftl=sconf.wav_fftl,
                               shiftms=sconf.wav_shiftms)
 
     # test directory

@@ -46,6 +46,7 @@ def main(*argv):
     # constract FeatureExtractor class
     feat = FeatureExtractor(analyzer=sconf.analyzer,
                             fs=sconf.wav_fs,
+                            fftl=sconf.wav_fftl,
                             shiftms=sconf.wav_shiftms,
                             minf0=sconf.f0_minf0,
                             maxf0=sconf.f0_maxf0)

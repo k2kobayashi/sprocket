@@ -175,4 +175,4 @@ class FeatureExtractor(object):
 
     def _analyzed_check(self):
         if self._f0 is None and self._spc is None and self._ap is None:
-            raise('Call FeatureExtractor.analyze() before get features.')
+            raise('Call FeatureExtractor.analyze() before get parameterized features.')
