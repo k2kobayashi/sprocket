@@ -166,14 +166,14 @@ def mod_power(cvmcep, rmcep, alpha=0.42, fftl=1024):
                          {} / {}".format(cvmcep.shape, rmcep.shape))
 
     hfftl = fftl // 2 + 1
-    r_spc = pysptk.mc2sp(rmcep, alpha, hfftl)
     cv_spc = pysptk.mc2sp(cvmcep, alpha, hfftl)
-
-    r_pow = np.mean(np.log(np.sqrt(r_spc)), axis=1)
     cv_pow = np.mean(np.log(np.sqrt(cv_spc)), axis=1)
+
+    r_spc = pysptk.mc2sp(rmcep, alpha, hfftl)
+    r_pow = np.mean(np.log(np.sqrt(r_spc)), axis=1)
     dpow = r_pow - cv_pow
 
-    modified_cvmcep = cvmcep
+    modified_cvmcep = np.copy(cvmcep)
     modified_cvmcep[:, 0] += dpow
 
     return modified_cvmcep
