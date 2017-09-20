@@ -69,7 +69,7 @@ class FeatureExtractor(object):
         self._ap = None
 
     def analyze(self, x):
-        """Analyzer acoustic features using analyzer
+        """Analyze acoustic features using analyzer
 
         Parameters
         ----------
@@ -96,6 +96,31 @@ class FeatureExtractor(object):
             print("WARNING: F0 values are all zero.")
 
         return self._f0, self._spc, self._ap
+
+    def analyze_f0(self, x):
+        """Analyze F0 using analyzer
+
+        Parameters
+        ----------
+        x : array
+            Array of waveform samples
+
+        Returns
+        -------
+        f0 : array, shape (`T`,)
+            F0 sequence
+        """
+
+        self.x = np.array(x, dtype=np.float)
+        self._f0 = self.analyzer.analyze_f0(self.x)
+
+        # check non-negative for F0
+        self._f0[self._f0 < 0] = 0
+
+        if np.sum(self._f0) == 0.0:
+            print("WARNING: F0 values are all zero.")
+
+        return self._f0
 
     def mcep(self, dim=24, alpha=0.42):
         """Return mel-cepstrum sequence parameterized from spectral envelope
