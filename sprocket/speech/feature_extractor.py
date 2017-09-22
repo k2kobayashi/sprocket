@@ -19,8 +19,6 @@ class FeatureExtractor(object):
 
     Parameters
     ----------
-    x : array
-        Vector of waveform samples
     analyzer : str, optional
         Analyzer of acoustic feature
         'world' : WORLD analysis/synthesis framework
