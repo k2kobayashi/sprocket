@@ -73,7 +73,7 @@ def main(*argv):
 
                 print("Extract acoustic features: " + wavf)
 
-                # analyze F0, spc, ap and bandap
+                # analyze F0, spc, and ap
                 f0, spc, ap = feat.analyze(x)
                 mcep = feat.mcep(dim=sconf.mcep_dim, alpha=sconf.mcep_alpha)
                 npow = feat.npow()
