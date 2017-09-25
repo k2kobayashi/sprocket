@@ -108,7 +108,7 @@ def main(*argv):
             f = line.rstrip()
             wavf = os.path.join(args.wav_dir, f + '.wav')
             fs, x = wavfile.read(wavf)
-            x = np.array(x, dtype=np.float)
+            x = x.astype(np.float)
             assert fs == sconf.wav_fs
 
             # analyze F0, mcep, and ap
@@ -123,7 +123,7 @@ def main(*argv):
                                         alpha=sconf.mcep_alpha,
                                         )
             wavpath = os.path.join(test_dir, f + '_anasyn.wav')
-            wavfile.write(wavpath, fs, np.array(wav, dtype=np.int16))
+            wavfile.write(wavpath, fs, wav.astype(np.int16))
 
             # convert F0
             cvf0 = f0stats.convert(f0, orgf0stats, tarf0stats)
@@ -163,7 +163,7 @@ def main(*argv):
 
             # write waveform
             wav = np.clip(wav, -32768, 32767)
-            wavfile.write(wavpath, fs, np.array(wav, dtype=np.int16))
+            wavfile.write(wavpath, fs, wav.astype(np.int16))
             print(wavpath)
 
 
