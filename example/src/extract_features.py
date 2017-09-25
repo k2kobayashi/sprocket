@@ -13,9 +13,10 @@ import sys
 import numpy as np
 from scipy.io import wavfile
 
+from .yml import SpeakerYML
+from .misc import low_cut_filter
 from sprocket.speech import FeatureExtractor, Synthesizer
 from sprocket.util import HDF5
-from yml import SpeakerYML
 
 
 def main(*argv):
@@ -69,6 +70,7 @@ def main(*argv):
                 wavf = os.path.join(args.wav_dir, f + '.wav')
                 fs, x = wavfile.read(wavf)
                 x = np.array(x, dtype=np.float)
+                x = low_cut_filter(x, fs, cutoff=70)
                 assert fs == sconf.wav_fs
 
                 print("Extract acoustic features: " + wavf)
