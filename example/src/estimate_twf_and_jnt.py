@@ -21,6 +21,32 @@ from sprocket.model.GMM import GMMTrainer, GMMConvertor
 
 
 def get_aligned_jointdata(orgdata, orgnpow, tardata, tarnpow, cvdata=None):
+    """Get aligment between features
+
+    Paramters
+    ---------
+    orgdata : array, shape (`T_org`, `dim`)
+        Acoustic feature of source speaker
+    orgnpow : array, shape (`T_org`)
+        Normalized power of soruce speaker
+    orgdata : array, shape (`T_tar`, `dim`)
+        Acoustic feature of target speaker
+    orgnpow : array, shape (`T_tar`)
+        Normalized power of target speaker
+    cvdata : array, optiona, shape (`T_org`, `dim`)
+        Converted acoustic feature from source into target
+
+    Returns
+    ---------
+    jdata : array, shape (`T_new` `dim * 2`)
+        Joint feature vector between source and target
+    twf : array, shape (`T_new`, `2`)
+        Time warping function
+    mcd : float,
+        Mel-cepstrum distortion between source and target
+
+    """
+
     # extract extsddata
     org_extsddata = extfrm(static_delta(orgdata), orgnpow)
     tar_extsddata = extfrm(static_delta(tardata), tarnpow)
@@ -30,6 +56,9 @@ def get_aligned_jointdata(orgdata, orgnpow, tardata, tarnpow, cvdata=None):
         twf = estimate_twf(org_extsddata, tar_extsddata, distance='melcd')
         mcd = melcd(org_extsddata[twf[0]], tar_extsddata[twf[1]])
     else:
+        if orgdata.shape != cvdata.shape:
+            raise ValueError('Dimension mismatch between orgdata and cvdata: \
+                             {} {}'.format(orgdata.shape, cvdata.shape))
         # calculate twf and mel-cd with converted data
         cv_extsddata = extfrm(static_delta(cvdata), orgnpow)
         twf = estimate_twf(cv_extsddata, tar_extsddata, distance='melcd')
@@ -70,15 +99,15 @@ def main(*argv):
     assert len(org_mceps) == len(org_npows)
 
     itnum = 1
-    sd = 1
+    sd = 1  # start dimension for aligment of mcep
     num_files = len(org_mceps)
-    print(str(itnum) + '-th joint feature extraction starts.')
+    print('{}-th joint feature extraction starts.'.format(itnum))
 
     # first iteration
     for i in range(num_files):
-        jdata, twf, mcd = get_aligned_jointdata(org_mceps[i][:, sd:], org_npows[i],
-                                                tar_mceps[i][:, sd:], tar_npows[i])
-        print('distortion [dB] for ' + str(i) + '-th file: ' + str(mcd))
+        jdata, _, mcd = get_aligned_jointdata(org_mceps[i][:, sd:], org_npows[i],
+                                              tar_mceps[i][:, sd:], tar_npows[i])
+        print('distortion [dB] for {}-th file: {}'.format(i + 1, mcd))
         if i == 0:
             jnt = jdata
         else:
@@ -87,7 +116,7 @@ def main(*argv):
 
     # second through final iteration
     while itnum < pconf.jnt_n_iter + 1:
-        print(str(itnum) + '-th joint feature extraction starts.')
+        print('{}-th joint feature extraction starts.'.format(itnum))
         # train GMM
         trgmm = GMMTrainer(n_mix=pconf.GMM_mcep_n_mix,
                            n_iter=pconf.GMM_mcep_n_iter,
@@ -106,7 +135,7 @@ def main(*argv):
                                                     tar_mceps[i][:, sd:],
                                                     tar_npows[i],
                                                     cvdata=cvmcep)
-            print('distortion [dB] for ' + str(i) + '-th file: ' + str(mcd))
+            print('distortion [dB] for {}-th file: {}'.format(i + 1, mcd))
             if i == 0:
                 jnt = jdata
             else:
@@ -115,8 +144,7 @@ def main(*argv):
 
         itnum += 1
 
-    # save files in final steps
-    # save jnt
+    # save joint feature vector
     jnt_dir = os.path.join(args.pair_dir, 'jnt')
     if not os.path.exists(jnt_dir):
         os.makedirs(jnt_dir)

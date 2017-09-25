@@ -10,7 +10,7 @@ Voice conversion toolkit - Voice conversion (VC) is a technique to convert a spe
 
 
 ## Purpose
-### Reproduce VC based on the GMM and DIFFVC based on the DIFFGMM
+### Reproduce VC and DIFFVC based on GMM
 
 In the major purpose of this framework, it enables for the users to implement voice conversion only preparing parallel dataset and excusing example scripts.
 As the details of conversion method, please see the following papers.
@@ -18,15 +18,15 @@ As the details of conversion method, please see the following papers.
 - Toda et al., "Voice Conversion Based on Maximum-Likelihood Estimation of Spectral Parameter Trajectory," IEEE Trans. on ASLP, Vol. 15, No. 8, pp. 2222-2235, Nov. 2007
 - Kobayashi et al., "F0 TRANSFORMATION TECHNIQUES FOR STATISTICAL VOICE CONVERSION WITH DIRECT WAVEFORM MODIFICATION WITH SPECTRAL DIFFERENTIAL," Proc. IEEE SLT, pp. 693-700, Dec 2016.
 
-### Supply Python2/3 library related to VC
-To easily develop VC and speech-based application using Python, the library of sprocket supplies several interfaces such ash acoustic feature analysis/synthesis, acoustic feature modeling and acoustic feature modifications.
-For the details of the library, please see sprocket documents in https://hogehoge.hoge
+### Supply Python3 library related to VC
+To easily develop VC and speech-based application using Python, the library of sprocket also supplies several interfaces such as acoustic feature analysis/synthesis, acoustic feature modeling and acoustic feature modifications.
+For the details of the library, please see sprocket documents in (coming soon).
 
 ## Installation & Run
 
 ### Current stable version
 
-Ver. 0.20
+Ver. 0.24
 
 ### Install requirements
 
@@ -38,12 +38,12 @@ pip install -r requirements.txt
 ### Install sprocket
 
 ```
-python setup.py develop
+python setup.py install
 ```
 
 ### Run example
 
-See [Voice Conversion Example](docs/vc_example.md)
+See [VC example](docs/vc_example.md)
 
 ## REPORTING BUGS
 
@@ -62,4 +62,4 @@ Released under the MIT license
 https://opensource.org/licenses/mit-license.php
 
 ## ACKNOWLEDGEMENTS
-Thank you @r9y9 and @tats-u for lots of contributions and encouragement helps before release.
+Thank you [@r9y9](https://github.com/r9y9) and [@tats-u](https://github.com/tats-u) for lots of contributions and encouragement helps before release.
