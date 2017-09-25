@@ -140,20 +140,20 @@ class FeatureExtractor(object):
 
         return pysptk.sp2mc(self._spc, dim, alpha)
 
-    def bandap(self):
-        """Return encoded aperiodicity sequence
-
-        Parameters
-        ------
-        dim: int, optional
-            Dimension of the band-aperiodiciy
+    def codeap(self):
+        """Return coded aperiodicity sequence
 
         Returns
         -------
-        bandap: array, shape (`T`, `dim`)
+        codeap : array, shape (`T`, `dim`)
             Encoded aperiodicity sequence of the waveform
-
+            The `dim` of code ap is defined based on the `fs` as follow:
+            fs = `16000` : `1`
+            fs = `22050` : `2`
+            fs = `44100` : `5`
+            fs = `48000` : `5`
         """
+
         self._analyzed_check()
 
         return pyworld.code_aperiodicity(self._ap, self.fs)
