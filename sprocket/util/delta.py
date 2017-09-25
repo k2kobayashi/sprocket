@@ -6,7 +6,7 @@ import numpy as np
 import scipy.sparse
 
 
-def delta(data, win=[-0.5, 0, 0.5]):
+def delta(data, win=[-1.0, 1.0, 0]):
     """Calculate delta component
 
     Parameters
@@ -15,7 +15,7 @@ def delta(data, win=[-0.5, 0, 0.5]):
         Array of static matrix sequence.
     win: array, optional, shape (`3`)
         The shape of window matrix.
-        Default set to [-0.5, 0, 0.5].
+        Default set to [-1.0, 1.0, 0].
 
     Returns
     -------
@@ -44,7 +44,7 @@ def delta(data, win=[-0.5, 0, 0.5]):
     return delta
 
 
-def static_delta(data, win=[-0.5, 0, 0.5]):
+def static_delta(data, win=[-1.0, 1.0, 0]):
     """Calculate static and delta component
 
     Parameters
@@ -53,7 +53,7 @@ def static_delta(data, win=[-0.5, 0, 0.5]):
         Array of static matrix sequence.
     win: array, optional, shape (`3`)
         The shape of window matrix.
-        Default set to [-0.5, 0, 0.5].
+        Default set to [-1.0, 1.0, 0].
 
     Returns
     -------
@@ -66,7 +66,7 @@ def static_delta(data, win=[-0.5, 0, 0.5]):
     return sddata
 
 
-def construct_static_and_delta_matrix(T, D):
+def construct_static_and_delta_matrix(T, D, win=[-1.0, 1.0, 0]):
     """Calculate static and delta transformation matrix
 
     Parameters
@@ -75,6 +75,9 @@ def construct_static_and_delta_matrix(T, D):
         Scala of time length
     D : scala, `D`
         Scala of the number of dimentsion
+    win: array, optional, shape (`3`)
+        The shape of window matrix for delta.
+        Default set to [-1.0, 1.0, 0].
 
     Returns
     -------
@@ -84,7 +87,7 @@ def construct_static_and_delta_matrix(T, D):
     """
 
     static = [0, 1, 0]
-    delta = [-0.5, 0, 0.5]
+    delta = win
     assert len(static) == len(delta)
 
     # generate full W
