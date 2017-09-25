@@ -13,7 +13,7 @@ import sys
 import numpy as np
 from scipy.io import wavfile
 
-from sprocket.speech import FeatureExtractor
+from sprocket.speech import FeatureExtractor, Synthesizer
 from sprocket.util import HDF5
 from yml import SpeakerYML
 
@@ -40,15 +40,24 @@ def main(*argv):
     # read parameters from speaker yml
     sconf = SpeakerYML(args.ymlf)
     h5_dir = os.path.join(args.pair_dir, 'h5')
-    if not os.path.exists(h5_dir):
-        os.makedirs(h5_dir)
+    anasyn_dir = os.path.join(args.pair_dir, 'anasyn')
+    if not os.path.exists(os.path.join(h5_dir, args.speaker)):
+        os.makedirs(os.path.join(h5_dir, args.speaker))
+    if not os.path.exists(os.path.join(anasyn_dir, args.speaker)):
+        os.makedirs(os.path.join(anasyn_dir, args.speaker))
 
     # constract FeatureExtractor class
     feat = FeatureExtractor(analyzer=sconf.analyzer,
                             fs=sconf.wav_fs,
+                            fftl=sconf.wav_fftl,
                             shiftms=sconf.wav_shiftms,
                             minf0=sconf.f0_minf0,
                             maxf0=sconf.f0_maxf0)
+
+    # constract Synthesizer class
+    synthesizer = Synthesizer(fs=sconf.wav_fs,
+                              fftl=sconf.wav_fftl,
+                              shiftms=sconf.wav_shiftms)
 
     # open list file
     with open(args.list_file, 'r') as fp:
@@ -66,7 +75,6 @@ def main(*argv):
 
                 # analyze F0, spc, ap and bandap
                 f0, spc, ap = feat.analyze(x)
-                bandap = feat.bandap()
                 mcep = feat.mcep(dim=sconf.mcep_dim, alpha=sconf.mcep_alpha)
                 npow = feat.npow()
 
@@ -75,10 +83,18 @@ def main(*argv):
                 h5.save(f0, ext='f0')
                 h5.save(spc, ext='spc')
                 h5.save(ap, ext='ap')
-                h5.save(bandap, ext='bandap')
                 h5.save(mcep, ext='mcep')
                 h5.save(npow, ext='npow')
                 h5.close()
+
+                # analysis/synthesis using F0, mcep, and ap
+                wav = synthesizer.synthesis(f0,
+                                            mcep,
+                                            ap,
+                                            alpha=sconf.mcep_alpha,
+                                            )
+                anasynf = os.path.join(anasyn_dir, f + '.wav')
+                wavfile.write(anasynf, fs, np.array(wav, dtype=np.int16))
             else:
                 print("Acoustic features already exist: " + h5f)
 

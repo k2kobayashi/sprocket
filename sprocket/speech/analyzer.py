@@ -6,32 +6,33 @@ import pyworld
 
 
 class WORLD(object):
-    """WORLD-based speech analyzer & synthesizer
+    """WORLD-based speech analyzer
 
-    Attributes
+    Parameters
     ----------
-    period : float
-        frame period (default: 5.0)
-    fs : int
-        sampling frequency (default: 44100)
-    f0_floor : float
-        floor in f0 estimation
-    f0_ceil : float
-        ceil in f0 estimation
+    fs : int, optional
+        Sampling frequency
+        Default set to 16000
+    fftl : int, optional
+        FFT length
+        Default set to 1024
+    shiftms : int, optional
+        Shift lengs [ms]
+        Default set to 5.0
+    minf0 : int, optional
+        Floor in f0 estimation
+        Default set to 50
+    maxf0 : int, optional
+        Ceil in f0 estimation
+        Default set to 500
     """
 
-    def __init__(self,
-                 period=5.0,
-                 fs=44100,
-                 f0_floor=40.0,
-                 f0_ceil=700.0,
-                 ):
-        super(WORLD, self).__init__()
-
-        self.period = period
+    def __init__(self, fs=16000, fftl=1024, shiftms=5.0, minf0=40.0, maxf0=500.0):
         self.fs = fs
-        self.f0_floor = f0_floor
-        self.f0_ceil = f0_ceil
+        self.fftl = fftl
+        self.shiftms = shiftms
+        self.minf0 = minf0
+        self.maxf0 = maxf0
 
     def analyze(self, x):
         """Analyze acoustic features based on WORLD
@@ -53,14 +54,14 @@ class WORLD(object):
             aperiodicity sequence
 
         """
-        f0, time_axis = pyworld.harvest(x, self.fs, f0_floor=self.f0_floor,
-                                        f0_ceil=self.f0_ceil,
-                                        frame_period=self.period)
-        spectrum_envelope = pyworld.cheaptrick(
-            x, f0, time_axis, self.fs, f0_floor=self.f0_floor)
-        aperiodicity = pyworld.d4c(x, f0, time_axis, self.fs)
+        f0, time_axis = pyworld.harvest(x, self.fs, f0_floor=self.minf0,
+                                        f0_ceil=self.maxf0, frame_period=self.shiftms)
+        spc = pyworld.cheaptrick(x, f0, time_axis, self.fs,
+                                 fft_size=self.fftl)
+        ap = pyworld.d4c(x, f0, time_axis, self.fs, fft_size=self.fftl)
 
-        return f0, spectrum_envelope, aperiodicity
+        assert spc.shape == ap.shape
+        return f0, spc, ap
 
     def analyze_f0(self, x):
         """Analyze decomposes a speech signal into F0:
@@ -76,9 +77,10 @@ class WORLD(object):
             F0 sequence
 
         """
-        f0, time_axis = pyworld.harvest(x, self.fs, f0_floor=self.f0_floor,
-                                        f0_ceil=self.f0_ceil,
-                                        frame_period=self.period)
+
+        f0, time_axis = pyworld.harvest(x, self.fs, f0_floor=self.minf0,
+                                        f0_ceil=self.maxf0, frame_period=self.shiftms)
+
         return f0
 
     def synthesis(self, f0, spc, ap):
@@ -95,4 +97,4 @@ class WORLD(object):
 
         """
 
-        return pyworld.synthesize(f0, spc, ap, self.fs, frame_period=self.period)
+        return pyworld.synthesize(f0, spc, ap, self.fs, frame_period=self.shiftms)

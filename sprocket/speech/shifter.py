@@ -115,8 +115,8 @@ class Shifter(object):
         uf0 = np.zeros(len(f0))
 
         # synthesis
-        synth = Synthesizer()
-        unvoice_anasyn = synth.synthesis_spc(uf0, spc, ap, fs=self.fs)
+        synth = Synthesizer(fs=self.fs)
+        unvoice_anasyn = synth.synthesis_spc(uf0, spc, ap)
 
         # HPF for synthesized speech
         fil = firwin(255, self.f0rate, pass_zero=False)

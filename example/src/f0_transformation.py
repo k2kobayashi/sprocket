@@ -36,9 +36,9 @@ def get_f0s_from_list(conf, list_file, wav_dir):
         print("Extract F0: " + wavf)
         # constract FeatureExtractor clas
         feat = FeatureExtractor(analyzer=conf.analyzer, fs=conf.wav_fs,
-                                shiftms=conf.wav_shiftms,
+                                fftl=conf.wav_fftl, shiftms=conf.wav_shiftms,
                                 minf0=conf.f0_minf0, maxf0=conf.f0_maxf0)
-        f0, _, _ = feat.analyze(x)
+        f0 = feat.analyze_f0(x)
         f0s.append(f0)
 
     return f0s
@@ -90,6 +90,8 @@ def main(*argv):
     # Options for python
     dcp = 'Extract aoucstic features for the speaker'
     parser = argparse.ArgumentParser(description=dcp)
+    parser.add_argument('--f0rate', type=float, default=-1,
+                        help='Original speaker label')
     parser.add_argument('speaker', type=str,
                         help='Original speaker label')
     parser.add_argument('org_yml', type=str,
@@ -110,17 +112,20 @@ def main(*argv):
     org_conf = SpeakerYML(args.org_yml)
     tar_conf = SpeakerYML(args.tar_yml)
 
-    # get f0 list to calculate F0 transformation ratio
-    org_f0s = get_f0s_from_list(org_conf, args.org_train_list, args.wav_dir)
-    tar_f0s = get_f0s_from_list(tar_conf, args.tar_train_list, args.wav_dir)
+    if args.f0rate == -1:
+        # get f0 list to calculate F0 transformation ratio
+        org_f0s = get_f0s_from_list(org_conf, args.org_train_list, args.wav_dir)
+        tar_f0s = get_f0s_from_list(tar_conf, args.tar_train_list, args.wav_dir)
 
-    # calculate F0 statistics of original and target speaker
-    f0stats = F0statistics()
-    orgf0stats = f0stats.estimate(org_f0s)
-    tarf0stats = f0stats.estimate(tar_f0s)
+        # calculate F0 statistics of original and target speaker
+        f0stats = F0statistics()
+        orgf0stats = f0stats.estimate(org_f0s)
+        tarf0stats = f0stats.estimate(tar_f0s)
 
-    # calculate F0 transformation ratio between original and target speakers
-    f0rate = np.round(np.exp(tarf0stats[0] - orgf0stats[0]), decimals=2)
+        # calculate F0 transformation ratio between original and target speakers
+        f0rate = np.round(np.exp(tarf0stats[0] - orgf0stats[0]), decimals=2)
+    else:
+        f0rate = args.f0rate
     print('F0 transformation ratio: ' + str(f0rate))
 
     # F0 transformation of original waveform in both train and eval list files

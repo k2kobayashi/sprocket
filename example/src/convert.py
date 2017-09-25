@@ -13,14 +13,11 @@ import os
 import sys
 import numpy as np
 
-import pysptk
-from pysptk.synthesis import MLSADF
 from scipy.io import wavfile
 from sklearn.externals import joblib
-from pyworld import get_cheaptrick_fft_size
 
 from .yml import PairYML, SpeakerYML
-from sprocket.speech import FeatureExtractor, Synthesizer, mod_power
+from sprocket.speech import FeatureExtractor, Synthesizer
 from sprocket.model import GMMConvertor, F0statistics, GV
 from sprocket.util import static_delta, HDF5
 
@@ -89,16 +86,15 @@ def main(*argv):
     # constract FeatureExtractor class
     feat = FeatureExtractor(analyzer=sconf.analyzer,
                             fs=sconf.wav_fs,
+                            fftl=sconf.wav_fftl,
                             shiftms=sconf.wav_shiftms,
                             minf0=sconf.f0_minf0,
                             maxf0=sconf.f0_maxf0)
-    fftl = get_cheaptrick_fft_size(sconf.wav_fs, sconf.f0_minf0)
 
-    # open synthesizer
-    synthesizer = Synthesizer()
-    shiftl = int(sconf.wav_fs / 1000 * sconf.wav_shiftms)
-    mlsa_fil = pysptk.synthesis.Synthesizer(
-        MLSADF(order=sconf.mcep_dim, alpha=sconf.mcep_alpha), shiftl)
+    # constract Synthesizer class
+    synthesizer = Synthesizer(fs=sconf.wav_fs,
+                              fftl=sconf.wav_fftl,
+                              shiftms=sconf.wav_shiftms)
 
     # test directory
     test_dir = os.path.join(args.pair_dir, 'test')
@@ -112,7 +108,7 @@ def main(*argv):
             f = line.rstrip()
             wavf = os.path.join(args.wav_dir, f + '.wav')
             fs, x = wavfile.read(wavf)
-            x = np.array(x, dtype=np.float)
+            x = x.astype(np.float)
             assert fs == sconf.wav_fs
 
             # analyze F0, mcep, and ap
@@ -120,7 +116,15 @@ def main(*argv):
             mcep = feat.mcep(dim=sconf.mcep_dim, alpha=sconf.mcep_alpha)
             mcep_0th = mcep[:, 0]
 
-            print('convert ' + f)
+            # output analysis synthesized voice of source
+            wav = synthesizer.synthesis(f0,
+                                        mcep,
+                                        ap,
+                                        alpha=sconf.mcep_alpha,
+                                        )
+            wavpath = os.path.join(test_dir, f + '_anasyn.wav')
+            wavfile.write(wavpath, fs, wav.astype(np.int16))
+
             # convert F0
             cvf0 = f0stats.convert(f0, orgf0stats, tarf0stats)
 
@@ -135,15 +139,12 @@ def main(*argv):
                                                targvstats,
                                                cvgvstats=cvgvstats,
                                                startdim=1)
-                cvmcep_wGV = mod_power(cvmcep, mcep, alpha=sconf.mcep_alpha)
                 wav = synthesizer.synthesis(cvf0,
                                             cvmcep_wGV,
                                             ap,
+                                            rmcep=mcep,
                                             alpha=sconf.mcep_alpha,
-                                            fftl=fftl,
-                                            fs=sconf.wav_fs)
-
-                wav = np.clip(wav, -32768, 32767)
+                                            )
                 wavpath = os.path.join(test_dir, f + '_VC.wav')
 
             # synthesis DIFFVC w/ GV
@@ -153,17 +154,17 @@ def main(*argv):
                                                targvstats,
                                                cvgvstats=diffcvgvstats,
                                                startdim=1) - mcep
-                b = np.apply_along_axis(
-                    pysptk.mc2b, 1, cvmcep_wGV, sconf.mcep_alpha)
-                assert np.isfinite(b).all()
-                x = x.astype(np.float64)
-                wav = mlsa_fil.synthesis(x, b)
-                wav = np.clip(wav, -32768, 32767)
+                wav = synthesizer.synthesis_diff(x,
+                                                 cvmcep_wGV,
+                                                 rmcep=mcep,
+                                                 alpha=sconf.mcep_alpha,
+                                                 )
                 wavpath = os.path.join(test_dir, f + '_DIFFVC.wav')
 
             # write waveform
-            wavfile.write(
-                wavpath, fs, np.array(wav, dtype=np.int16))
+            wav = np.clip(wav, -32768, 32767)
+            wavfile.write(wavpath, fs, wav.astype(np.int16))
+            print(wavpath)
 
 
 if __name__ == '__main__':

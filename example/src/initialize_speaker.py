@@ -67,7 +67,7 @@ def main(*argv):
 
         # constract FeatureExtractor clas
         feat = FeatureExtractor(analyzer='world', fs=fs)
-        f0, _, _ = feat.analyze(x)
+        f0 = feat.analyze_f0(x)
 
         # f0 extraction
         f0s.append(f0)

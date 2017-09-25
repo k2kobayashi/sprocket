@@ -19,36 +19,45 @@ class FeatureExtractor(object):
 
     Parameters
     ----------
-    x : array
-        Vector of waveform samples
     analyzer : str, optional
         Analyzer of acoustic feature
         'world' : WORLD analysis/synthesis framework
+        Default set to world
     fs : int, optional
         Sampling frequency of the waveform
+        Default set to 16000
+    fftl: int, optional
+        FFT length
+        Default set to 1024
     shiftms : int, optional
         Shift size for short-time Fourier transform [ms]
+        Default set to 5
     minf0 : float, optional
         Floor value for F0 estimation
+        Default set to 50
     maxf0 : float, optional
         Ceil value for F0 estimation
+        Default set to 500
 
     """
 
-    def __init__(self, analyzer='world', fs=16000, shiftms=5,
+    def __init__(self, analyzer='world', fs=16000, fftl=1024, shiftms=5,
                  minf0=50, maxf0=500):
         self.analyzer = analyzer
         self.fs = fs
+        self.fftl = fftl
         self.shiftms = shiftms
         self.minf0 = minf0
         self.maxf0 = maxf0
 
         # analyzer setting
         if self.analyzer == 'world':
-            self.analyzer = WORLD(period=self.shiftms,
-                                  fs=self.fs,
-                                  f0_floor=self.minf0,
-                                  f0_ceil=self.maxf0)
+            self.analyzer = WORLD(fs=self.fs,
+                                  fftl=self.fftl,
+                                  minf0=self.minf0,
+                                  maxf0=self.maxf0,
+                                  shiftms=self.shiftms
+                                  )
         else:
             raise(
                 'Other analyzer does not support, please use "world" instead')
@@ -58,7 +67,7 @@ class FeatureExtractor(object):
         self._ap = None
 
     def analyze(self, x):
-        """Analyzer acoustic features using analyzer
+        """Analyze acoustic features using analyzer
 
         Parameters
         ----------
@@ -85,6 +94,31 @@ class FeatureExtractor(object):
             print("WARNING: F0 values are all zero.")
 
         return self._f0, self._spc, self._ap
+
+    def analyze_f0(self, x):
+        """Analyze F0 using analyzer
+
+        Parameters
+        ----------
+        x : array
+            Array of waveform samples
+
+        Returns
+        -------
+        f0 : array, shape (`T`,)
+            F0 sequence
+        """
+
+        self.x = np.array(x, dtype=np.float)
+        self._f0 = self.analyzer.analyze_f0(self.x)
+
+        # check non-negative for F0
+        self._f0[self._f0 < 0] = 0
+
+        if np.sum(self._f0) == 0.0:
+            print("WARNING: F0 values are all zero.")
+
+        return self._f0
 
     def mcep(self, dim=24, alpha=0.42):
         """Return mel-cepstrum sequence parameterized from spectral envelope
@@ -139,4 +173,4 @@ class FeatureExtractor(object):
 
     def _analyzed_check(self):
         if self._f0 is None and self._spc is None and self._ap is None:
-            raise('Call FeatureExtractor.analyze() before get features.')
+            raise('Call FeatureExtractor.analyze() before get parameterized features.')
