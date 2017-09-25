@@ -81,8 +81,8 @@ def main(*argv):
                 # save features into a hdf5 file
                 h5 = HDF5(h5f, mode='w')
                 h5.save(f0, ext='f0')
-                h5.save(spc, ext='spc')
-                h5.save(ap, ext='ap')
+                # h5.save(spc, ext='spc')
+                # h5.save(ap, ext='ap')
                 h5.save(mcep, ext='mcep')
                 h5.save(npow, ext='npow')
                 h5.close()
