@@ -62,5 +62,4 @@ Released under the MIT license
 https://opensource.org/licenses/mit-license.php
 
 ## ACKNOWLEDGEMENTS
-Thank you, thank you.
-
+Thank you @r9y9 and @tats-u for lots of contributions and encouragement helps before release.
