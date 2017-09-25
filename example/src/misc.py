@@ -29,8 +29,8 @@ def low_cut_filter(x, fs, cutoff=70):
     nyquist = fs // 2
     norm_cutoff = cutoff / nyquist
 
-    # HPF for synthesized speech
-    fil = firwin(127, norm_cutoff, pass_zero=False)
+    # low cut filter
+    fil = firwin(255, norm_cutoff, pass_zero=False)
     lcf_x = lfilter(fil, 1, x)
 
     return lcf_x
