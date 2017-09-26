@@ -17,6 +17,7 @@ from scipy.io import wavfile
 from sklearn.externals import joblib
 
 from .yml import PairYML, SpeakerYML
+from .misc import low_cut_filter
 from sprocket.speech import FeatureExtractor, Synthesizer
 from sprocket.model import GMMConvertor, F0statistics, GV
 from sprocket.util import static_delta, HDF5
@@ -109,6 +110,7 @@ def main(*argv):
             wavf = os.path.join(args.wav_dir, f + '.wav')
             fs, x = wavfile.read(wavf)
             x = x.astype(np.float)
+            x = low_cut_filter(x, fs, cutoff=70)
             assert fs == sconf.wav_fs
 
             # analyze F0, mcep, and ap
