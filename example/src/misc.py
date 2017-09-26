@@ -16,7 +16,7 @@ def low_cut_filter(x, fs, cutoff=70):
         Waveform sequence
     fs: array, int
         Sampling frequency
-    cutoff : float,
+    cutoff : float, optional
         Cutoff frequency of low cut filter
         Default set to 70 [Hz]
 
