@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """
@@ -6,18 +6,18 @@ Estimate joint feature vector of the speaker pair using GMM
 
 """
 
-from __future__ import absolute_import, division, print_function
-
 import argparse
 import os
 import sys
+
 import numpy as np
 from sklearn.externals import joblib
 
-from .misc import read_feats
+from sprocket.model.GMM import GMMConvertor, GMMTrainer
+from sprocket.util import HDF5, estimate_twf, extfrm, melcd, static_delta
 from yml import PairYML
-from sprocket.util import static_delta, extfrm, estimate_twf, melcd, HDF5
-from sprocket.model.GMM import GMMTrainer, GMMConvertor
+
+from .misc import read_feats
 
 
 def get_aligned_jointdata(orgdata, orgnpow, tardata, tarnpow, cvdata=None):

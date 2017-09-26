@@ -1,12 +1,10 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """
 Generate F0 histogram to decide F0 range of the speaker
 
 """
-
-from __future__ import absolute_import, division, print_function
 
 import argparse
 import os

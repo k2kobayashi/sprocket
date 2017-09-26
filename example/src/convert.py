@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """
@@ -6,21 +6,20 @@ Conversion
 
 """
 
-from __future__ import absolute_import, division, print_function
-
 import argparse
 import os
 import sys
-import numpy as np
 
+import numpy as np
 from scipy.io import wavfile
 from sklearn.externals import joblib
 
-from .yml import PairYML, SpeakerYML
-from .misc import low_cut_filter
+from sprocket.model import GV, F0statistics, GMMConvertor
 from sprocket.speech import FeatureExtractor, Synthesizer
-from sprocket.model import GMMConvertor, F0statistics, GV
-from sprocket.util import static_delta, HDF5
+from sprocket.util import HDF5, static_delta
+
+from .misc import low_cut_filter
+from .yml import PairYML, SpeakerYML
 
 
 def main(*argv):
