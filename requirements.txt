@@ -9,5 +9,4 @@ dtw
 fastdtw
 nose
 pyyaml
-six
 docopt
