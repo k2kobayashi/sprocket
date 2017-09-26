@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """An example script to run sprocket.
 
@@ -19,27 +19,15 @@ Note:
     All steps are executed if no options from -1 to -5 are given.
 """
 
-from __future__ import division  # , unicode_literals
-from __future__ import absolute_import, print_function
-
 import os
 import sys
+from pathlib import Path
 
 import docopt
-import six
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "src"))  # isort:skip
 from src import (convert, estimate_feature_statistics, estimate_twf_and_jnt,  # isort:skip # pylint: disable=C0413
                  extract_features, train_GMM)
-
-if six.PY2:
-    # pylint: disable=unused-import, redefined-builtin, import-error, line-too-long
-    from future_builtins import ascii, filter, hex, map, oct, zip
-    # pylint: disable=unused-import, redefined-builtin, import-error, line-too-long, ungrouped-imports
-    from six.moves import range, input
-if six.PY3:
-    # pylint: disable=unused-import, redefined-builtin, import-error, line-too-long
-    from six.moves import reduce
 
 
 def list_lengths_are_all_same(first_path, *remain_paths):
@@ -73,7 +61,7 @@ def list_lengths_are_all_same(first_path, *remain_paths):
         n_words : int
             The number of words in the file whose path is `path`.
         """
-        with open(path) as handler:
+        with open(str(path)) as handler:
             words = len(
                 handler.read().split())  # when space in path, bug appears
         return words
@@ -83,36 +71,32 @@ def list_lengths_are_all_same(first_path, *remain_paths):
                 for path in remain_paths))
 
 
-LIST_EXTENSION = ".list"
 USES = ("train", "eval")
 LIST_SUFFIXES = {
-    use: "_" + use + LIST_EXTENSION for use in USES}
-YML_EXTENSION = ".yml"
+    use: "_" + use + ".list" for use in USES}
 
-EXAMPLE_ROOT_DIR = os.path.dirname(__file__)
-CONF_DIR = os.path.join(EXAMPLE_ROOT_DIR, "conf")
-DATA_DIR = os.path.join(EXAMPLE_ROOT_DIR, "data")
-LIST_DIR = os.path.join(EXAMPLE_ROOT_DIR, "list")
-WAV_DIR = os.path.join(DATA_DIR, "wav")
+EXAMPLE_ROOT_DIR = Path(__file__).parent
+CONF_DIR = EXAMPLE_ROOT_DIR / "conf"
+DATA_DIR = EXAMPLE_ROOT_DIR / "data"
+LIST_DIR = EXAMPLE_ROOT_DIR / "list"
+WAV_DIR = DATA_DIR / "wav"
 
 if __name__ == "__main__":
     args = docopt.docopt(__doc__)  # pylint: disable=invalid-name
 
     LABELS = {label: args[label.upper()] for label in ("source", "target")}
     SOURCE_TARGET_PAIR = LABELS["source"] + "-" + LABELS["target"]
-    PAIR_DIR = os.path.join(DATA_DIR, "pair",
-                            SOURCE_TARGET_PAIR)
+    PAIR_DIR = DATA_DIR / "pair" / SOURCE_TARGET_PAIR
     LIST_FILES = {
         speaker_part: {
-            use: os.path.join(LIST_DIR, speaker_label + LIST_SUFFIXES[use])
+            use: LIST_DIR / (speaker_label + LIST_SUFFIXES[use])
             for use in USES}
         for speaker_part, speaker_label in LABELS.items()}
     SPEAKER_CONF_FILES = {
-        part: os.path.join(
-            CONF_DIR, "speaker", label + YML_EXTENSION)
+        part:
+            CONF_DIR / "speaker" / (label + ".yml")
         for part, label in LABELS.items()}
-    PAIR_CONF_FILE = os.path.join(
-        CONF_DIR, "pair", SOURCE_TARGET_PAIR + YML_EXTENSION)
+    PAIR_CONF_FILE = CONF_DIR / "pair" / (SOURCE_TARGET_PAIR + ".yml")
 
     # The first False is dummy for alignment
     #   between indexes of `args_execute_steps` and arguments
@@ -131,40 +115,40 @@ if __name__ == "__main__":
             *[list_files_per_part[use]
               for list_files_per_part in LIST_FILES.values()])
 
-    os.makedirs(PAIR_DIR, exist_ok=True)
+    os.makedirs(str(PAIR_DIR), exist_ok=True)
 
     if execute_steps[1]:
         print("### 1. Extract acoustic features ###")
         # Extract acoustic features consisting of F0, spc, ap, mcep, npow
         for speaker_part, speaker_label in LABELS.items():
             extract_features.main(
-                speaker_label, SPEAKER_CONF_FILES[speaker_part],
-                LIST_FILES[speaker_part]['train'],
-                WAV_DIR, PAIR_DIR)
+                speaker_label, str(SPEAKER_CONF_FILES[speaker_part]),
+                str(LIST_FILES[speaker_part]['train']),
+                str(WAV_DIR), str(PAIR_DIR))
 
     if execute_steps[2]:
         print("### 2. Estimate acoustic feature statistics ###")
         # Estimate speaker-dependent statistics for F0 and mcep
         for speaker_part, speaker_label in LABELS.items():
             estimate_feature_statistics.main(
-                speaker_label, LIST_FILES[speaker_part]["train"],
-                PAIR_DIR)
+                speaker_label, str(LIST_FILES[speaker_part]["train"]),
+                str(PAIR_DIR))
 
     if execute_steps[3]:
         print("### 3. Estimate time warping function and jnt ###")
         estimate_twf_and_jnt.main(
-            PAIR_CONF_FILE,
-            LIST_FILES["source"]["train"],
-            LIST_FILES["target"]["train"],
-            PAIR_DIR)
+            str(PAIR_CONF_FILE),
+            str(LIST_FILES["source"]["train"]),
+            str(LIST_FILES["target"]["train"]),
+            str(PAIR_DIR))
 
     if execute_steps[4]:
         print("### 4. Train GMM and converted GV ###")
         # estimate GMM parameter using the joint feature vector
         train_GMM.main(
-            LIST_FILES["source"]["train"],
-            PAIR_CONF_FILE,
-            PAIR_DIR)
+            str(LIST_FILES["source"]["train"]),
+            str(PAIR_CONF_FILE),
+            str(PAIR_DIR))
 
     if execute_steps[5]:
         print("### 5. Conversion based on the trained models ###")
@@ -172,16 +156,16 @@ if __name__ == "__main__":
         # convertsion based on the trained GMM
         convert.main(
             LABELS["source"], LABELS["target"],
-            SPEAKER_CONF_FILES["source"],
-            PAIR_CONF_FILE,
-            EVAL_LIST_FILE,
-            WAV_DIR,
-            PAIR_DIR)
+            str(SPEAKER_CONF_FILES["source"]),
+            str(PAIR_CONF_FILE),
+            str(EVAL_LIST_FILE),
+            str(WAV_DIR),
+            str(PAIR_DIR))
         convert.main(
             "-gmmmode", "diff",
             LABELS["source"], LABELS["target"],
-            SPEAKER_CONF_FILES["source"],
-            PAIR_CONF_FILE,
-            EVAL_LIST_FILE,
-            WAV_DIR,
-            PAIR_DIR)
+            str(SPEAKER_CONF_FILES["source"]),
+            str(PAIR_CONF_FILE),
+            str(EVAL_LIST_FILE),
+            str(WAV_DIR),
+            str(PAIR_DIR))
