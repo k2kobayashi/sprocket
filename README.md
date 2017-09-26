@@ -1,4 +1,4 @@
-[![Wercker](https://img.shields.io/wercker/ci/wercker/docs.svg)](https://app.wercker.com/k2kobayashi/sprocket)
+[![Build Status](https://www.travis-ci.org/k2kobayashi/sprocket.svg?branch=travis)](https://www.travis-ci.org/k2kobayashi/sprocket)
 [![PyPI Version](http://img.shields.io/pypi/v/{{sprocket}}.svg)](https://pypi.python.org/pypi/{{sprocket}})
 [![PyPI Downloads](http://img.shields.io/pypi/dm/{{sproket}}.svg)](https://pypi.python.org/pypi/{{sprocket}})
 [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
