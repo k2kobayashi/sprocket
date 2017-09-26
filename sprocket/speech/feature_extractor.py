@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import division, print_function, absolute_import
-
 import pysptk
 import pyworld
 import numpy as np
