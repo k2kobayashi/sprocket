@@ -1,0 +1,16 @@
+language: python
+cache: pip
+python:
+  - "3.6"
+  - "3.5"
+before_install:
+  - pip install numpy cython nose
+  - pip install -Ur requirements.txt
+install:
+  - python setup.py install
+script:
+  - nosetests -s -v
+notifications:
+  email:
+    on_success: never
+    on_failure: change
