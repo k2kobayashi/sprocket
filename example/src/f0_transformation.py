@@ -14,12 +14,31 @@ import sys
 import numpy as np
 from scipy.io import wavfile
 
-from .yml import SpeakerYML
 from sprocket.speech import FeatureExtractor, Shifter
 from sprocket.model import F0statistics
 
+from .misc import low_cut_filter
+from .yml import SpeakerYML
+
 
 def get_f0s_from_list(conf, list_file, wav_dir):
+    """Get f0s from listfile
+
+    Parameters
+    ---------
+    conf : SpeakerYML,
+        Speaker dependent YAML class
+    listfile : str, path-like,
+        File path of the list file of the speaker
+    wav_dir : str, path-like,
+        Directory path of the waveform
+
+    Returns
+    ---------
+    f0s : list, shape(`num_files`),
+        List of the f0s
+    """
+
     # open list file
     with open(list_file, 'r') as fp:
         files = fp.readlines()
@@ -31,6 +50,7 @@ def get_f0s_from_list(conf, list_file, wav_dir):
         wavf = os.path.join(wav_dir, f + '.wav')
         fs, x = wavfile.read(wavf)
         x = np.array(x, dtype=np.float)
+        x = low_cut_filter(x, fs, cutoff=70)
         assert fs == conf.wav_fs
 
         print("Extract F0: " + wavf)
@@ -45,6 +65,24 @@ def get_f0s_from_list(conf, list_file, wav_dir):
 
 
 def transform_f0_from_list(speaker, f0rate, wav_fs, list_file, wav_dir):
+    """Transform f0 from list
+    Transform F0 of the waveforms based on `f0rate` and
+    save into `wav_dir` with  `speaker`_`$f0rate` label
+
+    Parameters
+    ---------
+    speaker : str,
+        Label of the source speaker
+    f0rate : float,
+        File path of the list file of the speaker
+    wav_fs : int,
+        Sampling frequency of the waveform
+    listfile : str, path-like,
+        File path of the list file of the speaker
+    wav_dir : str, path-like,
+        Directory path of the waveform
+    """
+
     # open list file
     with open(list_file, 'r') as fp:
         files = fp.readlines()
@@ -75,6 +113,7 @@ def transform_f0_from_list(speaker, f0rate, wav_fs, list_file, wav_dir):
             # transform F0 of waveform
             fs, x = wavfile.read(wavf)
             x = np.array(x, dtype=np.float)
+            x = low_cut_filter(x, fs, cutoff=70)
             assert fs == wav_fs
             transformed_x = shifter.f0transform(x, completion=completion)
 
@@ -114,8 +153,10 @@ def main(*argv):
 
     if args.f0rate == -1:
         # get f0 list to calculate F0 transformation ratio
-        org_f0s = get_f0s_from_list(org_conf, args.org_train_list, args.wav_dir)
-        tar_f0s = get_f0s_from_list(tar_conf, args.tar_train_list, args.wav_dir)
+        org_f0s = get_f0s_from_list(
+            org_conf, args.org_train_list, args.wav_dir)
+        tar_f0s = get_f0s_from_list(
+            tar_conf, args.tar_train_list, args.wav_dir)
 
         # calculate F0 statistics of original and target speaker
         f0stats = F0statistics()
