@@ -26,7 +26,7 @@ class FeatureExtractor(object):
     fs : int, optional
         Sampling frequency of the waveform
         Default set to 16000
-    fftl: int, optional
+    fftl : int, optional
         FFT length
         Default set to 1024
     shiftms : int, optional
@@ -80,7 +80,7 @@ class FeatureExtractor(object):
             F0 sequence
         spc : array, shape (`T`, `fftl / 2 + 1`)
             Spectral envelope sequence
-        ap: array, shape (`T`, `fftl / 2 + 1`)
+        ap : array, shape (`T`, `fftl / 2 + 1`)
             aperiodicity sequence
         """
 
@@ -163,7 +163,7 @@ class FeatureExtractor(object):
 
         Returns
         -------
-        npow: vector, shape (`T`,)
+        npow : vector, shape (`T`,)
             Normalized power sequence of the given waveform
 
         """

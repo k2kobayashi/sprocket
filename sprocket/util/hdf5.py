@@ -11,7 +11,7 @@ class HDF5(object):
     Offer the hdf5 format file handler
 
     Parameters
-    ---------
+    ----------
     fpath : str,
         Path of hdf5 file
 
@@ -21,7 +21,7 @@ class HDF5(object):
         `r` : open as read
 
     Attributes
-    ---------
+    ----------
     h5 : hdf5 class
 
     """
@@ -55,7 +55,7 @@ class HDF5(object):
         """Read vector or array from h5 file
 
         Parameters
-        ---------
+        ----------
         ext : str
             File extention including h5 file
 
@@ -77,11 +77,11 @@ class HDF5(object):
         """Write vector or array into h5 file
 
         Parameters
-        ---------
-        data :
+        ----------
+        data : array_like
             Vector or array will be wrote into h5 file
 
-        ext: str
+        ext : str
             File label of saved file
 
         """
@@ -97,6 +97,10 @@ class HDF5(object):
         return
 
     def close(self):
+        """Close HDF5 Class
+
+        """
+
         self.h5.close()
 
         return

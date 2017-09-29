@@ -45,12 +45,12 @@ class WORLD(object):
             monoral speech signal in time domain
 
         Returns
-        ---------
+        -------
         f0 : array, shape (`T`,)
             F0 sequence
         spc : array, shape (`T`, `fftl / 2 + 1`)
             Spectral envelope sequence
-        ap: array, shape (`T`, `fftl / 2 + 1`)
+        ap : array, shape (`T`, `fftl / 2 + 1`)
             aperiodicity sequence
 
         """
@@ -68,11 +68,11 @@ class WORLD(object):
 
         Paramters
         ---------
-        x: array, shape (`T`)
+        x : array, shape (`T`)
             monoral speech signal in time domain
 
         Returns
-        ---------
+        -------
         f0 : array, shape (`T`,)
             F0 sequence
 
@@ -92,7 +92,7 @@ class WORLD(object):
             F0 sequence
         spc : array, shape (`T`, `dim`)
             Spectral envelope sequence
-        ap: array, shape (`T`, `dim`)
+        ap : array, shape (`T`, `dim`)
             Aperiodicity sequence
 
         """

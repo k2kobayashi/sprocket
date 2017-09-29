@@ -7,9 +7,9 @@ import numpy as np
 
 class GV (object):
     """A global variance (GV) statistics class
+
     Estimate statistics and perform postfilter based on
     the GV statistics
-
     """
 
     def __init__(self):
@@ -19,13 +19,13 @@ class GV (object):
         """Estimate GV statistics from list of data
 
         Parameters
-        ---------
+        ----------
         datalist : list, shape ('num_data')
             List of several data ([T, dim]) sequence
 
         Returns
         ---------
-        gvstats : array, shape (`2`, `dim`)
+        gvstats : array_like, shape (`2`, `dim`)
             Array of mean and standard deviation for GV
         """
 
@@ -48,12 +48,12 @@ class GV (object):
         """Perform postfilter based on GV statistics into data
 
         Parameters
-        ---------
+        ----------
         data : array, shape (`T`, `dim`)
             Array of data sequence
-        gvstats: array, shape (`2`, `dim`)
+        gvstats : array, shape (`2`, `dim`)
             Array of mean and variance for target GV
-        cvgvstats: array, shape (`2`, `dim`), optional
+        cvgvstats : array, shape (`2`, `dim`), optional
             Array of mean and variance for converted GV
             This option replaces the mean variance of the given data
             into the mean variance estimated from training data.
@@ -65,7 +65,7 @@ class GV (object):
             Start dimension to perform GV postfilter
 
         Returns
-        ---------
+        -------
         filtered_data : array, shape (`T`, `data`)
             Array of GV postfiltered data sequence
 

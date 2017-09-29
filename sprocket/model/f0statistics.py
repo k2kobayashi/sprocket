@@ -7,6 +7,7 @@ import numpy as np
 
 class F0statistics(object):
     """F0 statistics class
+
     Estimate F0 statistics and convert F0
 
     """
@@ -18,12 +19,12 @@ class F0statistics(object):
         """Estimate F0 statistics from list of f0
 
         Parameters
-        ---------
+        ----------
         f0list : list, shape('f0num')
             List of several F0 sequence
 
         Returns
-        ---------
+        -------
         f0stats : array, shape(`[mean, std]`)
             Values of mean and standard deviation for logarithmic F0
 
@@ -45,16 +46,16 @@ class F0statistics(object):
         """Convert F0 based on F0 statistics
 
         Parameters
-        ---------
+        ----------
         f0 : array, shape(`T`, `1`)
             Array of F0 sequence
-        orgf0stats, shape (`[mean, std]`)
+        orgf0stats : shape(`[mean, std]`)
             Vector of mean and standard deviation of logarithmic F0 for original speaker
-        tarf0stats, shape (`[mean, std]`)
+        tarf0stats : , shape(`[mean, std]`)
             Vector of mean and standard deviation of logarithmic F0 for target speaker
 
         Returns
-        ---------
+        -------
         cvf0 : array, shape(`T`, `1`)
             Array of converted F0 sequence
 

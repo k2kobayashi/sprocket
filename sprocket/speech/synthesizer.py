@@ -14,13 +14,13 @@ class Synthesizer(object):
 
     Parameters
     ----------
-    fs: int, optional
+    fs : int, optional
         Sampling frequency
         Default set to 16000
-    fftl: int, optional
+    fftl : int, optional
         Frame Length of STFT
         Default set to 1024
-    shiftms: int, optional
+    shiftms : int, optional
         Shift size for STFT
         Default set to 5
     """
@@ -51,8 +51,8 @@ class Synthesizer(object):
             Default set to 0.42
 
         Returns
-        ----------
-        wav: array,
+        -------
+        wav : array,
             Synethesized waveform
 
         """
@@ -86,9 +86,9 @@ class Synthesizer(object):
             Parameter of all-path transfer function
             Default set to 0.42
 
-        Return
-        ----------
-        wav: array, shape (`samples`)
+        Returns
+        -------
+        wav : array, shape (`samples`)
             Synethesized waveform
 
         """
@@ -122,9 +122,9 @@ class Synthesizer(object):
         ap : array, shape (`T`, `fftl // 2 + 1`)
           array of aperiodicity
 
-        Return
-        ------
-        wav: vector, shape (`samples`)
+        Returns
+        -------
+        wav : vector, shape (`samples`)
           Synethesized waveform
 
         """
@@ -152,8 +152,8 @@ def mod_power(cvmcep, rmcep, alpha=0.42, irlen=256):
         Length for IIR filter
         Default set to 256
 
-    Return
-    ------
+    Returns
+    -------
     modified_cvmcep : array, shape (`T`, `dim`)
         array of power modified converted mel-cepstrum
 

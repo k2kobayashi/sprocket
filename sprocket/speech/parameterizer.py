@@ -13,8 +13,8 @@ def spc2npow(spectrogram):
     spectrogram : array, shape (T, `fftlen / 2 + 1`)
         Array of specturm envelope
 
-    Return
-    ------
+    Returns
+    -------
     npow : array, shape (`T`, `1`)
         Normalized power sequence
 
@@ -37,8 +37,8 @@ def _spvec2pow(specvec):
     specvec : vector, shape (`fftlen / 2 + 1`)
         Cector of specturm envelope
 
-    Return
-    ------
+    Returns
+    -------
     power : scala,
         Normalized power
 
