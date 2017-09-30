@@ -5,35 +5,13 @@ box: python
 # Once we can switch to Travis, we can simplify the testing steps.
 build:
   steps:
-    # Python2.7
-    - script:
-        name: py27 setup environment
-        code: |
-          wget http://repo.continuum.io/miniconda/Miniconda-3.8.3-Linux-x86_64.sh -O miniconda.sh;
-          bash miniconda.sh -b -p $HOME/miniconda
-          export PATH="$HOME/miniconda/bin:$PATH"
-          conda config --set always_yes yes --set changeps1 no
-          conda update -q conda
-          conda create -q -n test-py27-environment "python=2.7" numpy cython nose
-          source activate test-py27-environment
-
-    - script:
-        name: py27 pip install
-        code: |
-          pip install -e .
-
-    - script:
-        name: py27 nosetests
-        code: |
-          nosetests  -s -v
-
     # Python3.6
     - script:
         name: py36 setup environment
         code: |
           wget http://repo.continuum.io/miniconda/Miniconda3-3.8.3-Linux-x86_64.sh -O miniconda.sh;
           bash miniconda.sh -b -p $HOME/miniconda3
-          source activate root          
+          source activate root
           export PATH="$HOME/miniconda3/bin:$PATH"
           conda config --set always_yes yes --set changeps1 no
           conda update -q conda

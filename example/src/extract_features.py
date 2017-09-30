@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """
@@ -13,10 +13,11 @@ import sys
 import numpy as np
 from scipy.io import wavfile
 
-from .yml import SpeakerYML
-from .misc import low_cut_filter
 from sprocket.speech import FeatureExtractor, Synthesizer
 from sprocket.util import HDF5
+
+from .misc import low_cut_filter
+from .yml import SpeakerYML
 
 
 def main(*argv):

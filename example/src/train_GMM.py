@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """
@@ -6,18 +6,18 @@ Train GMM and converted GV statistics
 
 """
 
-from __future__ import absolute_import, division, print_function
-
 import argparse
 import os
 import sys
+
 import numpy as np
 from sklearn.externals import joblib
 
-from .misc import read_feats
-from sprocket.model import GMMTrainer, GMMConvertor, GV
+from sprocket.model import GV, GMMConvertor, GMMTrainer
 from sprocket.util import HDF5, static_delta
 from yml import PairYML
+
+from .misc import read_feats
 
 
 def feature_conversion(pconf, org_mceps, gmm, gmmmode=None):

@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import division, print_function, absolute_import
-
 import numpy as np
 import scipy.sparse
 import sklearn.mixture
@@ -208,7 +206,7 @@ class GMMConvertor(object):
 
             # conditional mean vector sequence
             mseq[t] = self.meanY[m] + \
-                np.dot(self.A[m], sddata[t] - self.meanX[m])
+                self.A[m] @ (sddata[t] - self.meanX[m])
 
             # conditional covariance sequence
             covseq[t] = self.cond_cov_inv[m]
@@ -224,7 +222,7 @@ class GMMConvertor(object):
             for m in range(self.n_mix):
                 odata[t] += wseq[t, m] * \
                     (self.meanY[m] +
-                     np.dot(self.A[m], sddata[t] - self.meanX[m]))
+                     self.A[m] @ (sddata[t] - self.meanX[m]))
 
         # retern static and throw away delta component
         return odata[:, :sddim // 2]
@@ -240,13 +238,13 @@ class GMMConvertor(object):
         D = get_diagonal_precision_matrix(T, sddim, covseq)
 
         # calculate W'D
-        WD = W.T.dot(D)
+        WD = W.T @ D
 
         # W'DW
-        WDW = WD.dot(W)
+        WDW = WD @ W
 
         # W'Um
-        WDm = WD.dot(mseq.flatten())
+        WDm = WD @ mseq.flatten()
 
         # estimate y = (W'DW)^-1 * W'Dm
         odata = scipy.sparse.linalg.spsolve(
@@ -301,15 +299,15 @@ class GMMConvertor(object):
         self.cond_cov_inv = np.zeros((self.n_mix, sddim, sddim))
         for m in range(self.n_mix):
             # calculate A (i.e., A = yxcov_m * xxcov_m^-1)
-            self.A[m] = np.dot(self.covYX[m], self.covXXinv[m])
+            self.A[m] = self.covYX[m] @ self.covXXinv[m]
 
             # calculate b (i.e., b = mean^Y - A * mean^X)
-            self.b[m] = self.meanY[m] - np.dot(self.A[m], self.meanX[m])
+            self.b[m] = self.meanY[m] - self.A[m] @ self.meanX[m]
 
             # calculate conditional covariance
             # (i.e., cov^(Y|X)^-1 = (yycov - A * xycov)^-1)
             self.cond_cov_inv[m] = np.linalg.inv(self.covYY[
-                m] - np.dot(self.A[m], self.covXY[m]))
+                m] - self.A[m] @ self.covXY[m])
 
         return
 
@@ -341,8 +339,7 @@ class GMMConvertor(object):
         self.meanX = self.meanX
         self.meanY = self.meanX
         self.covXX = self.covXX
-        self.covXY = np.dot(
-            self.covXY, np.linalg.solve(self.covYY, self.covYX))
+        self.covXY @= np.linalg.solve(self.covYY, self.covYX)
         self.covYX = self.covXY
         self.covYY = self.covXX
         return

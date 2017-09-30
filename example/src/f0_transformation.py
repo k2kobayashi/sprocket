@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
 
@@ -14,8 +14,8 @@ import sys
 import numpy as np
 from scipy.io import wavfile
 
-from sprocket.speech import FeatureExtractor, Shifter
 from sprocket.model import F0statistics
+from sprocket.speech import FeatureExtractor, Shifter
 
 from .misc import low_cut_filter
 from .yml import SpeakerYML

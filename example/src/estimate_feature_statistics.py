@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """
@@ -6,15 +6,14 @@ Estimate acoustic feature statistics
 
 """
 
-from __future__ import absolute_import, division, print_function
-
 import argparse
 import os
 import sys
 
-from .misc import read_feats
-from sprocket.model import F0statistics, GV
+from sprocket.model import GV, F0statistics
 from sprocket.util import HDF5
+
+from .misc import read_feats
 
 
 def main(*argv):
