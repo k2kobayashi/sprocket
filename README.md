@@ -6,27 +6,28 @@
 sprocket
 ======
 
-Voice conversion toolkit - Voice conversion (VC) is a technique to convert a speaker identity of a source speaker into that of a target speaker. In this framework, it enables for the users to develop a joint feature vector using parallel dataset between source and target speech samples and model it based on a Gaussian mixture model (GMM) and differential GMM (DIFFGMM).
-
+Voice conversion software - Voice conversion (VC) is a technique to convert a speaker identity of a source speaker into that of a target speaker.
+This software enables the users to develop a traditional VC system based on a Gaussian mixture model (GMM) and a vocoder-free VC system based on a differential GMM (DIFFGMM) using a parallel dataset of the source and target speakers.
 
 ## Purpose
-### Reproduce VC and DIFFVC based on GMM
+### Reproduce the typical VC systems
 
-In the major purpose of this framework, it enables for the users to implement voice conversion only preparing parallel dataset and excusing example scripts.
-As the details of conversion method, please see the following papers.
+This software was developed to make it possible for the users to easily build the VC systems by only preparing a parallel dataset of the desired source and target speakers and executing example scripts.
+The following VC methods were implemented as the typical VC methods.
 
-- Toda et al., "Voice Conversion Based on Maximum-Likelihood Estimation of Spectral Parameter Trajectory," IEEE Trans. on ASLP, Vol. 15, No. 8, pp. 2222-2235, Nov. 2007
-- Kobayashi et al., "F0 TRANSFORMATION TECHNIQUES FOR STATISTICAL VOICE CONVERSION WITH DIRECT WAVEFORM MODIFICATION WITH SPECTRAL DIFFERENTIAL," Proc. IEEE SLT, pp. 693-700, Dec 2016.
+- T. Toda, A.W. Black, K. Tokuda, "Voice conversion based on maximum likelihood estimation of spectral parameter trajectory," IEEE Transactions on Audio, Speech and Language Processing, Vol. 15, No. 8, pp. 2222-2235, Nov. 2007.
 
-### Supply Python3 library related to VC
-To easily develop VC and speech-based application using Python, the library of sprocket also supplies several interfaces such as acoustic feature analysis/synthesis, acoustic feature modeling and acoustic feature modifications.
-For the details of the library, please see sprocket documents in (coming soon).
+- K. Kobayashi, T. Toda, S. Nakamura, "F0 transformation techniques for statistical voice conversion with direct waveform modification with spectral differential," Proc. IEEE SLT, pp. 693-700, Dec. 2016.
+
+### Supply Python3 VC library
+To make it possible to easily develop VC-based applications using Python, the VC library is also supplied, including several interfaces, such as acoustic feature analysis/synthesis, acoustic feature modeling, acoustic feature conversion, and waveform modification.
+For the details of the VC library, please see sprocket documents in (coming soon).
 
 ## Installation & Run
 
 ### Current stable version
 
-Ver. 0.24
+Ver. 0.00
 
 ### Install requirements
 
@@ -59,7 +60,12 @@ Copyright (c) 2017 Kazuhiro KOBAYASHI
 
 Released under the MIT license
 
-https://opensource.org/licenses/mit-license.php
+[https://opensource.org/licenses/mit-license.php] (https://opensource.org/licenses/mit-license.php)
 
 ## ACKNOWLEDGEMENTS
 Thank you [@r9y9](https://github.com/r9y9) and [@tats-u](https://github.com/tats-u) for lots of contributions and encouragement helps before release.
+
+## Who we are
+- Kazuhiro Kobayashi [@k2kobayashi] (https://github.com/k2kobayashi) [maintainer, design and development]
+
+- [Tomoki Toda] (https://sites.google.com/site/tomokitoda/) [advisor] 

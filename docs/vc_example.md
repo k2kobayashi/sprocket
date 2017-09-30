@@ -1,13 +1,13 @@
 # Getting start with VC example
-After installation finished, you can try an example script of voice conversion (VC) in "/sprocket/example".
+After installation, you can try to run an example script of voice conversion (VC) in "/sprocket/example".
 
 ```
 cd example
 ```
 
 ## Download dataset from Voice Conversion Challenge 2016 (VCC2016)
-In this example, you first prepare parallel speech dataset of source and target speaker in the "data/wav" directory.
-In this tutorial, you can download VCC2016 speech database by executing following command.
+To run the example script, you need to first prepare a parallel speech dataset of a source speaker and a target speaker in the "data/wav" directory.
+In this tutorial, we use VCC2016 speech database.  You can download it by executing the following command.
 
 ```
 python download_vcc2016dataset.py
@@ -16,28 +16,27 @@ python download_vcc2016dataset.py
 Now, you can find speech samples in "data/wav" directory in each speaker.
 
 ## Initialization
-For the initialization step, you need to perform following 3 steps.
+As the initialization step, you need to perform the following 3 steps.
 
 1. Prepare lists for training and evaluation in each source and target speaker
-2. Prepare configure files of the source and target speakers and a speaker-pair
-3. Modify the F0 extraction ranges of source and target speakers 
+2. Prepare configure files for the source and target speakers and a speaker-pair
+3. Modify an F0 search range for each of the source and target speakers
 
 ### 1. Prepare training and evaluation lists
-To create lists of the source speaker (e.g., "SF1") and target speaker (e.g., "TF1"), run following command in example directory
+To create lists of the source speaker (e.g., "SF1") and target speaker (e.g., "TF1"), run the following command in the example directory.
 
 ```
 python initialize.py -1 SF1 TF1 16000
 ```
 where "16000" is the sampling rate of .wav file.
-"-1" option indicates a flag to generate training and evaluation lists of source and target speakers.
+"-1" option indicates a flag to generate training and evaluation lists of the source and target speakers.
 
-You can change the number of speech samples to be used in the training and evaluation process by editing the lists in "/list" directory.
-In this example, we make these lists shorter by manually modification.
-We change the number of training speech samples to 30 and the number of evaluation speech samples to 10 as below.
+You can change the number of speech samples to be used in the training and evaluation process by editing the lists in "list" directory.
+Here, we make these lists shorter by manually modifying them. For instance, you can set the number of training speech samples to 30 and the number of evaluation speech samples to 10 as shown below.
 
-list/SF1_train.list: 
+list/SF1\_train.list:
 
-``` 
+```
 SF1/100001
 SF1/100002
 SF1/100003
@@ -69,7 +68,7 @@ SF1/100028
 SF1/100029
 SF1/100030
 ```
-list/SF1_eval.list: 
+list/SF1\_eval.list:
 
 ```
 SF1/100031
@@ -84,9 +83,9 @@ SF1/100039
 SF1/100040
 ```
 
-list/TF1_train.list:
+list/TF1\_train.list:
 
-``` 
+```
 TF1/100001
 TF1/100002
 TF1/100003
@@ -119,9 +118,9 @@ TF1/100029
 TF1/100030
 ```
 
-list/TF1_eval.list:
+list/TF1\_eval.list:
 
-``` 
+```
 TF1/100031
 TF1/100032
 TF1/100033
@@ -133,52 +132,54 @@ TF1/100038
 TF1/100039
 TF1/100040
 ```
-Note that you have to coincidence the length and order of the lists between the source and target speakers.
+Note that you need to match the length and order of the lists between the source and target speakers.
 
 ### 2. Generate configure files
-Next, to generate configure files of speakers, run following command.
+Next, to generate configure files of the speakers, run the following command.
 
 ```
 python initialize.py -2 SF1 TF1 16000
 ```
 where "-2" option indicates a flag to generate configure files for the source and target speakers and the speaker-pair.
-By executing this script, speaker-dependent YAML file (e.g., "conf/speaker/SF1.yml") and speaker-pair dependent YAML file (e.g., "conf/pair/SF1-TF1.yml") are generated. 
-Parameters such as F0 extraction range, the number of mel-cepstrum dimension, and the number of mixture compornents are described in these YAML files, which are used for the training and conversion steps in this example. 
+By executing this script, speaker-dependent YAML files (e.g., "conf/speaker/SF1.yml") and a speaker-pair dependent YAML file (e.g., "conf/pair/SF1-TF1.yml") are generated.
+Several parameters, such as the F0 search range, the order of mel-cepstrum, and the number of mixture components of a GMM, are described in these YAML files, which are used for the training and conversion steps.
 
-### 3. Modify F0 extraction range
-In order to achieve better sound quality and conversion accuracy of the converted voice, it is necessary to designate appropriate parameters. 
-In this step, we describe how to define the F0 ranges.
-First you run following command to generated F0 histograms in each source and target speaker.
+### 3. Modify F0 search range
+To achieve good sound quality and conversion accuracy of the converted speech, it is necessary to carefully set some parameters. One of them is the F0 search range.
+In this step, we describe how to determine the F0 search range.
+First you run the following command to generate F0 histogram in each of the source and target speakers.
 
 ```
 python initialize.py -3 SF1 TF1 16000
 ```
 where "-3" option indicates a flag to generate the F0 histograms of the source and target speakers.
-After finishing this commands, you can find the histograms in "conf/figure" directory.
-Here is an example figure in "conf/figure/SF1_f0histogram.png".
+After finishing this command, you can find the histograms in "conf/figure" directory (e.g., "conf/figure/SF1\_f0histogram.png").
 
 ![Example](png/f0histogram_example.png)
 
-Based on this figure, you manually change the values of "minf0" and "maxf0" in speaker-dependent YAML file (e.g., "conf/speaker/TF1.yml").
+Based on this figure, you can manually change the values of "minf0" and "maxf0" in the speaker-dependent YAML file (e.g., "conf/speaker/TF1.yml").
 
-## Run VC
-Now you can execute VC using "run_sprocket.py"
+## Run VC (traditional VC system)
+Now you can build the traditional VC system using "run_sprocket.py"
 
 ```
 python run_sprocket.py -1 -2 -3 -4 -5 SF1 TF1
 ```
-The all procedures of "run_sprocket.py" are described in following figure.
+The procedures of "run_sprocket.py" are described in the following figure.
 
 ![VCflow](png/vc_flow.png)
 
+Consequently, converted speech samples are generated in "data/pair/SF1-TF1/test/SF1" directory as wav files "*\_VC.wav" (e.g., data/pair/SF1-TF1/test/SF1/100031_VC.wav).
 
-## Run DIFFVC
-If you want to perform DIFFVC with F0 transformation, you need to perform F0 transformation of speech samples of source speaker.
-To perform F0 transformation, you run following command
+## Run DIFFVC (vocoder-free VC system)
+If you want to build the vocoder-free VC system, you need to first perform F0 transformation of speech samples of the source speaker.
+To do so, you need to run the following command.
 
 ```
 python run_f0_transformation.py SF1 TF1
 ```
-After this command finished, you can find F0 transformed wav files in "data/wav" directory.
-Using these speech samples as a new source speaker (e.g., "SF1_1.02"), you can execute DIFFVC with F0 transformation.
-Note that you need to perform initialization and run VC steps for F0 transformed source speaker and target speaker again.
+
+After finishing this command, you can find F0 transformed wav files in "data/wav/SF1\_{f0ratio}" directory (e.g., "SF1\_1.02").
+By running "run_sprocket.py" while using these speech samples as a new source speaker (i.e., "SF1\_1.02"), you can build the vocoder-free VC system and generate the converted speech samples.  Namely, you need to perform initialization and run VC steps for the F0 transformed source speaker (i.e., "SF1\_1.02") and target speaker (i.e., "TF1").
+
+Consequently, converted speech samples are generated in "data/pair/SF1\_1.02-TF1/test/SF1\_1.02" directory as wav files "*\_DIFFVC.wav" (e.g., data/pair/SF1\_1.02-TF1/test/SF1\_1.02/100031\_DIFFVC.wav).
