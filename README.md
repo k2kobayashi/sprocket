@@ -60,12 +60,12 @@ Copyright (c) 2017 Kazuhiro KOBAYASHI
 
 Released under the MIT license
 
-[https://opensource.org/licenses/mit-license.php] (https://opensource.org/licenses/mit-license.php)
+[https://opensource.org/licenses/mit-license.php](https://opensource.org/licenses/mit-license.php)
 
 ## ACKNOWLEDGEMENTS
 Thank you [@r9y9](https://github.com/r9y9) and [@tats-u](https://github.com/tats-u) for lots of contributions and encouragement helps before release.
 
 ## Who we are
-- Kazuhiro Kobayashi [@k2kobayashi] (https://github.com/k2kobayashi) [maintainer, design and development]
+- Kazuhiro Kobayashi [@k2kobayashi](https://github.com/k2kobayashi) [maintainer, design and development]
 
-- [Tomoki Toda] (https://sites.google.com/site/tomokitoda/) [advisor] 
+- [Tomoki Toda](https://sites.google.com/site/tomokitoda/) [advisor] 
