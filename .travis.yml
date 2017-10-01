@@ -6,10 +6,13 @@ python:
 before_install:
   - pip install numpy cython nose
   - pip install -Ur requirements.txt
+  - pip install coveralls
 install:
   - python setup.py install
 script:
-  - nosetests -s -v
+  - nosetests -s -v --with-coverage --cover-package=sprocket
+after_success:
+  - coveralls
 notifications:
   email:
     on_success: never
