@@ -1,5 +1,6 @@
 # Getting start with VC example
 After installation, you can try to run an example script of voice conversion (VC) in "/sprocket/example".
+Note: Please use NOT Python2 BUT Python3.
 
 ```
 cd example
@@ -159,7 +160,7 @@ After finishing this command, you can find the histograms in "conf/figure" direc
 
 Based on this figure, you can manually change the values of "minf0" and "maxf0" in the speaker-dependent YAML file (e.g., "conf/speaker/TF1.yml").
 
-## Run VC (traditional VC system)
+## Run VC (traditional VC system [Toda et al., 2007])
 Now you can build the traditional VC system using "run_sprocket.py"
 
 ```
@@ -171,7 +172,7 @@ The procedures of "run_sprocket.py" are described in the following figure.
 
 Consequently, converted speech samples are generated in "data/pair/SF1-TF1/test/SF1" directory as wav files "*\_VC.wav" (e.g., data/pair/SF1-TF1/test/SF1/100031_VC.wav).
 
-## Run DIFFVC (vocoder-free VC system)
+## Run DIFFVC (vocoder-free VC system [Kobayashi et al., 2016])
 If you want to build the vocoder-free VC system, you need to first perform F0 transformation of speech samples of the source speaker.
 To do so, you need to run the following command.
 
