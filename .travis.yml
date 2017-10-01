@@ -4,12 +4,14 @@ python:
   - "3.6"
   - "3.5"
 before_install:
-  - pip install numpy cython nose
+  - pip install numpy cython nose coveralls
   - pip install -Ur requirements.txt
 install:
   - python setup.py install
 script:
-  - nosetests -s -v
+  - nosetests -s -v --with-coverage --cover-package=sprocket
+after_success:
+  - coveralls
 notifications:
   email:
     on_success: never
