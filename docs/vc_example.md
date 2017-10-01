@@ -156,7 +156,7 @@ python initialize.py -3 SF1 TF1 16000
 where "-3" option indicates a flag to generate the F0 histograms of the source and target speakers.
 After finishing this command, you can find the histograms in "conf/figure" directory (e.g., "conf/figure/SF1\_f0histogram.png").
 
-![Example](png/f0histogram_example.png)
+![Example](https://raw.githubusercontent.com/k2kobayashi/sprocket/master/docs/png/f0histogram_example.png)
 
 Based on this figure, you can manually change the values of "minf0" and "maxf0" in the speaker-dependent YAML file (e.g., "conf/speaker/TF1.yml").
 
@@ -168,7 +168,7 @@ python run_sprocket.py -1 -2 -3 -4 -5 SF1 TF1
 ```
 The procedures of "run_sprocket.py" are described in the following figure.
 
-![VCflow](png/vc_flow.png)
+![VCflow](https://raw.githubusercontent.com/k2kobayashi/sprocket/master/docs/png/vc_flow.png)
 
 Consequently, converted speech samples are generated in "data/pair/SF1-TF1/test/SF1" directory as wav files "*\_VC.wav" (e.g., data/pair/SF1-TF1/test/SF1/100031_VC.wav).
 
