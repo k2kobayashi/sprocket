@@ -31,7 +31,7 @@ Please use NOT Python2 BUT Python3.
 
 ### Current stable version
 
-Ver. 0.00
+Ver. 0.18
 
 ### Install requirements
 

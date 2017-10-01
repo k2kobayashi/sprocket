@@ -11,8 +11,8 @@ CHANGES = open('CHANGES.md').read()
 
 setup(
     name="sprocket",
-    version="0.2.0",
-    description="Voice conversion tool kit",
+    version="0.18",
+    description="Voice conversion software",
     url='https://github.com/k2kobayashi/sprocket',
     author='Kazuhiro Kobayashi',
     packages=find_packages(),
