@@ -1,4 +1,6 @@
+[![Python Version](https://img.shields.io/badge/Python-3.5,%203.6-green.svg)](https://img.shields.io/badge/Python-3.5,%203.6-green.svg)
 [![Build Status](https://www.travis-ci.org/k2kobayashi/sprocket.svg?branch=travis)](https://www.travis-ci.org/k2kobayashi/sprocket)
+[![Coverage Status](https://coveralls.io/repos/github/k2kobayashi/sprocket/badge.svg?branch=master)](https://coveralls.io/github/k2kobayashi/sprocket?branch=master)
 [![PyPI Version](http://img.shields.io/pypi/v/{{sprocket}}.svg)](https://pypi.python.org/pypi/{{sprocket}})
 [![PyPI Downloads](http://img.shields.io/pypi/dm/{{sproket}}.svg)](https://pypi.python.org/pypi/{{sprocket}})
 [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
