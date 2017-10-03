@@ -22,7 +22,7 @@ class Shifter(object):
         Sampling frequency
     f0rate: float
         F0 transformation ratio
-    shift_ms : int, optional
+    shiftms : int, optional
         length of shift size [ms]
 
     Attributes
@@ -32,12 +32,12 @@ class Shifter(object):
 
     """
 
-    def __init__(self, fs, f0rate, shift_ms=10):
+    def __init__(self, fs, f0rate, shiftms=10):
         self.fs = fs
         self.f0rate = f0rate
 
-        self.shift_ms = shift_ms  # shift size for over-lap add
-        self.wsola = WSOLA(fs, 1 / f0rate, shift_ms=self.shift_ms)
+        self.shiftms = shiftms  # shift size for over-lap add
+        self.wsola = WSOLA(fs, 1 / f0rate, shiftms=self.shiftms)
 
     def f0transform(self, x, completion=False):
         """Transform F0 of given waveform signals using
