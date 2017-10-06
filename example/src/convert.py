@@ -32,7 +32,7 @@ def main(*argv):
     parser.add_argument('org', type=str,
                         help='Original speaker')
     parser.add_argument('tar', type=str,
-                        help='Original speaker')
+                        help='Target speaker')
     parser.add_argument('org_yml', type=str,
                         help='Yml file of the original speaker')
     parser.add_argument('pair_yml', type=str,
