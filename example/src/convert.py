@@ -139,6 +139,7 @@ def main(*argv):
                 cvmcep_wGV = mcepgv.postfilter(cvmcep,
                                                targvstats,
                                                cvgvstats=cvgvstats,
+                                               alpha=pconf.GV_morph_coeff,
                                                startdim=1)
                 wav = synthesizer.synthesis(cvf0,
                                             cvmcep_wGV,
@@ -154,6 +155,7 @@ def main(*argv):
                 cvmcep_wGV = mcepgv.postfilter(mcep + cvmcep,
                                                targvstats,
                                                cvgvstats=diffcvgvstats,
+                                               alpha=pconf.GV_morph_coeff,
                                                startdim=1) - mcep
                 wav = synthesizer.synthesis_diff(x,
                                                  cvmcep_wGV,

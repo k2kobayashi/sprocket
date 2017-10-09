@@ -59,6 +59,7 @@ class GV (object):
             Morphing coefficient between GV transformed data and data.
             .. math::
                alpha * gvpf(data) + (1 - alpha) * data
+            Default set to 1.0
         startdim : int, optional
             Start dimension to perform GV postfilter
 
