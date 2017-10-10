@@ -339,7 +339,7 @@ class GMMConvertor(object):
         self.meanX = self.meanX
         self.meanY = self.meanX
         self.covXX = self.covXX
-        self.covXY @= np.linalg.solve(self.covYY, self.covYX)
+        self.covXY = self.covXY @ np.linalg.solve(self.covYY, self.covYX)
         self.covYX = self.covXY
         self.covYY = self.covXX
         return
