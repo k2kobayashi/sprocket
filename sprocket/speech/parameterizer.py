@@ -4,12 +4,12 @@ import numpy as np
 
 
 def spc2npow(spectrogram):
-    """Calculate normalized_melcd power sequence from spectrogram
+    """Calculate normalized power sequence from spectrogram
 
     Parameters
     ----------
     spectrogram : array, shape (T, `fftlen / 2 + 1`)
-        Array of specturm envelope
+        Array of spectrum envelope
 
     Return
     ------
@@ -28,17 +28,17 @@ def spc2npow(spectrogram):
 
 
 def _spvec2pow(specvec):
-    """Convert vector of spectrum envelope into normalized power
+    """Convert a spectrum envelope into a power
 
     Parameters
     ----------
     specvec : vector, shape (`fftlen / 2 + 1`)
-        Cector of specturm envelope
+        Vector of specturm envelope |H(w)|^2
 
     Return
     ------
     power : scala,
-        Normalized power
+        Power of a frame
 
     """
 
