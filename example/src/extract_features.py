@@ -96,6 +96,7 @@ def main(*argv):
                                             ap,
                                             alpha=sconf.mcep_alpha,
                                             )
+                wav = np.clip(wav, -32768, 32767)
                 anasynf = os.path.join(anasyn_dir, f + '.wav')
                 wavfile.write(anasynf, fs, np.array(wav, dtype=np.int16))
             else:
