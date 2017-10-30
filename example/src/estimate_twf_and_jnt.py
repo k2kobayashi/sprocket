@@ -15,12 +15,13 @@ from sklearn.externals import joblib
 
 from sprocket.model.GMM import GMMConvertor, GMMTrainer
 from sprocket.util import HDF5, estimate_twf, extfrm, melcd, static_delta
-from yml import PairYML
+from yml import SpeakerYML, PairYML
 
 from .misc import read_feats
 
 
-def get_aligned_jointdata(orgdata, orgnpow, tardata, tarnpow, cvdata=None):
+def get_aligned_jointdata(orgdata, orgnpow, tardata, tarnpow, cvdata=None,
+                          orgpow_threshold=-20, tarpow_threshold=-20):
     """Get aligment between features
 
     Paramters
@@ -33,11 +34,17 @@ def get_aligned_jointdata(orgdata, orgnpow, tardata, tarnpow, cvdata=None):
         Acoustic feature of target speaker
     orgnpow : array, shape (`T_tar`)
         Normalized power of target speaker
-    cvdata : array, optiona, shape (`T_org`, `dim`)
+    cvdata : array, optional, shape (`T_org`, `dim`)
         Converted acoustic feature from source into target
+    orgpow_threshold : float, optional,
+        Original speaker power threshold
+        Default set to -20
+    tarpow_threshold : float, optional,
+        Target speaker power threshold
+        Default set to -20
 
     Returns
-    ---------
+    -------
     jdata : array, shape (`T_new` `dim * 2`)
         Joint feature vector between source and target
     twf : array, shape (`T_new`, `2`)
@@ -48,8 +55,10 @@ def get_aligned_jointdata(orgdata, orgnpow, tardata, tarnpow, cvdata=None):
     """
 
     # extract extsddata
-    org_extsddata = extfrm(static_delta(orgdata), orgnpow)
-    tar_extsddata = extfrm(static_delta(tardata), tarnpow)
+    org_extsddata = extfrm(static_delta(orgdata), orgnpow,
+                           power_threshold=orgpow_threshold)
+    tar_extsddata = extfrm(static_delta(tardata), tarnpow,
+                           power_threshold=tarpow_threshold)
 
     if cvdata is None:
         # calculate twf and mel-cd
@@ -60,7 +69,8 @@ def get_aligned_jointdata(orgdata, orgnpow, tardata, tarnpow, cvdata=None):
             raise ValueError('Dimension mismatch between orgdata and cvdata: \
                              {} {}'.format(orgdata.shape, cvdata.shape))
         # calculate twf and mel-cd with converted data
-        cv_extsddata = extfrm(static_delta(cvdata), orgnpow)
+        cv_extsddata = extfrm(static_delta(cvdata), orgnpow,
+                              power_threshold=orgpow_threshold)
         twf = estimate_twf(cv_extsddata, tar_extsddata, distance='melcd')
         mcd = melcd(cv_extsddata[twf[0]], tar_extsddata[twf[1]])
 
@@ -75,6 +85,10 @@ def main(*argv):
     # Options for python
     description = 'estimate joint feature of source and target speakers'
     parser = argparse.ArgumentParser(description=description)
+    parser.add_argument('org_yml', type=str,
+                        help='Yml file of the original speaker')
+    parser.add_argument('tar_yml', type=str,
+                        help='Yml file of the target speaker')
     parser.add_argument('pair_yml', type=str,
                         help='Yml file of the speaker pair')
     parser.add_argument('org_list_file', type=str,
@@ -84,6 +98,10 @@ def main(*argv):
     parser.add_argument('pair_dir', type=str,
                         help='Directory path of h5 files')
     args = parser.parse_args(argv)
+
+    # read speaker-dependent yml files
+    oconf = SpeakerYML(args.org_yml)
+    tconf = SpeakerYML(args.tar_yml)
 
     # read pair-dependent yml file
     pconf = PairYML(args.pair_yml)
@@ -104,9 +122,15 @@ def main(*argv):
     print('{}-th joint feature extraction starts.'.format(itnum))
 
     # first iteration
+    # dtw between original and target
     for i in range(num_files):
-        jdata, _, mcd = get_aligned_jointdata(org_mceps[i][:, sd:], org_npows[i],
-                                              tar_mceps[i][:, sd:], tar_npows[i])
+        jdata, _, mcd = get_aligned_jointdata(org_mceps[i][:, sd:],
+                                              org_npows[i],
+                                              tar_mceps[i][:, sd:],
+                                              tar_npows[i],
+                                              orgpow_threshold=oconf.power_threshold,
+                                              tarpow_threshold=tconf.power_threshold
+                                              )
         print('distortion [dB] for {}-th file: {}'.format(i + 1, mcd))
         if i == 0:
             jnt = jdata
@@ -115,6 +139,7 @@ def main(*argv):
     itnum += 1
 
     # second through final iteration
+    # dtw between converted and target
     while itnum < pconf.jnt_n_iter + 1:
         print('{}-th joint feature extraction starts.'.format(itnum))
         # train GMM
@@ -134,7 +159,10 @@ def main(*argv):
                                                     org_npows[i],
                                                     tar_mceps[i][:, sd:],
                                                     tar_npows[i],
-                                                    cvdata=cvmcep)
+                                                    cvdata=cvmcep,
+                                                    orgpow_threshold=oconf.power_threshold,
+                                                    tarpow_threshold=tconf.power_threshold
+                                                    )
             print('distortion [dB] for {}-th file: {}'.format(i + 1, mcd))
             if i == 0:
                 jnt = jdata

@@ -137,6 +137,8 @@ if __name__ == "__main__":
     if execute_steps[3]:
         print("### 3. Estimate time warping function and jnt ###")
         estimate_twf_and_jnt.main(
+            str(SPEAKER_CONF_FILES["source"]),
+            str(SPEAKER_CONF_FILES["target"]),
             str(PAIR_CONF_FILE),
             str(LIST_FILES["source"]["train"]),
             str(LIST_FILES["target"]["train"]),

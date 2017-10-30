@@ -5,7 +5,7 @@ from __future__ import division, print_function, absolute_import
 import numpy as np
 
 
-def extfrm(data, npow, threshold=-20):
+def extfrm(data, npow, power_threshold=-20):
     """Extract frame over the power threshold
 
     Parameters
@@ -14,8 +14,8 @@ def extfrm(data, npow, threshold=-20):
         Array of input data
     npow : array, shape (`T`)
         Vector of normalized power sequence.
-    threshold: scala, optional
-        Scala of power threshold [dB]
+    power_threshold : float, optional
+        Value of power threshold [dB]
         Default set to -20
 
     Returns
@@ -30,6 +30,8 @@ def extfrm(data, npow, threshold=-20):
     if T != len(npow):
         raise("Length of two vectors is different.")
 
-    valid_index = np.where(npow > threshold)
+    valid_index = np.where(npow > power_threshold)
+    extdata = data[valid_index]
+    assert extdata.shape[0] <= T
 
-    return data[valid_index]
+    return extdata

@@ -25,8 +25,7 @@ class SpeakerYML(object):
 
         self.mcep_dim = conf['mcep']['dim']
         self.mcep_alpha = conf['mcep']['alpha']
-
-        self.power_dim = conf['power']['threshold']
+        self.power_threshold = conf['power']['threshold']
 
         self.analyzer = conf['analyzer']
 
