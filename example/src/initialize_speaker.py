@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Generate F0 histogram to decide F0 range of the speaker
+Generate histograms to decide speaker-dependent parameters
 
 """
 
@@ -20,25 +20,49 @@ matplotlib.use('Agg')  # noqa #isort:skip
 import matplotlib.pyplot as plt  # isort:skip
 
 
-def create_f0_histogram(f0s, f0histogrampath):
-    # plot histgram
-    plt.hist(f0s, bins=200, range=(40, 700),
-             normed=True, histtype="stepfilled")
-    plt.xlabel("Fundamental frequency")
-    plt.ylabel("Probability")
-    plt.xticks(np.arange(0, 750, 50))
+def create_histogram(data, figure_path, range_min=-70, range_max=20,
+                     step=10, xlabel='Power [dB]'):
+    """Create histogram
 
-    figure_dir = os.path.dirname(f0histogrampath)
+    Parameters
+    ----------
+    data : list,
+        List of several data sequences
+    figure_path : str,
+        Filepath to be output figure
+    range_min : int, optional,
+        Minimum range for histogram
+        Default set to -70
+    range_max : int, optional,
+        Maximum range for histogram
+        Default set to -20
+    step : int, optional
+        Stap size of label in horizontal axis
+        Default set to 10
+    xlabel : str, optional
+        Label of the horizontal axis
+        Default set to 'Power [dB]'
+
+    """
+
+    # plot histgram
+    plt.hist(data, bins=200, range=(range_min, range_max),
+             normed=True, histtype="stepfilled")
+    plt.xlabel(xlabel)
+    plt.ylabel("Probability")
+    plt.xticks(np.arange(range_min, range_max, step))
+
+    figure_dir = os.path.dirname(figure_path)
     if not os.path.exists(figure_dir):
         os.makedirs(figure_dir)
 
-    plt.savefig(f0histogrampath)
-    plt.close()  # savefig() doesn't reset figures unlike show()
+    plt.savefig(figure_path)
+    plt.close()
 
 
 def main(*argv):
     argv = argv if argv else sys.argv[1:]
-    dcp = 'create speaker-dependent configure file (speaker.yml)'
+    dcp = 'Create histogram for speaker-dependent configure'
     parser = argparse.ArgumentParser(description=dcp)
     parser.add_argument('speaker', type=str,
                         help='Input speaker label')
@@ -55,25 +79,39 @@ def main(*argv):
         files = fp.readlines()
 
     f0s = []
+    npows = []
     for f in files:
         # open waveform
         f = f.rstrip()
         wavf = os.path.join(args.wav_dir, f + '.wav')
         fs, x = wavfile.read(wavf)
         x = np.array(x, dtype=np.float)
-        print("Extract f0: " + wavf)
+        print("Extract: " + wavf)
 
-        # constract FeatureExtractor clas
+        # constract FeatureExtractor class
         feat = FeatureExtractor(analyzer='world', fs=fs)
-        f0 = feat.analyze_f0(x)
 
-        # f0 extraction
+        # f0 and npow extraction
+        f0, _, _ = feat.analyze(x)
+        npow = feat.npow()
+
         f0s.append(f0)
+        npows.append(npow)
 
-    # create a figure to visualize F0 range of the speaker
+    f0s = np.hstack(f0s).flatten()
+    npows = np.hstack(npows).flatten()
+
+    # create a histogram to visualize F0 range of the speaker
     f0histogrampath = os.path.join(
         args.figure_dir, args.speaker + '_f0histogram.png')
-    create_f0_histogram(np.hstack(f0s).flatten(), f0histogrampath)
+    create_histogram(f0s, f0histogrampath, range_min=40, range_max=700,
+                     step=50, xlabel='Fundamental frequency [Hz]')
+
+    # create a histogram to visualize npow range of the speaker
+    npowhistogrampath = os.path.join(
+        args.figure_dir, args.speaker + '_npowhistogram.png')
+    create_histogram(npows, npowhistogrampath, range_min=-70, range_max=20,
+                     step=10, xlabel="Frame power [dB]")
 
 
 if __name__ == '__main__':

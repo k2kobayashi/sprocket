@@ -172,11 +172,11 @@ if __name__ == "__main__":
             str(CONF_DIR), "default", "pair_default.yml"))
 
     if execute_steps[3]:
-        print("### 3. create figures to define F0 range ###")
+        print("### 3. create figures to define parameters ###")
         # get F0 range in each speaker
         for part, speaker in LABELS.items():
             initialize_speaker.main(
                 speaker, str(LIST_FILES[part]["train"]),
                 str(WAV_DIR), str(CONF_DIR / "figure"))
-        print("# Please modify f0 range values"
-              " in speaker-dependent YAML files based on the figure #")
+        print("# Please modify f0 range and power threshold"
+              " in speaker-dependent YAML files #")
