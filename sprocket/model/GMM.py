@@ -14,7 +14,7 @@ class GMMTrainer(object):
     This class offers the training of GMM with several types of covariance matrix.
 
     Parameters
-    ---------
+    ----------
     n_mix: int, optional
         The number of mixture components of the GMM
         Default set to 32.
@@ -27,7 +27,7 @@ class GMMTrainer(object):
         block_diag (not implemeted) : block-diagonal matrix
 
     Attributes
-    ---------
+    ----------
     param :
         Sklean-based model parameters of the GMM
 
@@ -51,7 +51,7 @@ class GMMTrainer(object):
         """Fit GMM parameter from given joint feature vector
 
         Parameters
-        ---------
+        ----------
         jnt : array, shape(`T`, `jnt.shape[0]`)
             Joint feature vector of original and target feature vector consisting
             of static and delta components
@@ -79,7 +79,7 @@ class GMMTrainer(object):
         EM-algorithm is performed only one time.
 
         Parameters
-        ---------
+        ----------
         reference_jnt: array, shape(`T`, `reference_jnt.shape[0]`)
             Reference joint feature vector of original and target feature vector consisting
             of static and delta components, which was already fit.
@@ -108,7 +108,7 @@ class GMMConvertor(object):
     Parameter Generation (MLPG) and Mimimum Mean Square Error (MMSE).
 
     Parameters
-    ---------
+    ----------
     n_mix : int, optional
         The number of mixture components of the GMM
         Default set to 32.
@@ -123,14 +123,14 @@ class GMMConvertor(object):
         `intra` : Intra-speaker GMM
 
     Attributes
-    ---------
-    param :
+    ----------
+    param
         Sklean-based model parameters of the GMM
-    w : shape (`n_mix`)
+    w : array_like, shape (`n_mix`),
         Vector of mixture component weight of the GMM
-    jmean : shape (`n_mix`, `jnt.shape[0]`)
+    jmean : array_like, shape (`n_mix`, `jnt.shape[0]`),
         Array of joint mean vector of the GMM
-    jcov: shape (`n_mix`, `jnt.shape[0]`, `jnt.shape[0]`)
+    jcov : array, shape (`n_mix`, `jnt.shape[0]`, `jnt.shape[0]`),
         Array of joint covariance matrix of the GMM
 
     """
@@ -144,8 +144,8 @@ class GMMConvertor(object):
         """Open GMM from GMMTrainer
 
         Parameters
-        ---------
-        trainer: GMMTrainer
+        ----------
+        trainer : GMMTrainer
             GMMTrainer class
 
         """
@@ -159,16 +159,16 @@ class GMMConvertor(object):
         """Convert data based on conditional probability densify function
 
         Parameters
-        ---------
+        ----------
         data : array, shape(`T`, `dim`)
             Original data will be converted
-        cvtype: str, optional
+        cvtype : str, optional
             Type of conversion technique
             `mlpg` : maximum likelihood parameter generation
             `mmse` : minimum mean square error
 
         Returns
-        ---------
+        -------
         odata : array, shape(`T`, `dim`)
             Converted data
 

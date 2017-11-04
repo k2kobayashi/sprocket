@@ -20,7 +20,7 @@ class Shifter(object):
     ----------
     fs : int
         Sampling frequency
-    f0rate: float
+    f0rate : float
         F0 transformation ratio
     shiftms : int, optional
         length of shift size [ms]
@@ -54,7 +54,7 @@ class Shifter(object):
         when F0ratio setting to smaller than 1.0.
 
         Returns
-        ---------
+        -------
         transformed : array, shape (`len(x)`)
             Array of F0 transformed waveform sequence
 
@@ -80,12 +80,12 @@ class Shifter(object):
         """Resampling base on 1st order interpolation
 
         Parameters
-        ---------
+        ----------
         x : array, shape ('int(len(x) * f0rate)')
             array of wsolaed waveform
 
         Returns
-        ---------
+        -------
         wsolaed: array, shape (`len(x)`)
             Array of resampled (F0 transformed) waveform sequence
 

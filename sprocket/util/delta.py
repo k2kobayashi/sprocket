@@ -11,7 +11,7 @@ def delta(data, win=[-1.0, 1.0, 0]):
     ----------
     data : array, shape (`T`, `dim`)
         Array of static matrix sequence.
-    win: array, optional, shape (`3`)
+    win : array, optional, shape (`3`)
         The shape of window matrix.
         Default set to [-1.0, 1.0, 0].
 
@@ -49,13 +49,13 @@ def static_delta(data, win=[-1.0, 1.0, 0]):
     ----------
     data : array, shape (`T`, `dim`)
         Array of static matrix sequence.
-    win: array, optional, shape (`3`)
+    win : array, optional, shape (`3`)
         The shape of window matrix.
         Default set to [-1.0, 1.0, 0].
 
     Returns
     -------
-    sddata: array, shape (`T`, `dim*2`)
+    sddata : array, shape (`T`, `dim*2`)
         Array static and delta matrix sequence.
 
     """
@@ -73,7 +73,7 @@ def construct_static_and_delta_matrix(T, D, win=[-1.0, 1.0, 0]):
         Scala of time length
     D : scala, `D`
         Scala of the number of dimentsion
-    win: array, optional, shape (`3`)
+    win : array, optional, shape (`3`)
         The shape of window matrix for delta.
         Default set to [-1.0, 1.0, 0].
 

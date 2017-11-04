@@ -42,13 +42,13 @@ class WSOLA(object):
         """Duration modification based on WSOLA
 
         Parameters
-        ---------
+        ----------
         x : array, shape ('len(x)')
             array of waveform sequence
 
         Returns
-        ---------
-        wsolaed: array, shape (`int(len(x) / speech_rate)`)
+        -------
+        wsolaed : array, shape (`int(len(x) / speech_rate)`)
             Array of WSOLAed waveform sequence
 
         """

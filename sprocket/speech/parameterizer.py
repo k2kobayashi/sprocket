@@ -11,8 +11,8 @@ def spc2npow(spectrogram):
     spectrogram : array, shape (T, `fftlen / 2 + 1`)
         Array of spectrum envelope
 
-    Return
-    ------
+    Returns
+    -------
     npow : array, shape (`T`, `1`)
         Normalized power sequence
 
@@ -35,8 +35,8 @@ def _spvec2pow(specvec):
     specvec : vector, shape (`fftlen / 2 + 1`)
         Vector of specturm envelope |H(w)|^2
 
-    Return
-    ------
+    Returns
+    -------
     power : scala,
         Power of a frame
 

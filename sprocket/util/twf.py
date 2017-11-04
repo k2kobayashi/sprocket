@@ -11,7 +11,7 @@ def estimate_twf(orgdata, tardata, distance='melcd', fast=True):
     """time warping function estimator
 
     Parameters
-    ---------
+    ----------
     orgdata : array, shape(`T_org`, `dim`)
         Array of source feature
     tardata : array, shape(`T_tar`, `dim`)
@@ -24,7 +24,7 @@ def estimate_twf(orgdata, tardata, distance='melcd', fast=True):
         Default set to `True`
 
     Returns
-    ---------
+    -------
     twf : array, shape(`2`, `T`)
         Time warping function between original and target
     """

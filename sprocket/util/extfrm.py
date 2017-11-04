@@ -10,17 +10,17 @@ def extfrm(data, npow, threshold=-20):
 
     Parameters
     ----------
-    data: array, shape (`T`, `dim`)
+    data : array, shape (`T`, `dim`)
         Array of input data
     npow : array, shape (`T`)
         Vector of normalized power sequence.
-    threshold: scala, optional
+    threshold : int, optional
         Scala of power threshold [dB]
         Default set to -20
 
     Returns
     -------
-    data: array, shape (`T_ext`, `dim`)
+    data : array, shape (`T_ext`, `dim`)
         Remaining data after extracting frame
         `T_ext` <= `T`
 
