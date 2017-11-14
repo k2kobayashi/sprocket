@@ -2,11 +2,12 @@
 
 """An example script to transform F0
 
-Usage: f0_transformation.py [-h] [--f0rate <f0rate>] SOURCE TARGET
+Usage: f0_transformation.py [-h] [--f0rate <f0rate>] [--ev] SOURCE TARGET
 
 Options:
     -h, --help   Show the help
     --f0rate <f0rate>  F0 transformation ratio, [default: -1]
+    --ev           Transform waveform only for evaluation list
     SOURCE         The name of speaker
                    whose voice you would like to convert from
     TARGET         The name of speaker whose voice you would like to convert to
@@ -52,6 +53,7 @@ if __name__ == "__main__":
         for part, label in LABELS.items()}
     PAIR_CONF_FILE = CONF_DIR / "pair" / (SOURCE_TARGET_PAIR + ".yml")
     f0rate = args['--f0rate']
+    evlist_flag = args['--ev']
 
     # check list file
     for use in ("train", "eval"):
@@ -60,9 +62,17 @@ if __name__ == "__main__":
 
     print("### 1. F0 transformation of original waveform ###")
     # transform F0 of waveform of original speaker
-    main("--f0rate", f0rate,
-         LABELS["source"], str(SPEAKER_CONF_FILES["source"]),
-         str(SPEAKER_CONF_FILES["target"]),
-         str(LIST_FILES["source"]["train"]),
-         str(LIST_FILES["source"]["eval"]), str(LIST_FILES["target"]["train"]), str(WAV_DIR))
+    if evlist_flag:
+        main("--f0rate", f0rate, "--evlist",
+             LABELS["source"], str(SPEAKER_CONF_FILES["source"]),
+             str(SPEAKER_CONF_FILES["target"]),
+             str(LIST_FILES["source"]["train"]),
+             str(LIST_FILES["source"]["eval"]), str(LIST_FILES["target"]["train"]), str(WAV_DIR))
+    else:
+        main("--f0rate", f0rate,
+             LABELS["source"], str(SPEAKER_CONF_FILES["source"]),
+             str(SPEAKER_CONF_FILES["target"]),
+             str(LIST_FILES["source"]["train"]),
+             str(LIST_FILES["source"]["eval"]), str(LIST_FILES["target"]["train"]), str(WAV_DIR))
+
     print("# F0 transformed waveforms are generated #")

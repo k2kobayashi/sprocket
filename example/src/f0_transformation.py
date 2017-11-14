@@ -131,6 +131,8 @@ def main(*argv):
     parser = argparse.ArgumentParser(description=dcp)
     parser.add_argument('--f0rate', type=float, default=-1,
                         help='Original speaker label')
+    parser.add_argument('--evlist', default=False, action='store_true',
+                        help='Transform wavforms only for evaluation list')
     parser.add_argument('speaker', type=str,
                         help='Original speaker label')
     parser.add_argument('org_yml', type=str,
@@ -169,11 +171,16 @@ def main(*argv):
         f0rate = args.f0rate
     print('F0 transformation ratio: ' + str(f0rate))
 
-    # F0 transformation of original waveform in both train and eval list files
-    transform_f0_from_list(args.speaker, f0rate, org_conf.wav_fs,
-                           args.org_train_list, args.wav_dir)
-    transform_f0_from_list(args.speaker, f0rate, org_conf.wav_fs,
-                           args.org_eval_list, args.wav_dir)
+    if not args.evlist:
+        # F0 transformation of original waveform in both train and eval list files
+        transform_f0_from_list(args.speaker, f0rate, org_conf.wav_fs,
+                               args.org_train_list, args.wav_dir)
+        transform_f0_from_list(args.speaker, f0rate, org_conf.wav_fs,
+                               args.org_eval_list, args.wav_dir)
+    else:
+        # F0 transformation of original waveform in eval list files
+        transform_f0_from_list(args.speaker, f0rate, org_conf.wav_fs,
+                               args.org_eval_list, args.wav_dir)
 
 
 if __name__ == '__main__':
