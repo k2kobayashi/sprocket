@@ -41,3 +41,26 @@ def estimate_twf(orgdata, tardata, distance='melcd', fast=True):
         _, _, _, twf = dtw(orgdata, tardata, distance_func)
 
     return twf
+
+
+def align_data(org_data, tar_data, twf):
+    """Get aligned joint feature vector
+
+    Paramters
+    ---------
+    orgdata : array, shape (`T_org`, `dim_org`)
+        Acoustic feature vector of original speaker
+    tardata : array, shape (`T_tar`, `dim_tar`)
+        Acoustic feature vector of target speaker
+    twf : array, shape (`2`, `T`)
+        Time warping function between original and target
+
+    Returns
+    -------
+    jdata : array, shape (`T_new` `dim_org + dim_tar`)
+        Joint feature vector between source and target
+
+    """
+
+    jdata = np.c_[org_data[twf[0]], tar_data[twf[1]]]
+    return jdata
