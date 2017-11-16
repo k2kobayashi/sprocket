@@ -39,8 +39,8 @@ class Synthesizer(object):
             array of F0 sequence
         mcep : array, shape (`T`, `dim`)
             array of mel-cepstrum sequence
-        ap : array, shape (T, `fftlen / 2 + 1`)
-            array of aperiodicity
+        ap : array, shape (`T`, `fftlen / 2 + 1`) or (`T`, `dim_codeap`)
+            array of aperiodicity or code aperiodicity
         rmcep : array, optional, shape (`T`, `dim`)
             array of reference mel-cepstrum sequence
             Default set to None
@@ -58,6 +58,10 @@ class Synthesizer(object):
         if rmcep is not None:
             # power modification
             mcep = mod_power(mcep, rmcep, alpha=alpha)
+
+        if ap.shape[1] < self.fftl // 2 + 1:
+            # decode codeap to ap
+            ap = pyworld.decode_aperiodicity(ap, self.fs, self.fftl)
 
         # mcep into spc
         spc = pysptk.mc2sp(mcep, alpha, self.fftl)

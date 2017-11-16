@@ -47,6 +47,11 @@ class PairYML(object):
         self.GMM_mcep_covtype = conf['GMM']['mcep']['covtype']
         self.GMM_mcep_cvtype = conf['GMM']['mcep']['cvtype']
 
+        self.GMM_codeap_n_mix = conf['GMM']['codeap']['n_mix']
+        self.GMM_codeap_n_iter = conf['GMM']['codeap']['n_iter']
+        self.GMM_codeap_covtype = conf['GMM']['codeap']['covtype']
+        self.GMM_codeap_cvtype = conf['GMM']['codeap']['cvtype']
+
         self.GV_morph_coeff = conf['GV']['morph_coeff']
 
     def _read_training_list(self):
