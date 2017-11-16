@@ -20,64 +20,52 @@ from yml import SpeakerYML, PairYML
 from .misc import read_feats
 
 
-def get_aligned_jointdata(orgdata, orgnpow, tardata, tarnpow, cvdata=None,
-                          orgpow_threshold=-20, tarpow_threshold=-20):
-    """Get aligment between features
+def get_extsddata(data, npow, power_threshold=-20):
+    """Get power extract static and delta feature vector
 
     Paramters
     ---------
-    orgdata : array, shape (`T_org`, `dim`)
-        Acoustic feature of source speaker
-    orgnpow : array, shape (`T_org`)
-        Normalized power of soruce speaker
-    orgdata : array, shape (`T_tar`, `dim`)
-        Acoustic feature of target speaker
-    orgnpow : array, shape (`T_tar`)
-        Normalized power of target speaker
-    cvdata : array, optional, shape (`T_org`, `dim`)
-        Converted acoustic feature from source into target
-    orgpow_threshold : float, optional,
-        Original speaker power threshold
-        Default set to -20
-    tarpow_threshold : float, optional,
-        Target speaker power threshold
+    data : array, shape (`T`, `dim`)
+        Acoustic feature vector
+    npow : array, shape (`T`)
+        Normalized power vector
+    power_threshold : float, optional,
+        Power threshold
         Default set to -20
 
     Returns
     -------
-    jdata : array, shape (`T_new` `dim * 2`)
-        Joint feature vector between source and target
-    twf : array, shape (`T_new`, `2`)
-        Time warping function
-    mcd : float,
-        Mel-cepstrum distortion between source and target
+    extsddata : array, shape (`T_new` `dim * 2`)
+        Silence remove static and delta feature vector
 
     """
 
-    # extract extsddata
-    org_extsddata = extfrm(static_delta(orgdata), orgnpow,
-                           power_threshold=orgpow_threshold)
-    tar_extsddata = extfrm(static_delta(tardata), tarnpow,
-                           power_threshold=tarpow_threshold)
+    extsddata = extfrm(static_delta(data), npow,
+                       power_threshold=power_threshold)
+    return extsddata
 
-    if cvdata is None:
-        # calculate twf and mel-cd
-        twf = estimate_twf(org_extsddata, tar_extsddata, distance='melcd')
-        mcd = melcd(org_extsddata[twf[0]], tar_extsddata[twf[1]])
-    else:
-        if orgdata.shape != cvdata.shape:
-            raise ValueError('Dimension mismatch between orgdata and cvdata: \
-                             {} {}'.format(orgdata.shape, cvdata.shape))
-        # calculate twf and mel-cd with converted data
-        cv_extsddata = extfrm(static_delta(cvdata), orgnpow,
-                              power_threshold=orgpow_threshold)
-        twf = estimate_twf(cv_extsddata, tar_extsddata, distance='melcd')
-        mcd = melcd(cv_extsddata[twf[0]], tar_extsddata[twf[1]])
 
-    # concatenate joint feature data into joint feature matrix
-    jdata = np.c_[org_extsddata[twf[0]], tar_extsddata[twf[1]]]
+def get_aligned_data(org_data, tar_data, twf):
+    """Get aligned joint feature vector
 
-    return jdata, twf, mcd
+    Paramters
+    ---------
+    org_data : array, shape (`T_org`, `dim_org`)
+        Acoustic feature vector of original speaker
+    tar_data : array, shape (`T_tar`, `dim_tar`)
+        Acoustic feature vector of target speaker
+    twf : array, shape (`2`)
+        Time warping function
+
+    Returns
+    -------
+    jdata : array, shape (`T_new` `dim_org + dim_tar`)
+        Joint feature vector between source and target
+
+    """
+
+    jdata = np.c_[org_data[twf[0]], tar_data[twf[1]]]
+    return jdata
 
 
 def main(*argv):
@@ -109,8 +97,10 @@ def main(*argv):
     # read source and target features from HDF file
     h5_dir = os.path.join(args.pair_dir, 'h5')
     org_mceps = read_feats(args.org_list_file, h5_dir, ext='mcep')
+    org_codeaps = read_feats(args.org_list_file, h5_dir, ext='codeap')
     org_npows = read_feats(args.org_list_file, h5_dir, ext='npow')
     tar_mceps = read_feats(args.tar_list_file, h5_dir, ext='mcep')
+    tar_codeaps = read_feats(args.tar_list_file, h5_dir, ext='codeap')
     tar_npows = read_feats(args.tar_list_file, h5_dir, ext='npow')
     assert len(org_mceps) == len(tar_mceps)
     assert len(org_npows) == len(tar_npows)
@@ -124,18 +114,21 @@ def main(*argv):
     # first iteration
     # dtw between original and target
     for i in range(num_files):
-        jdata, _, mcd = get_aligned_jointdata(org_mceps[i][:, sd:],
-                                              org_npows[i],
-                                              tar_mceps[i][:, sd:],
-                                              tar_npows[i],
-                                              orgpow_threshold=oconf.power_threshold,
-                                              tarpow_threshold=tconf.power_threshold
-                                              )
+        org_extsdmcep = get_extsddata(org_mceps[i][:, sd:],
+                                      org_npows[i],
+                                      power_threshold=oconf.power_threshold)
+        tar_extsdmcep = get_extsddata(tar_mceps[i][:, sd:],
+                                      tar_npows[i],
+                                      power_threshold=tconf.power_threshold)
+        twf = estimate_twf(org_extsdmcep, tar_extsdmcep, distance='melcd')
+        jsdmcep = get_aligned_data(org_extsdmcep, tar_extsdmcep, twf)
+        mcd = melcd(org_extsdmcep[twf[0]], tar_extsdmcep[twf[1]])
+
         print('distortion [dB] for {}-th file: {}'.format(i + 1, mcd))
         if i == 0:
-            jnt = jdata
+            jnt = jsdmcep
         else:
-            jnt = np.r_[jnt, jdata]
+            jnt = np.r_[jnt, jsdmcep]
     itnum += 1
 
     # second through final iteration
@@ -155,30 +148,51 @@ def main(*argv):
         for i in range(num_files):
             cvmcep = cvgmm.convert(static_delta(org_mceps[i][:, sd:]),
                                    cvtype=pconf.GMM_mcep_cvtype)
-            jdata, twf, mcd = get_aligned_jointdata(org_mceps[i][:, sd:],
-                                                    org_npows[i],
-                                                    tar_mceps[i][:, sd:],
-                                                    tar_npows[i],
-                                                    cvdata=cvmcep,
-                                                    orgpow_threshold=oconf.power_threshold,
-                                                    tarpow_threshold=tconf.power_threshold
-                                                    )
+            org_extsdmcep = get_extsddata(org_mceps[i][:, sd:],
+                                          org_npows[i],
+                                          power_threshold=oconf.power_threshold)
+            tar_extsdmcep = get_extsddata(tar_mceps[i][:, sd:],
+                                          tar_npows[i],
+                                          power_threshold=tconf.power_threshold)
+            cv_extsdmcep = get_extsddata(cvmcep,
+                                         org_npows[i],
+                                         power_threshold=oconf.power_threshold)
+            twf = estimate_twf(cv_extsdmcep, tar_extsdmcep, distance='melcd')
+            jsdmcep = get_aligned_data(org_extsdmcep, tar_extsdmcep, twf)
+            mcd = melcd(cv_extsdmcep[twf[0]], tar_extsdmcep[twf[1]])
+
             print('distortion [dB] for {}-th file: {}'.format(i + 1, mcd))
             if i == 0:
-                jnt = jdata
+                jnt = jsdmcep
             else:
-                jnt = np.r_[jnt, jdata]
+                jnt = np.r_[jnt, jsdmcep]
             twfs.append(twf)
+
+            if itnum == pconf.jnt_n_iter:
+                # extract codeap joint feature vector
+                org_extsdcodeap = get_extsddata(org_codeaps[i],
+                                                org_npows[i],
+                                                power_threshold=oconf.power_threshold)
+                tar_extsdcodeap = get_extsddata(tar_codeaps[i],
+                                                tar_npows[i],
+                                                power_threshold=tconf.power_threshold)
+                jcodeap = get_aligned_data(
+                    org_extsdcodeap, tar_extsdcodeap, twf)
+                if i == 0:
+                    jnt_codeap = jcodeap
+                else:
+                    jnt_codeap = np.r_[jnt_codeap, jcodeap]
 
         itnum += 1
 
-    # save joint feature vector
+    # save joint feature vector of mcep
     jnt_dir = os.path.join(args.pair_dir, 'jnt')
     if not os.path.exists(jnt_dir):
         os.makedirs(jnt_dir)
     jntpath = os.path.join(jnt_dir, 'it' + str(itnum) + '_jnt.h5')
     jnth5 = HDF5(jntpath, mode='w')
-    jnth5.save(jnt, ext='jnt')
+    jnth5.save(jnt, ext='mcep')
+    jnth5.save(jnt_codeap, ext='codeap')
     jnth5.close()
 
     # save GMM
