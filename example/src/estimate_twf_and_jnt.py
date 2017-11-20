@@ -9,43 +9,18 @@ Estimate joint feature vector of the speaker pair using GMM
 import argparse
 import os
 import sys
-import numpy as np
 
 from sprocket.model.GMM import GMMConvertor, GMMTrainer
-from sprocket.util import HDF5, estimate_twf, extfrm, melcd
+from sprocket.util import HDF5, estimate_twf, melcd
 from sprocket.util import static_delta, align_data
 
 from yml import SpeakerYML, PairYML
-from misc import read_feats
-
-
-def extsddata(data, npow, power_threshold=-20):
-    """Get power extract static and delta feature vector
-
-    Paramters
-    ---------
-    data : array, shape (`T`, `dim`)
-        Acoustic feature vector
-    npow : array, shape (`T`)
-        Normalized power vector
-    power_threshold : float, optional,
-        Power threshold
-        Default set to -20
-
-    Returns
-    -------
-    extsddata : array, shape (`T_new` `dim * 2`)
-        Silence remove static and delta feature vector
-
-    """
-
-    extsddata = extfrm(static_delta(data), npow,
-                       power_threshold=power_threshold)
-    return extsddata
+from misc import read_feats, extsddata, transform_jnt
 
 
 def get_alignment(odata, onpow, tdata, tnpow, opow=-20, tpow=-20,
-                  sd=0, cvdata=None, given_twf=None, distance='melcd'):
+                  sd=0, cvdata=None, given_twf=None, otflag=None,
+                  distance='melcd'):
     """Get alignment between original and target
 
     Paramters
@@ -73,6 +48,14 @@ def get_alignment(odata, onpow, tdata, tnpow, opow=-20, tpow=-20,
     given_twf : array, shape (`T_new` `dim * 2`)
         Alignment given twf
         Default set to None
+    otflag : str, optional
+        Alignment into the length of specification
+        'org' : alignment into original length
+        'tar' : alignment into target length
+        Default set to None
+    distance : str,
+        Distance function to be used
+        Default set to 'melcd'
 
     Returns
     -------
@@ -80,7 +63,7 @@ def get_alignment(odata, onpow, tdata, tnpow, opow=-20, tpow=-20,
         Joint static and delta feature vector
     twf : array, shape (`T_new` `dim * 2`)
         Time warping function
-    mcd : float ,
+    mcd : float,
         Mel-cepstrum distortion between arrays
 
     """
@@ -98,27 +81,63 @@ def get_alignment(odata, onpow, tdata, tnpow, opow=-20, tpow=-20,
         align_odata = cvexdata
 
     if given_twf is None:
-        twf = estimate_twf(align_odata, texdata, distance=distance)
+        twf = estimate_twf(align_odata, texdata,
+                           distance=distance, otflag=otflag)
     else:
         twf = given_twf
 
     jdata = align_data(oexdata, texdata, twf)
     mcd = melcd(align_odata[twf[0]], texdata[twf[1]])
+
     return jdata, twf, mcd
 
 
-def transform_jnt(array_list):
-    num_files = len(array_list)
-    for i in range(num_files):
-        if i == 0:
-            jnt = array_list[i]
-        else:
-            jnt = np.r_[jnt, array_list[i]]
-    return jnt
-
-
 def align_feature_vectors(odata, onpows, tdata, tnpows, pconf,
-                          opow=-20, tpow=-20, itnum=3, sd=0, given_twfs=None):
+                          opow=-20, tpow=-20, itnum=3, sd=0,
+                          given_twfs=None, otflag=None):
+    """Get alignment to create joint feature vector
+
+    Paramters
+    ---------
+    odata : list, (`num_files`)
+        List of original feature vectors
+    onpows : list , (`num_files`)
+        List of original npows
+    tdata : list, (`num_files`)
+        List of target feature vectors
+    tnpows : list , (`num_files`)
+        List of target npows
+    opow : float, optional,
+        Power threshold of original
+        Default set to -20
+    tpow : float, optional,
+        Power threshold of target
+        Default set to -20
+    itnum : int , optional,
+        The number of iteration
+        Default set to 3
+    sd : int , optional,
+        Start dimension of feature vector to be used for alignment
+        Default set to 0
+    given_twf : array, shape (`T_new` `dim * 2`)
+        Use given alignment while 1st iteration
+        Default set to None
+    otflag : str, optional
+        Alignment into the length of specification
+        'org' : alignment into original length
+        'tar' : alignment into target length
+        Default set to None
+
+    Returns
+    -------
+    jdata : array, shape (`T_new` `dim * 2`)
+        Joint static and delta feature vector
+    twf : array, shape (`T_new` `dim * 2`)
+        Time warping function
+    mcd : float ,
+        Mel-cepstrum distortion between arrays
+
+    """
     it = 1
     num_files = len(odata)
     cvgmm, cvdata = None, None
@@ -142,7 +161,8 @@ def align_feature_vectors(odata, onpows, tdata, tnpows, pconf,
                                             tpow=tpow,
                                             sd=sd,
                                             cvdata=cvdata,
-                                            given_twf=gtwf)
+                                            given_twf=gtwf,
+                                            otflag=otflag)
             twfs.append(twf)
             jfvs.append(jdata)
             print('distortion [dB] for {}-th file: {}'.format(i + 1, mcd))
@@ -198,6 +218,7 @@ def main(*argv):
     assert len(org_mceps) == len(org_npows)
 
     # dtw between original and target w/o 0th and silence
+    print('## Alignment mcep w/o 0-th and silence ##')
     jmceps, twfs = align_feature_vectors(org_mceps,
                                          org_npows,
                                          tar_mceps,
@@ -206,10 +227,12 @@ def main(*argv):
                                          opow=oconf.power_threshold,
                                          tpow=tconf.power_threshold,
                                          itnum=pconf.jnt_n_iter,
-                                         sd=1)
+                                         sd=1,
+                                         )
     jnt_mcep = transform_jnt(jmceps)
 
     # dtw between original and target w/o silence
+    print('## Alignment mcep w/o silence ##')
     jmceps, twfs = align_feature_vectors(org_mceps,
                                          org_npows,
                                          tar_mceps,
@@ -223,6 +246,7 @@ def main(*argv):
     jnt_mcep = transform_jnt(jmceps)
 
     # dtw between original and target
+    print('## Alignment mcep ##')
     jmceps, twfs = align_feature_vectors(org_mceps,
                                          org_npows,
                                          tar_mceps,
@@ -235,7 +259,23 @@ def main(*argv):
                                          given_twfs=twfs)
     jnt_mcep = transform_jnt(jmceps)
 
+    # dtw between original and target into target length
+    print('## Alignment mcep into target length ##')
+    jmceps, twfs = align_feature_vectors(org_mceps,
+                                         org_npows,
+                                         tar_mceps,
+                                         tar_npows,
+                                         pconf,
+                                         opow=-100,
+                                         tpow=-100,
+                                         itnum=pconf.jnt_n_iter,
+                                         sd=0,
+                                         given_twfs=twfs,
+                                         otflag='tar')
+    jnt_mcep = transform_jnt(jmceps)
+
     # create joint feature for codeap using given twfs
+    print('## Alignment codeap into target length using given twf ##')
     org_codeaps = read_feats(args.org_list_file, h5_dir, ext='codeap')
     tar_codeaps = read_feats(args.tar_list_file, h5_dir, ext='codeap')
     jcodeaps = []
