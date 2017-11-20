@@ -93,7 +93,7 @@ def get_alignment(odata, onpow, tdata, tnpow, opow=-20, tpow=-20,
 
 
 def align_feature_vectors(odata, onpows, tdata, tnpows, pconf,
-                          opow=-20, tpow=-20, itnum=3, sd=0,
+                          opow=-100, tpow=-100, itnum=3, sd=0,
                           given_twfs=None, otflag=None):
     """Get alignment to create joint feature vector
 
@@ -109,10 +109,10 @@ def align_feature_vectors(odata, onpows, tdata, tnpows, pconf,
         List of target npows
     opow : float, optional,
         Power threshold of original
-        Default set to -20
+        Default set to -100
     tpow : float, optional,
         Power threshold of target
-        Default set to -20
+        Default set to -100
     itnum : int , optional,
         The number of iteration
         Default set to 3
@@ -252,8 +252,6 @@ def main(*argv):
                                          tar_mceps,
                                          tar_npows,
                                          pconf,
-                                         opow=-100,
-                                         tpow=-100,
                                          itnum=pconf.jnt_n_iter,
                                          sd=0,
                                          given_twfs=twfs)
@@ -266,8 +264,6 @@ def main(*argv):
                                          tar_mceps,
                                          tar_npows,
                                          pconf,
-                                         opow=-100,
-                                         tpow=-100,
                                          itnum=pconf.jnt_n_iter,
                                          sd=0,
                                          given_twfs=twfs,
