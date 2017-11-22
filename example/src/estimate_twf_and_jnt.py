@@ -231,45 +231,6 @@ def main(*argv):
                                          )
     jnt_mcep = transform_jnt(jmceps)
 
-    # dtw between original and target w/o silence
-    print('## Alignment mcep w/o silence ##')
-    jmceps, twfs = align_feature_vectors(org_mceps,
-                                         org_npows,
-                                         tar_mceps,
-                                         tar_npows,
-                                         pconf,
-                                         opow=oconf.power_threshold,
-                                         tpow=tconf.power_threshold,
-                                         itnum=pconf.jnt_n_iter,
-                                         sd=0,
-                                         given_twfs=twfs)
-    jnt_mcep = transform_jnt(jmceps)
-
-    # dtw between original and target
-    print('## Alignment mcep ##')
-    jmceps, twfs = align_feature_vectors(org_mceps,
-                                         org_npows,
-                                         tar_mceps,
-                                         tar_npows,
-                                         pconf,
-                                         itnum=pconf.jnt_n_iter,
-                                         sd=0,
-                                         given_twfs=twfs)
-    jnt_mcep = transform_jnt(jmceps)
-
-    # dtw between original and target into target length
-    print('## Alignment mcep into target length ##')
-    jmceps, twfs = align_feature_vectors(org_mceps,
-                                         org_npows,
-                                         tar_mceps,
-                                         tar_npows,
-                                         pconf,
-                                         itnum=pconf.jnt_n_iter,
-                                         sd=0,
-                                         given_twfs=twfs,
-                                         otflag='tar')
-    jnt_mcep = transform_jnt(jmceps)
-
     # create joint feature for codeap using given twfs
     print('## Alignment codeap into target length using given twf ##')
     org_codeaps = read_feats(args.org_list_file, h5_dir, ext='codeap')
