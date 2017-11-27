@@ -53,7 +53,7 @@ if __name__ == "__main__":
         for part, label in LABELS.items()}
     PAIR_CONF_FILE = CONF_DIR / "pair" / (SOURCE_TARGET_PAIR + ".yml")
     f0rate = args['--f0rate']
-    evlist_flag = args['--ev']
+    evlist_only = args['--ev']
 
     # check list file
     for use in ("train", "eval"):
@@ -62,7 +62,7 @@ if __name__ == "__main__":
 
     print("### 1. F0 transformation of original waveform ###")
     # transform F0 of waveform of original speaker
-    if evlist_flag:
+    if evlist_only:
         main("--f0rate", f0rate, "--evlist",
              LABELS["source"], str(SPEAKER_CONF_FILES["source"]),
              str(SPEAKER_CONF_FILES["target"]),

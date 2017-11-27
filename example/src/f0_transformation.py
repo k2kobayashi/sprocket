@@ -172,13 +172,13 @@ def main(*argv):
     print('F0 transformation ratio: ' + str(f0rate))
 
     if not args.evlist:
-        # F0 transformation of original waveform in both train and eval list files
+        # F0 transformation of original waveform in both train and eval list
         transform_f0_from_list(args.speaker, f0rate, org_conf.wav_fs,
                                args.org_train_list, args.wav_dir)
         transform_f0_from_list(args.speaker, f0rate, org_conf.wav_fs,
                                args.org_eval_list, args.wav_dir)
     else:
-        # F0 transformation of original waveform in eval list files
+        # F0 transformation of original waveform only in eval list
         transform_f0_from_list(args.speaker, f0rate, org_conf.wav_fs,
                                args.org_eval_list, args.wav_dir)
 
