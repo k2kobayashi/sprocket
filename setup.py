@@ -10,7 +10,7 @@ else:
 CHANGES = open('CHANGES.md').read()
 
 setup(
-    name="sprocket",
+    name="sprocket-vc",
     version="0.18",
     description="Voice conversion software",
     url='https://github.com/k2kobayashi/sprocket',
