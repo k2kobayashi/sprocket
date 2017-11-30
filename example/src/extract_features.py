@@ -80,6 +80,7 @@ def main(*argv):
                 f0, spc, ap = feat.analyze(x)
                 mcep = feat.mcep(dim=sconf.mcep_dim, alpha=sconf.mcep_alpha)
                 npow = feat.npow()
+                codeap = feat.codeap()
 
                 # save features into a hdf5 file
                 h5 = HDF5(h5f, mode='w')
@@ -88,6 +89,7 @@ def main(*argv):
                 # h5.save(ap, ext='ap')
                 h5.save(mcep, ext='mcep')
                 h5.save(npow, ext='npow')
+                h5.save(codeap, ext='codeap')
                 h5.close()
 
                 # analysis/synthesis using F0, mcep, and ap

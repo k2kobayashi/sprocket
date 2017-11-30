@@ -50,14 +50,23 @@ def main(*argv):
     pconf = PairYML(args.pair_yml)
 
     # read GMM for mcep
-    mcepgmmpath = os.path.join(args.pair_dir, 'model/GMM.pkl')
+    mcepgmmpath = os.path.join(args.pair_dir, 'model/GMM_mcep.pkl')
     mcepgmm = GMMConvertor(n_mix=pconf.GMM_mcep_n_mix,
                            covtype=pconf.GMM_mcep_covtype,
                            gmmmode=args.gmmmode,
                            )
     param = joblib.load(mcepgmmpath)
     mcepgmm.open_from_param(param)
-    print("conversion mode: {}".format(args.gmmmode))
+    print("GMM for mcep conversion mode: {}".format(args.gmmmode))
+
+    # read GMM for codeap
+    codeapgmmpath = os.path.join(args.pair_dir, 'model/GMM_codeap.pkl')
+    codeapgmm = GMMConvertor(n_mix=pconf.GMM_codeap_n_mix,
+                             covtype=pconf.GMM_codeap_covtype,
+                             gmmmode=None,
+                             )
+    param = joblib.load(codeapgmmpath)
+    codeapgmm.open_from_param(param)
 
     # read F0 statistics
     stats_dir = os.path.join(args.pair_dir, 'stats')
@@ -73,7 +82,7 @@ def main(*argv):
     targvstats = tarstats_h5.read(ext='gv')
     tarstats_h5.close()
 
-    # read GV statistics for converted
+    # read GV statistics for converted mcep
     cvgvstatspath = os.path.join(args.pair_dir, 'model', 'cvgv.h5')
     cvgvstats_h5 = HDF5(cvgvstatspath, mode='r')
     cvgvstats = cvgvstats_h5.read(ext='cvgv')
@@ -98,8 +107,7 @@ def main(*argv):
 
     # test directory
     test_dir = os.path.join(args.pair_dir, 'test')
-    if not os.path.exists(os.path.join(test_dir, args.org)):
-        os.makedirs(os.path.join(test_dir, args.org))
+    os.makedirs(os.path.join(test_dir, args.org), exist_ok=True)
 
     # conversion in each evaluation file
     with open(args.eval_list_file, 'r') as fp:
@@ -116,23 +124,19 @@ def main(*argv):
             f0, spc, ap = feat.analyze(x)
             mcep = feat.mcep(dim=sconf.mcep_dim, alpha=sconf.mcep_alpha)
             mcep_0th = mcep[:, 0]
-
-            # output analysis synthesized voice of source
-            wav = synthesizer.synthesis(f0,
-                                        mcep,
-                                        ap,
-                                        alpha=sconf.mcep_alpha,
-                                        )
-            wavpath = os.path.join(test_dir, f + '_anasyn.wav')
-            wavfile.write(wavpath, fs, wav.astype(np.int16))
+            codeap = feat.codeap()
 
             # convert F0
             cvf0 = f0stats.convert(f0, orgf0stats, tarf0stats)
 
-            # convert mel-cepstrum
+            # convert mcep
             cvmcep_wopow = mcepgmm.convert(static_delta(mcep[:, 1:]),
                                            cvtype=pconf.GMM_mcep_cvtype)
             cvmcep = np.c_[mcep_0th, cvmcep_wopow]
+
+            # convert codeap
+            cvcodeap = codeapgmm.convert(static_delta(codeap),
+                                         cvtype=pconf.GMM_codeap_cvtype)
 
             # synthesis VC w/ GV
             if args.gmmmode is None:
@@ -143,7 +147,7 @@ def main(*argv):
                                                startdim=1)
                 wav = synthesizer.synthesis(cvf0,
                                             cvmcep_wGV,
-                                            ap,
+                                            cvcodeap,
                                             rmcep=mcep,
                                             alpha=sconf.mcep_alpha,
                                             )

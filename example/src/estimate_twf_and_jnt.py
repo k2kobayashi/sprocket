@@ -10,74 +10,175 @@ import argparse
 import os
 import sys
 
-import numpy as np
-from sklearn.externals import joblib
-
 from sprocket.model.GMM import GMMConvertor, GMMTrainer
-from sprocket.util import HDF5, estimate_twf, extfrm, melcd, static_delta
+from sprocket.util import HDF5, estimate_twf, melcd
+from sprocket.util import static_delta, align_data
+
 from yml import SpeakerYML, PairYML
+from misc import read_feats, extsddata, transform_jnt
 
-from .misc import read_feats
 
-
-def get_aligned_jointdata(orgdata, orgnpow, tardata, tarnpow, cvdata=None,
-                          orgpow_threshold=-20, tarpow_threshold=-20):
-    """Get aligment between features
+def get_alignment(odata, onpow, tdata, tnpow, opow=-20, tpow=-20,
+                  sd=0, cvdata=None, given_twf=None, otflag=None,
+                  distance='melcd'):
+    """Get alignment between original and target
 
     Paramters
     ---------
-    orgdata : array, shape (`T_org`, `dim`)
-        Acoustic feature of source speaker
-    orgnpow : array, shape (`T_org`)
-        Normalized power of soruce speaker
-    orgdata : array, shape (`T_tar`, `dim`)
-        Acoustic feature of target speaker
-    orgnpow : array, shape (`T_tar`)
-        Normalized power of target speaker
-    cvdata : array, optional, shape (`T_org`, `dim`)
-        Converted acoustic feature from source into target
-    orgpow_threshold : float, optional,
-        Original speaker power threshold
+    odata : array, shape (`T`, `dim`)
+        Acoustic feature vector of original
+    onpow : array, shape (`T`)
+        Normalized power vector of original
+    tdata : array, shape (`T`, `dim`)
+        Acoustic feature vector of target
+    tnpow : array, shape (`T`)
+        Normalized power vector of target
+    opow : float, optional,
+        Power threshold of original
         Default set to -20
-    tarpow_threshold : float, optional,
-        Target speaker power threshold
+    tpow : float, optional,
+        Power threshold of target
         Default set to -20
+    sd : int , optional,
+        Start dimension to be used for alignment
+        Default set to 0
+    cvdata : array, shape (`T`, `dim`), optional,
+        Converted original data
+        Default set to None
+    given_twf : array, shape (`T_new`, `dim * 2`), optional,
+        Alignment given twf
+        Default set to None
+    otflag : str, optional
+        Alignment into the length of specification
+        'org' : alignment into original length
+        'tar' : alignment into target length
+        Default set to None
+    distance : str,
+        Distance function to be used
+        Default set to 'melcd'
 
     Returns
     -------
     jdata : array, shape (`T_new` `dim * 2`)
-        Joint feature vector between source and target
-    twf : array, shape (`T_new`, `2`)
+        Joint static and delta feature vector
+    twf : array, shape (`T_new` `dim * 2`)
         Time warping function
     mcd : float,
-        Mel-cepstrum distortion between source and target
+        Mel-cepstrum distortion between arrays
 
     """
 
-    # extract extsddata
-    org_extsddata = extfrm(static_delta(orgdata), orgnpow,
-                           power_threshold=orgpow_threshold)
-    tar_extsddata = extfrm(static_delta(tardata), tarnpow,
-                           power_threshold=tarpow_threshold)
+    oexdata = extsddata(odata[:, sd:], onpow,
+                        power_threshold=opow)
+    texdata = extsddata(tdata[:, sd:], tnpow,
+                        power_threshold=tpow)
 
     if cvdata is None:
-        # calculate twf and mel-cd
-        twf = estimate_twf(org_extsddata, tar_extsddata, distance='melcd')
-        mcd = melcd(org_extsddata[twf[0]], tar_extsddata[twf[1]])
+        align_odata = oexdata
     else:
-        if orgdata.shape != cvdata.shape:
-            raise ValueError('Dimension mismatch between orgdata and cvdata: \
-                             {} {}'.format(orgdata.shape, cvdata.shape))
-        # calculate twf and mel-cd with converted data
-        cv_extsddata = extfrm(static_delta(cvdata), orgnpow,
-                              power_threshold=orgpow_threshold)
-        twf = estimate_twf(cv_extsddata, tar_extsddata, distance='melcd')
-        mcd = melcd(cv_extsddata[twf[0]], tar_extsddata[twf[1]])
+        cvexdata = extsddata(cvdata, onpow,
+                             power_threshold=opow)
+        align_odata = cvexdata
 
-    # concatenate joint feature data into joint feature matrix
-    jdata = np.c_[org_extsddata[twf[0]], tar_extsddata[twf[1]]]
+    if given_twf is None:
+        twf = estimate_twf(align_odata, texdata,
+                           distance=distance, otflag=otflag)
+    else:
+        twf = given_twf
+
+    jdata = align_data(oexdata, texdata, twf)
+    mcd = melcd(align_odata[twf[0]], texdata[twf[1]])
 
     return jdata, twf, mcd
+
+
+def align_feature_vectors(odata, onpows, tdata, tnpows, pconf,
+                          opow=-100, tpow=-100, itnum=3, sd=0,
+                          given_twfs=None, otflag=None):
+    """Get alignment to create joint feature vector
+
+    Paramters
+    ---------
+    odata : list, (`num_files`)
+        List of original feature vectors
+    onpows : list , (`num_files`)
+        List of original npows
+    tdata : list, (`num_files`)
+        List of target feature vectors
+    tnpows : list , (`num_files`)
+        List of target npows
+    opow : float, optional,
+        Power threshold of original
+        Default set to -100
+    tpow : float, optional,
+        Power threshold of target
+        Default set to -100
+    itnum : int , optional,
+        The number of iteration
+        Default set to 3
+    sd : int , optional,
+        Start dimension of feature vector to be used for alignment
+        Default set to 0
+    given_twf : array, shape (`T_new` `dim * 2`)
+        Use given alignment while 1st iteration
+        Default set to None
+    otflag : str, optional
+        Alignment into the length of specification
+        'org' : alignment into original length
+        'tar' : alignment into target length
+        Default set to None
+
+    Returns
+    -------
+    jdata : array, shape (`T_new` `dim * 2`)
+        Joint static and delta feature vector
+    twf : array, shape (`T_new` `dim * 2`)
+        Time warping function
+    mcd : float ,
+        Mel-cepstrum distortion between arrays
+
+    """
+    it = 1
+    num_files = len(odata)
+    cvgmm, cvdata = None, None
+    for it in range(1, itnum + 1):
+        print('{}-th joint feature extraction starts.'.format(it))
+        # alignment
+        twfs, jfvs = [], []
+        for i in range(num_files):
+            if it == 1 and given_twfs is not None:
+                gtwf = given_twfs[i]
+            else:
+                gtwf = None
+            if it > 1:
+                cvdata = cvgmm.convert(static_delta(odata[i][:, sd:]),
+                                       cvtype=pconf.GMM_mcep_cvtype)
+            jdata, twf, mcd = get_alignment(odata[i],
+                                            onpows[i],
+                                            tdata[i],
+                                            tnpows[i],
+                                            opow=opow,
+                                            tpow=tpow,
+                                            sd=sd,
+                                            cvdata=cvdata,
+                                            given_twf=gtwf,
+                                            otflag=otflag)
+            twfs.append(twf)
+            jfvs.append(jdata)
+            print('distortion [dB] for {}-th file: {}'.format(i + 1, mcd))
+        jnt_data = transform_jnt(jfvs)
+
+        if it != itnum:
+            # train GMM, if not final iteration
+            datagmm = GMMTrainer(n_mix=pconf.GMM_mcep_n_mix,
+                                 n_iter=pconf.GMM_mcep_n_iter,
+                                 covtype=pconf.GMM_mcep_covtype)
+            datagmm.train(jnt_data)
+            cvgmm = GMMConvertor(n_mix=pconf.GMM_mcep_n_mix,
+                                 covtype=pconf.GMM_mcep_covtype)
+            cvgmm.open_from_param(datagmm.param)
+        it += 1
+    return jfvs, twfs
 
 
 def main(*argv):
@@ -116,87 +217,54 @@ def main(*argv):
     assert len(org_npows) == len(tar_npows)
     assert len(org_mceps) == len(org_npows)
 
-    itnum = 1
-    sd = 1  # start dimension for aligment of mcep
-    num_files = len(org_mceps)
-    print('{}-th joint feature extraction starts.'.format(itnum))
+    # dtw between original and target w/o 0th and silence
+    print('## Alignment mcep w/o 0-th and silence ##')
+    jmceps, twfs = align_feature_vectors(org_mceps,
+                                         org_npows,
+                                         tar_mceps,
+                                         tar_npows,
+                                         pconf,
+                                         opow=oconf.power_threshold,
+                                         tpow=tconf.power_threshold,
+                                         itnum=pconf.jnt_n_iter,
+                                         sd=1,
+                                         )
+    jnt_mcep = transform_jnt(jmceps)
 
-    # first iteration
-    # dtw between original and target
-    for i in range(num_files):
-        jdata, _, mcd = get_aligned_jointdata(org_mceps[i][:, sd:],
-                                              org_npows[i],
-                                              tar_mceps[i][:, sd:],
-                                              tar_npows[i],
-                                              orgpow_threshold=oconf.power_threshold,
-                                              tarpow_threshold=tconf.power_threshold
-                                              )
-        print('distortion [dB] for {}-th file: {}'.format(i + 1, mcd))
-        if i == 0:
-            jnt = jdata
-        else:
-            jnt = np.r_[jnt, jdata]
-    itnum += 1
+    # create joint feature for codeap using given twfs
+    print('## Alignment codeap into target length using given twf ##')
+    org_codeaps = read_feats(args.org_list_file, h5_dir, ext='codeap')
+    tar_codeaps = read_feats(args.tar_list_file, h5_dir, ext='codeap')
+    jcodeaps = []
+    for i in range(len(org_codeaps)):
+        # extract codeap joint feature vector
+        jcodeap, _, _ = get_alignment(org_codeaps[i],
+                                      org_npows[i],
+                                      tar_codeaps[i],
+                                      tar_npows[i],
+                                      opow=oconf.power_threshold,
+                                      tpow=tconf.power_threshold,
+                                      given_twf=twfs[i])
+        jcodeaps.append(jcodeap)
+    jnt_codeap = transform_jnt(jcodeaps)
 
-    # second through final iteration
-    # dtw between converted and target
-    while itnum < pconf.jnt_n_iter + 1:
-        print('{}-th joint feature extraction starts.'.format(itnum))
-        # train GMM
-        trgmm = GMMTrainer(n_mix=pconf.GMM_mcep_n_mix,
-                           n_iter=pconf.GMM_mcep_n_iter,
-                           covtype=pconf.GMM_mcep_covtype)
-        trgmm.train(jnt)
-
-        cvgmm = GMMConvertor(n_mix=pconf.GMM_mcep_n_mix,
-                             covtype=pconf.GMM_mcep_covtype)
-        cvgmm.open_from_param(trgmm.param)
-        twfs = []
-        for i in range(num_files):
-            cvmcep = cvgmm.convert(static_delta(org_mceps[i][:, sd:]),
-                                   cvtype=pconf.GMM_mcep_cvtype)
-            jdata, twf, mcd = get_aligned_jointdata(org_mceps[i][:, sd:],
-                                                    org_npows[i],
-                                                    tar_mceps[i][:, sd:],
-                                                    tar_npows[i],
-                                                    cvdata=cvmcep,
-                                                    orgpow_threshold=oconf.power_threshold,
-                                                    tarpow_threshold=tconf.power_threshold
-                                                    )
-            print('distortion [dB] for {}-th file: {}'.format(i + 1, mcd))
-            if i == 0:
-                jnt = jdata
-            else:
-                jnt = np.r_[jnt, jdata]
-            twfs.append(twf)
-
-        itnum += 1
-
-    # save joint feature vector
+    # save joint feature vectors
     jnt_dir = os.path.join(args.pair_dir, 'jnt')
-    if not os.path.exists(jnt_dir):
-        os.makedirs(jnt_dir)
-    jntpath = os.path.join(jnt_dir, 'it' + str(itnum) + '_jnt.h5')
+    os.makedirs(jnt_dir, exist_ok=True)
+    jntpath = os.path.join(jnt_dir, 'it' + str(pconf.jnt_n_iter) + '_jnt.h5')
     jnth5 = HDF5(jntpath, mode='w')
-    jnth5.save(jnt, ext='jnt')
+    jnth5.save(jnt_mcep, ext='mcep')
+    jnth5.save(jnt_codeap, ext='codeap')
     jnth5.close()
 
-    # save GMM
-    gmm_dir = os.path.join(args.pair_dir, 'GMM')
-    if not os.path.exists(gmm_dir):
-        os.makedirs(gmm_dir)
-    gmmpath = os.path.join(gmm_dir, 'it' + str(itnum) + '_gmm.pkl')
-    joblib.dump(trgmm.param, gmmpath)
-
-    # save twf
+    # save twfs
     twf_dir = os.path.join(args.pair_dir, 'twf')
-    if not os.path.exists(twf_dir):
-        os.makedirs(twf_dir)
+    os.makedirs(twf_dir, exist_ok=True)
     with open(args.org_list_file, 'r') as fp:
         for line, twf in zip(fp, twfs):
             f = os.path.basename(line.rstrip())
             twfpath = os.path.join(
-                twf_dir, 'it' + str(itnum) + '_' + f + '.h5')
+                twf_dir, 'it' + str(pconf.jnt_n_iter) + '_' + f + '.h5')
             twfh5 = HDF5(twfpath, mode='w')
             twfh5.save(twf, ext='twf')
             twfh5.close()
