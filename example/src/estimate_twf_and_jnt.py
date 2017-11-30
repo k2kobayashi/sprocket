@@ -45,7 +45,7 @@ def get_alignment(odata, onpow, tdata, tnpow, opow=-20, tpow=-20,
     cvdata : array, shape (`T`, `dim`), optional,
         Converted original data
         Default set to None
-    given_twf : array, shape (`T_new` `dim * 2`)
+    given_twf : array, shape (`T_new`, `dim * 2`), optional,
         Alignment given twf
         Default set to None
     otflag : str, optional
@@ -141,7 +141,7 @@ def align_feature_vectors(odata, onpows, tdata, tnpows, pconf,
     it = 1
     num_files = len(odata)
     cvgmm, cvdata = None, None
-    while it <= itnum:
+    for it in range(1, itnum + 1):
         print('{}-th joint feature extraction starts.'.format(it))
         # alignment
         twfs, jfvs = [], []
