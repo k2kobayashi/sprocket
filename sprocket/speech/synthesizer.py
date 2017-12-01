@@ -138,7 +138,7 @@ class Synthesizer(object):
         return wav
 
 
-def mod_power(cvmcep, rmcep, alpha=0.42, irlen=256):
+def mod_power(cvmcep, rmcep, alpha=0.42, irlen=1024):
     """Power modification based on inpulse responce
 
     Parameters
@@ -152,7 +152,7 @@ def mod_power(cvmcep, rmcep, alpha=0.42, irlen=256):
         Default set to 0.42
     irlen : int, optional
         Length for IIR filter
-        Default set to 256
+        Default set to 1024
 
     Return
     ------
