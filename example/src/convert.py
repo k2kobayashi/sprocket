@@ -147,7 +147,7 @@ def main(*argv):
                                                startdim=1)
                 wav = synthesizer.synthesis(cvf0,
                                             cvmcep_wGV,
-                                            cvcodeap,
+                                            ap,
                                             rmcep=mcep,
                                             alpha=sconf.mcep_alpha,
                                             )
