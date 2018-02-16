@@ -59,15 +59,6 @@ def main(*argv):
     mcepgmm.open_from_param(param)
     print("GMM for mcep conversion mode: {}".format(args.gmmmode))
 
-    # read GMM for codeap
-    codeapgmmpath = os.path.join(args.pair_dir, 'model/GMM_codeap.pkl')
-    codeapgmm = GMMConvertor(n_mix=pconf.GMM_codeap_n_mix,
-                             covtype=pconf.GMM_codeap_covtype,
-                             gmmmode=None,
-                             )
-    param = joblib.load(codeapgmmpath)
-    codeapgmm.open_from_param(param)
-
     # read F0 statistics
     stats_dir = os.path.join(args.pair_dir, 'stats')
     orgstatspath = os.path.join(stats_dir,  args.org + '.h5')
@@ -124,7 +115,6 @@ def main(*argv):
             f0, spc, ap = feat.analyze(x)
             mcep = feat.mcep(dim=sconf.mcep_dim, alpha=sconf.mcep_alpha)
             mcep_0th = mcep[:, 0]
-            codeap = feat.codeap()
 
             # convert F0
             cvf0 = f0stats.convert(f0, orgf0stats, tarf0stats)
@@ -133,10 +123,6 @@ def main(*argv):
             cvmcep_wopow = mcepgmm.convert(static_delta(mcep[:, 1:]),
                                            cvtype=pconf.GMM_mcep_cvtype)
             cvmcep = np.c_[mcep_0th, cvmcep_wopow]
-
-            # convert codeap
-            cvcodeap = codeapgmm.convert(static_delta(codeap),
-                                         cvtype=pconf.GMM_codeap_cvtype)
 
             # synthesis VC w/ GV
             if args.gmmmode is None:
