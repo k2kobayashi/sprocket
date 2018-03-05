@@ -83,7 +83,7 @@ def main(*argv):
 
     # read joint feature vector
     jntf = os.path.join(args.pair_dir, 'jnt',
-                        'it' + str(pconf.jnt_n_iter + 1) + '_jnt.h5')
+                        'it' + str(pconf.jnt_n_iter) + '_jnt.h5')
     jnth5 = HDF5(jntf, mode='r')
     jnt = jnth5.read(ext='mcep')
     jnt_codeap = jnth5.read(ext='codeap')
