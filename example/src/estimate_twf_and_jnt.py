@@ -229,6 +229,49 @@ def main(*argv):
                                          itnum=pconf.jnt_n_iter,
                                          sd=1,
                                          )
+
+    # dtw between original and target w/ 0th and w/o silence
+    print('## Alignment mcep w/o silence ##')
+    jmceps, twfs = align_feature_vectors(org_mceps,
+                                         org_npows,
+                                         tar_mceps,
+                                         tar_npows,
+                                         pconf,
+                                         opow=oconf.power_threshold,
+                                         tpow=tconf.power_threshold,
+                                         itnum=pconf.jnt_n_iter,
+                                         sd=0,
+                                         given_twfs=twfs,
+                                         )
+
+    # dtw between original and target w/ 0th and silence
+    print('## Alignment mcep w/ silence ##')
+    jmceps, twfs = align_feature_vectors(org_mceps,
+                                         org_npows,
+                                         tar_mceps,
+                                         tar_npows,
+                                         pconf,
+                                         opow=-100,
+                                         tpow=-100,
+                                         itnum=pconf.jnt_n_iter,
+                                         sd=0,
+                                         given_twfs=twfs,
+                                         )
+
+    # dtw between original and target
+    print('## Alignment mcep to target feature vector ##')
+    jmceps, twfs = align_feature_vectors(org_mceps,
+                                         org_npows,
+                                         tar_mceps,
+                                         tar_npows,
+                                         pconf,
+                                         opow=-100,
+                                         tpow=-100,
+                                         itnum=pconf.jnt_n_iter,
+                                         sd=0,
+                                         given_twfs=twfs,
+                                         otflag='tar',
+                                         )
     jnt_mcep = transform_jnt(jmceps)
 
     # create joint feature for codeap using given twfs
@@ -242,8 +285,8 @@ def main(*argv):
                                       org_npows[i],
                                       tar_codeaps[i],
                                       tar_npows[i],
-                                      opow=oconf.power_threshold,
-                                      tpow=tconf.power_threshold,
+                                      opow=-100,
+                                      tpow=-100,
                                       given_twf=twfs[i])
         jcodeaps.append(jcodeap)
     jnt_codeap = transform_jnt(jcodeaps)

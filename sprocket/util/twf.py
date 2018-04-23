@@ -3,6 +3,7 @@
 import numpy as np
 from dtw import dtw
 from fastdtw import fastdtw
+from dtw_c import dtw_c
 
 from sprocket.util import melcd
 
@@ -46,7 +47,17 @@ def estimate_twf(orgdata, tardata, distance='melcd', fast=True, otflag=None):
         _, _, _, twf = dtw(orgdata, tardata, distance_func)
 
     if otflag is not None:
-        twf = modify_twf(twf, otflag=otflag)
+        ldim = orgdata.shape[1] - 1
+        if otflag == 'org':
+            _, twf, _, _ = dtw_c.dtw_org_to_trg(tardata, orgdata,
+                                                0, ldim, 5.0, 0.0, 0.0)
+        else:
+            _, twf, _, _ = dtw_c.dtw_org_to_trg(orgdata, tardata,
+                                                0, ldim, 5.0, 0.0, 0.0)
+        twf[:, 1] = np.array(range(twf.shape[0]))  # replace target index
+        twf = twf.T
+        if otflag == 'org':
+            twf = twf[::-1, :]  # swap cols
 
     return twf
 
