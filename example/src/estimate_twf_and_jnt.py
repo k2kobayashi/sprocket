@@ -130,20 +130,15 @@ def align_feature_vectors(odata, onpows, tdata, tnpows, pconf,
 
     Returns
     -------
-    jdata : array, shape (`T_new` `dim * 2`)
-        Joint static and delta feature vector
-    twf : array, shape (`T_new` `dim * 2`)
-        Time warping function
-    mcd : float ,
-        Mel-cepstrum distortion between arrays
-
+    jfvs : list,
+        List of joint feature vectors
+    twfs : list,
+        List of time warping functions
     """
-    it = 1
     num_files = len(odata)
     cvgmm, cvdata = None, None
     for it in range(1, itnum + 1):
         print('{}-th joint feature extraction starts.'.format(it))
-        # alignment
         twfs, jfvs = [], []
         for i in range(num_files):
             if it == 1 and given_twfs is not None:
