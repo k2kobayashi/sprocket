@@ -36,6 +36,8 @@ def main(*argv):
                         help='Wav file directory of the speaker')
     parser.add_argument('pair_dir', type=str,
                         help='Directory of the speaker pair')
+    parser.add_argument('lf_f0', type=str, 
+                        help='f0 h5 file name instead of original')
     args = parser.parse_args(argv)
 
     # read parameters from speaker yml
@@ -59,12 +61,13 @@ def main(*argv):
     synthesizer = Synthesizer(fs=sconf.wav_fs,
                               fftl=sconf.wav_fftl,
                               shiftms=sconf.wav_shiftms)
-        # open list file
-    with open(args.list_file, 'r') as fp:
-        for line in fp:
+    # open list file and f0 h5 list file
+    with open(args.list_file, 'r') as fp, open(args.lf_f0, 'r') as fp_f0:
+        for line, line_f0 in zip(fp, fp_f0):
             f = line.rstrip()
             h5f = os.path.join(h5_dir, f + '.h5')
-
+            f_f0 = line_f0.rstrip()
+            h5f_f0 = os.path.join(h5_dir, f_f0 + '.h5')
             if (not os.path.exists(h5f)) or args.overwrite:
                 wavf = os.path.join(args.wav_dir, f + '.wav')
                 fs, x = wavfile.read(wavf)
@@ -73,9 +76,11 @@ def main(*argv):
                 assert fs == sconf.wav_fs
 
                 print("Extract acoustic features: " + wavf)
-
+                # read f0 instead of original f0
+                h5_f0 = HDF5(h5f_f0, mode='r')
+                in_f0 = h5_f0.read(ext='f0')
                 # analyze F0, spc, and ap
-                f0, spc, ap = feat.analyze(x)
+                f0, spc, ap = feat.analyze(x,in_f0)
                 mcep = feat.mcep(dim=sconf.mcep_dim, alpha=sconf.mcep_alpha)
                 npow = feat.npow()
                 codeap = feat.codeap()

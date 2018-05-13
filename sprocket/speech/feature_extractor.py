@@ -64,14 +64,15 @@ class FeatureExtractor(object):
         self._spc = None
         self._ap = None
 
-    def analyze(self, x):
+    def analyze(self, x, in_f0=1):
         """Analyze acoustic features using analyzer
 
         Parameters
         ----------
         x : array
             Array of waveform samples
-
+        in_f0 : array, shape (`T`)
+                option when you want to use other f0
         Returns
         -------
         f0 : array, shape (`T`,)
@@ -83,7 +84,8 @@ class FeatureExtractor(object):
         """
 
         self.x = np.array(x, dtype=np.float)
-        self._f0, self._spc, self._ap = self.analyzer.analyze(self.x)
+        # if in_f0 != 1: give f0 vec to analyze
+        self._f0, self._spc, self._ap = self.analyzer.analyze(self.x, in_f0)
 
         # check non-negative for F0
         self._f0[self._f0 < 0] = 0
