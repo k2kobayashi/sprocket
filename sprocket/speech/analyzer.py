@@ -32,7 +32,7 @@ class WORLD(object):
         self.minf0 = minf0
         self.maxf0 = maxf0
 
-    def analyze(self, x):
+    def analyze(self, x, in_f0=1):
         """Analyze acoustic features based on WORLD
 
         analyze F0, spectral envelope, aperiodicity
@@ -54,6 +54,9 @@ class WORLD(object):
         """
         f0, time_axis = pyworld.harvest(x, self.fs, f0_floor=self.minf0,
                                         f0_ceil=self.maxf0, frame_period=self.shiftms)
+        if type(in_f0) != int: 
+            print("excahge f0")
+            f0 = in_f0
         spc = pyworld.cheaptrick(x, f0, time_axis, self.fs,
                                  fft_size=self.fftl)
         ap = pyworld.d4c(x, f0, time_axis, self.fs, fft_size=self.fftl)
