@@ -160,7 +160,7 @@ After finishing this command, you can find the histograms in "conf/figure" direc
 
 Based on this figure, you can manually change the values of "minf0" and "maxf0" in the speaker-dependent YAML file (e.g., "conf/speaker/TF1.yml").
 
-## Run VC (traditional VC system [Toda et al., 2007])
+## Run VC (traditional VC [Toda+07]) and DIFFVC (vocoder-free VC [Kobayashi+14])
 Now you can build the traditional VC system using "run_sprocket.py"
 
 ```
@@ -172,15 +172,18 @@ The procedures of "run_sprocket.py" are described in the following figure.
 
 Consequently, converted speech samples are generated in "data/pair/SF1-TF1/test/SF1" directory as wav files "*\_VC.wav" (e.g., data/pair/SF1-TF1/test/SF1/100031_VC.wav).
 
-## Run DIFFVC (vocoder-free VC system [Kobayashi et al., 2016])
-If you want to build the vocoder-free VC system, you need to first perform F0 transformation of speech samples of the source speaker.
-To do so, you need to run the following command.
+Note that the generated waveforms labeled "*\_DIFFVC.wav" indicates converted speech samples by vocoder-free VC system (i.e., DIFFVC without F0 transformation). 
+
+## Run DIFFVC with F0 transformation [Kobayashi+16]
+If you want to build the vocoder-free VC system with F0 transformation, you need to first perform F0 transformation of speech samples of the source speaker.
+To do so, you need to run the following command after performing the modification of the F0 search range of the source and target speakers.
 
 ```
 python run_f0_transformation.py SF1 TF1
 ```
 
 After finishing this command, you can find F0 transformed wav files in "data/wav/SF1\_{f0ratio}" directory (e.g., "SF1\_1.02").
-By running "run_sprocket.py" while using these speech samples as a new source speaker (i.e., "SF1\_1.02"), you can build the vocoder-free VC system and generate the converted speech samples.  Namely, you need to perform initialization and run VC steps for the F0 transformed source speaker (i.e., "SF1\_1.02") and target speaker (i.e., "TF1").
+Then, you need to perform initializations for the F0 transformed source speaker and target speaker (i.e., "TF1") again.
+By running "run_sprocket.py" with the F0 transformed source speaker and the target speaker, you can build the vocoder-free VC system with F0 transformation and generate the converted speech samples.  
 
 Consequently, converted speech samples are generated in "data/pair/SF1\_1.02-TF1/test/SF1\_1.02" directory as wav files "*\_DIFFVC.wav" (e.g., data/pair/SF1\_1.02-TF1/test/SF1\_1.02/100031\_DIFFVC.wav).
