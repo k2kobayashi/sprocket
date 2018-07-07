@@ -44,7 +44,7 @@ class UserOption:
 
 class FixedStrPattern:
     """
-    Class of fied-string pattern
+    Class of fixed-string pattern
 
     Uses duck-typing to commonalize interface `match` for a time.
 
@@ -109,12 +109,12 @@ class GlobPattern(FixedStrPattern):
 
 def generate_pattern_from_obj(pattern_obj):
     """
-    Generates an appropriate instance of pattern from object from YAML.
+    Generates an appropriate pattern from object from YAML.
 
     Parameters
     ----------
     pattern_obj : Union[str, Dict[str, str]]
-        Parsed YAML object.  Only one of objects from these expressions
+        Parsed YAML object.  Only one object indicated by these expressions is allowed.
         are allowed::
 
             pattern -> fixed string
@@ -462,7 +462,7 @@ class Downloader:
     Parameters
     ----------
     config_path : Path
-
+        Path of configuration file for downloading corpus
     user_option : UserOption
         User option designated in arguments of this program (e.g. verbose)
     """
