@@ -27,7 +27,7 @@ import yaml
 from docopt import docopt
 
 
-class Behaivior:
+class UserOption:
     """
     Class (structure) that contains flags given in Parameters
 -
@@ -329,18 +329,18 @@ class DataArchive:
         parsed contents of each element in `files` clause.
     global_config : Dict[str, Any]
         parsed contents in `config` clause.
-    behavior : Behaivior
-        behavior of this program (verbose etc.).
+    user_option : UserOption
+        User option of this program (verbose etc.).
     """
 
-    def __init__(self, file_config, global_config, behavior):
+    def __init__(self, file_config, global_config, user_option):
         self.name = file_config["name"]
         self.src_url = file_config["src"]
         # Leading `/` throws away the path of a directory
         # where a archive file is extracted
         self.audio_root_relative = file_config["root"].lstrip("/")
         self.global_config = global_config
-        self.behavior = behavior
+        self.user_option = user_option
         self.file_path_filter = FilePathFilter.from_obj(
             file_config.get("only"), file_config.get("except")
         )
@@ -359,12 +359,12 @@ class DataArchive:
             working_dir = Path(working_dir) # convert from str
 
             # download archive and extract files in the working directory.
-            if self.behavior.verbose:
+            if self.user_option.verbose:
                 print("Downloading", self.name, "from", self.src_url, "...")
             archive_path = DataArchive._download_file(
                 self.src_url, working_dir
             )
-            if self.behavior.verbose:
+            if self.user_option.verbose:
                 print("Unpack:", archive_path)
             shutil.unpack_archive(str(archive_path), str(working_dir))
 
@@ -404,9 +404,9 @@ class DataArchive:
         dest : Path
             the path of the directory audio files are moved to.
         """
-        if self.behavior.verbose:
+        if self.user_option.verbose:
             print("Move:", src.name)
-        os.makedirs(str(dest), exist_ok=self.behavior.force)
+        os.makedirs(str(dest), exist_ok=self.user_option.force)
         for wav_file in self.global_config.extensions.itemize_in_directory(
             src
         ):
@@ -417,7 +417,7 @@ class DataArchive:
         """
         Moves one file.
         """
-        if dest.exists() and self.behavior.force:
+        if dest.exists() and self.user_option.force:
             dest.unlink()
         shutil.move(str(src), str(dest))
 
@@ -463,18 +463,18 @@ class Downloader:
     ----------
     config_path : Path
 
-    behavior : Behavior
-        behavior designated in arguments of this program (e.g. verbose)
+    user_option : UserOption
+        User option designated in arguments of this program (e.g. verbose)
     """
-    def __init__(self, config_path, behavior):
+    def __init__(self, config_path, user_option):
         with open(config_path) as f:
             self.all_configs = yaml.load(f)
-        self.behavior = behavior
+        self.user_option = user_option
         self.global_config = GlobalConfiguration(
             self.all_configs.get("config", {})
         )
         self.files = [
-            DataArchive(file_info_dic, self.global_config, behavior)
+            DataArchive(file_info_dic, self.global_config, user_option)
             for file_info_dic in self.all_configs["files"]
         ]
 
@@ -500,7 +500,7 @@ if __name__ == "__main__":
     base_dir = Path(__file__).parent
     wav_root_dir = base_dir / "data" / "wav"
 
-    Downloader(config_path, Behaivior(is_verbose, does_by_force)).download(
+    Downloader(config_path, UserOption(is_verbose, does_by_force)).download(
         wav_root_dir
     )
 
