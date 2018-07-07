@@ -12,7 +12,6 @@ Parameters:
     -h, --help      Show this help and exit
     -q, --quiet     Don't show any messages about progress
     -f, --force     Overwrite existing directories and files
-    -m, --minimal   Exit when there are some directories in data/wav
 """
 
 import os
@@ -496,16 +495,10 @@ if __name__ == "__main__":
     args = docopt(__doc__)
     is_verbose = not args["--quiet"]  # Whether prints regular messages
     does_by_force = args["--force"]
-    does_minimally = args["--minimal"]
     config_path = args["<config>"]
 
     base_dir = Path(__file__).parent
     wav_root_dir = base_dir / "data" / "wav"
-
-    if does_minimally and list(filter(Path.is_dir, wav_root_dir.iterdir())):
-        if is_verbose:
-            print("There are some directories in:", wav_root_dir)
-        exit(0)
 
     Downloader(config_path, Behaivior(is_verbose, does_by_force)).download(
         wav_root_dir
