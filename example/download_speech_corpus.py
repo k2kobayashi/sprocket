@@ -11,7 +11,7 @@ Parameters:
     <config>        The path of configuration file
     -h, --help      Show this help and exit
     -q, --quiet     Don't show any messages about progress
-    -f, --force     Overwrite existing directories and files
+    -f, --force     Overwrite existing corpus files
 """
 
 import os
@@ -406,7 +406,7 @@ class DataArchive:
         """
         if self.user_option.verbose:
             print("Move:", src.name)
-        os.makedirs(str(dest), exist_ok=self.user_option.force)
+        os.makedirs(str(dest), exist_ok=True)
         for wav_file in self.global_config.extensions.itemize_in_directory(
             src
         ):
