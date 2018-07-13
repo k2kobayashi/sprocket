@@ -24,6 +24,7 @@ import shutil
 import urllib.parse
 import urllib.request
 from pathlib import Path
+from sys import stderr
 from tempfile import TemporaryDirectory
 
 from docopt import docopt
@@ -62,6 +63,10 @@ def download(url, dest=None):
 
 
 if __name__ == "__main__":
+    print(
+        "Warning: This script was replaced with download_corpus_data.py and"
+        " are going to be removed in the future.  Use it instead.",
+        file=stderr)
     args = docopt(__doc__)
     is_verbose = not args["--quiet"]  # Whether prints regular messages
     does_by_force = args["--force"]
