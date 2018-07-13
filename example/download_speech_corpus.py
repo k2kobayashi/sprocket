@@ -12,6 +12,10 @@ Parameters:
     -h, --help      Show this help and exit
     -q, --quiet     Don't show any messages about progress
     -f, --force     Overwrite existing corpus files
+
+Example:
+    Run `./download_speech_corpus.py ./downloader_conf/vcc2016.yml` to download
+        corpus for VCC 2016.
 """
 
 import os
