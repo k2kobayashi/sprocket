@@ -1,0 +1,23 @@
+# Configuration to download data for The Voice Conversion Challenge 2018
+#
+# About data:
+#   http://datashare.is.ed.ac.uk/handle/10283/3061
+# Article of VCC 2018:
+#   https://arxiv.org/pdf/1804.04262.pdf
+# License of VCC 2018 dataset:
+#   https://datashare.is.ed.ac.uk/bitstream/handle/10283/3061/license_text?sequence=11&isAllowed=y
+config:
+  extensions:
+    - wav
+files:
+  - name: training data
+    src: https://datashare.is.ed.ac.uk/bitstream/handle/10283/3061/vcc2018_database_training.zip?sequence=2&isAllowed=y
+    root: /vcc2018_training
+    except:
+      - Transcriptions
+  - name: evaluation data
+    src: https://datashare.is.ed.ac.uk/bitstream/handle/10283/3061/vcc2018_database_evaluation.zip?sequence=3&isAllowed=y
+    root: /vcc2018_evaluation
+  - name: reference data
+    src: https://datashare.is.ed.ac.uk/bitstream/handle/10283/3061/vcc2018_database_reference.zip?sequence=5&isAllowed=y
+    root: /vcc2018_reference
