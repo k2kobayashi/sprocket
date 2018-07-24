@@ -40,20 +40,22 @@ def estimate_twf(orgdata, tardata, distance='melcd', fast=True, otflag=None):
     else:
         raise ValueError('other distance metrics than melcd does not support.')
 
-    if fast:
-        _, path = fastdtw(orgdata, tardata, dist=distance_func)
-        twf = np.array(path).T
+    if otflag is None:
+        # use dtw or fastdtw
+        if fast:
+            _, path = fastdtw(orgdata, tardata, dist=distance_func)
+            twf = np.array(path).T
+        else:
+            _, _, _, twf = dtw(orgdata, tardata, distance_func)
     else:
-        _, _, _, twf = dtw(orgdata, tardata, distance_func)
-
-    if otflag is not None:
+        # use dtw_c to align target length
         ldim = orgdata.shape[1] - 1
         if otflag == 'org':
             _, twf, _, _ = dtw_c.dtw_org_to_trg(tardata, orgdata,
-                                                0, ldim, 5.0, 0.0, 0.0)
+                                                0, ldim, 5.0, 100.0, 100.0)
         else:
             _, twf, _, _ = dtw_c.dtw_org_to_trg(orgdata, tardata,
-                                                0, ldim, 5.0, 0.0, 0.0)
+                                                0, ldim, 5.0, 100.0, 100.0)
         twf[:, 1] = np.array(range(twf.shape[0]))  # replace target index
         twf = twf.T
         if otflag == 'org':
