@@ -32,7 +32,7 @@ def main(*argv):
     # open h5 files
     h5_dir = os.path.join(args.pair_dir, 'h5')
     statspath = os.path.join(args.pair_dir, 'stats', args.speaker + '.h5')
-    h5 = HDF5(statspath, mode='w')
+    h5 = HDF5(statspath, mode='a')
 
     # estimate and save F0 statistics
     f0stats = F0statistics()

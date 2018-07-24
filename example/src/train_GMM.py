@@ -125,7 +125,7 @@ def main(*argv):
 
     # open h5 files
     statspath = os.path.join(gmm_dir, 'cvgv.h5')
-    cvgvh5 = HDF5(statspath, mode='w')
+    cvgvh5 = HDF5(statspath, mode='a')
     cvgvh5.save(cvgvstats, ext='cvgv')
     cvgvh5.save(diffcvgvstats, ext='diffcvgv')
     print("Converted gvstats save into " + statspath)

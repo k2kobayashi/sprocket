@@ -83,7 +83,7 @@ def main(*argv):
                 codeap = feat.codeap()
 
                 # save features into a hdf5 file
-                h5 = HDF5(h5f, mode='w')
+                h5 = HDF5(h5f, mode='a')
                 h5.save(f0, ext='f0')
                 # h5.save(spc, ext='spc')
                 # h5.save(ap, ext='ap')
