@@ -48,7 +48,7 @@ def estimate_twf(orgdata, tardata, distance='melcd', fast=True, otflag=None):
         else:
             _, _, _, twf = dtw(orgdata, tardata, distance_func)
     else:
-        # use dtw_c to align target length
+        # use dtw_c to align target/original feature vector
         ldim = orgdata.shape[1] - 1
         if otflag == 'org':
             _, twf, _, _ = dtw_c.dtw_org_to_trg(tardata, orgdata,

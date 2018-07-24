@@ -237,8 +237,8 @@ def main(*argv):
                                       org_npows[i],
                                       tar_codeaps[i],
                                       tar_npows[i],
-                                      opow=-100,
-                                      tpow=-100,
+                                      opow=oconf.power_threshold,
+                                      tpow=tconf.power_threshold,
                                       given_twf=twfs[i])
         jcodeaps.append(jcodeap)
     jnt_codeap = transform_jnt(jcodeaps)
