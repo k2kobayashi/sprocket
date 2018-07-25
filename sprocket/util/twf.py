@@ -60,7 +60,7 @@ def estimate_twf(orgdata, tardata, distance='melcd', fast=True, otflag=None):
         twf = twf.T
         if otflag == 'org':
             twf = twf[::-1, :]  # swap cols
-            assert twf.shape[1] == orgdata.shape[0]
+            assert twf.shape[0] == orgdata.shape[0]
         else:
             assert twf.shape[1] == tardata.shape[0]
 
