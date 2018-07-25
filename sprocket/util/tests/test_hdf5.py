@@ -36,7 +36,10 @@ class hdf5FunctionsTest(unittest.TestCase):
         h5 = HDF5(path, 'a')
         tmp1d = h5.read(ext='1d')
         h5.save(data1d2, '1d')
+        tmp1d2 = h5.read(ext='1d')
         h5.close()
+        assert np.allclose(tmp1d, data1d)
+        assert np.allclose(tmp1d2, data1d2)
 
         # remove files
         os.remove(path)
