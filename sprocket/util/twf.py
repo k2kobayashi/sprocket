@@ -56,10 +56,13 @@ def estimate_twf(orgdata, tardata, distance='melcd', fast=True, otflag=None):
         else:
             _, twf, _, _ = dtw_c.dtw_org_to_trg(orgdata, tardata,
                                                 0, ldim, 5.0, 100.0, 100.0)
-        twf[:, 1] = np.array(range(twf.shape[0]))  # replace target index
+        twf[:, 1] = np.array(range(twf.shape[0]))  # replace target index by frame number
         twf = twf.T
         if otflag == 'org':
             twf = twf[::-1, :]  # swap cols
+            assert twf.shape[1] == orgdata.shape[0]
+        else:
+            assert twf.shape[1] == tardata.shape[0]
 
     return twf
 
