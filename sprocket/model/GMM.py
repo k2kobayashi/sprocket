@@ -8,6 +8,86 @@ from sklearn.mixture.gaussian_mixture import _compute_precision_cholesky
 from sprocket.util.delta import construct_static_and_delta_matrix
 
 
+class BlockDiagonalGaussianMixture(sklearn.mixture.GaussianMixture):
+    """GMM with block diagonal covariance matrix
+    This class offers the training of GMM with block diagonal covariance matrix.
+    Note that the parent class (GaussianMixture) is trained as full-covariance matrix
+
+    Parameters
+    ---------
+    n_mix : int, optional
+        The number of mixture components of the GMM
+        Default set to 32.
+    n_iter : int, optional
+        The number of iteration for EM algorithm.
+        Default set to 100.
+    floor : str, optional
+        Flooring of covariance matrix
+
+    Attributes
+    ----------
+    param :
+        Sklean-based model parameters of the GMM
+    """
+
+    def __init__(self, n_mix=32, n_iter=100, floor=1e-6):
+        super().__init__(n_components=n_mix, reg_covar=floor, max_iter=n_iter,
+                         covariance_type='full')
+        self.n_mix = n_mix
+        self.n_iter = n_iter
+        self.floor = floor
+
+        # seed for random in sklearn
+        self.random_state = np.random.mtrand._rand
+
+    def fit(self, jnt):
+        # create mask
+        blockdiag_mask = self._generate_blockdiag_mask(jnt.shape[1])
+
+        # initialize
+        self._initialize_parameters(jnt, self.random_state)
+        lower_bound = -np.infty
+
+        for n in range(self.n_iter):
+            # EM algorithm
+            log_prob_norm, log_resp = self._e_step(jnt)
+            self._m_step(jnt, log_resp)
+
+            self.covariances_ += self.floor
+
+            # apply block diagonal mask to covariance
+            self._apply_blockdiag_mask(blockdiag_mask)
+
+            # check converge
+            back_lower_bound = lower_bound
+            lower_bound = self._compute_lower_bound(
+                log_resp, log_prob_norm)
+
+    def _generate_blockdiag_mask(self, jdim):
+        """Generate a mask to make zero excluding diagonal components
+
+        """
+        sddim = jdim // 2
+        mask = scipy.sparse.diags(
+            [1, 1, 1], [-sddim, 0, sddim], shape=(jdim, jdim)).toarray()
+        return mask
+
+    def _apply_blockdiag_mask(self, mask):
+        """Applying diagonal mask to full-covariance matrix
+
+        """
+        for n in range(self.n_mix):
+            self.covariances_[n] *= mask
+
+    def _mstep(self, jnt, log_resp):
+        """M-step
+        M step should be implemented by ourself because the m-step for full-covariance
+        matrix is too slow.
+
+        """
+        raise NotImplementedError()
+
+
 class GMMTrainer(object):
 
     """GMM trainer
@@ -15,19 +95,19 @@ class GMMTrainer(object):
 
     Parameters
     ---------
-    n_mix: int, optional
+    n_mix : int, optional
         The number of mixture components of the GMM
         Default set to 32.
-    n_iter: int, optional
+    n_iter : int, optional
         THe number of iteration for EM algorithm.
         Default set to 100.
-    covtype: str, optional
+    covtype : str, optional
         The type of covariance matrix of the GMM
-        full: full-covariance matrix
-        block_diag (not implemeted) : block-diagonal matrix
+        'full': full-covariance matrix
+        'block_diag' : block-diagonal matrix
 
     Attributes
-    ---------
+    ----------
     param :
         Sklean-based model parameters of the GMM
 
@@ -39,83 +119,88 @@ class GMMTrainer(object):
         self.covtype = covtype
 
         # construct GMM parameter
-        self.param = sklearn.mixture.GaussianMixture(
-            n_components=self.n_mix,
-            covariance_type=self.covtype,
-            max_iter=self.n_iter)
-
-        if self.covtype == 'block_diag':
-            raise NotImplementedError()
+        if self.covtype == 'full':
+            self.param = sklearn.mixture.GaussianMixture(
+                n_components=self.n_mix,
+                covariance_type=self.covtype,
+                max_iter=self.n_iter)
+        elif self.covtype == 'block_diag':
+            self.param = BlockDiagonalGaussianMixture(
+                n_mix=self.n_mix,
+                n_iter=self.n_iter)
+        else:
+            raise ValueError('Covariance type should be full or block_diag')
 
     def train(self, jnt):
         """Fit GMM parameter from given joint feature vector
 
         Parameters
         ---------
-        jnt : array, shape(`T`, `jnt.shape[0]`)
+        jnt : array, shape(`T`, `dim`)
             Joint feature vector of original and target feature vector consisting
             of static and delta components
 
         """
+        self.param.fit(jnt)
 
-        if self.covtype == 'full':
-            self.param.fit(jnt)
-        elif self.covtype == 'block_diag':
-            self._train_block_diag(jnt)
-
-        return
-
-    def train_singlepath(self, reference_jnt, jnt):
+    def train_singlepath(self, ref_jnt, tar_jnt):
         """Fit GMM parameter based on single-path training
 
         Single-path training is a technique to fit GMM parameters of
-        `reference_jnt` using joint feature vector `jnt` and its fitted
+        `ref_jnt` using joint feature vector `tar_jnt` and its fitted
         paramter `param`. The single-path training assumes the hidden
-        variable of `jnt` and `reference_jnt` is equals.
+        variable of `tar_jnt` and `ref_jnt` is equals.
         For E-step :
-            Estimate occupancy based on `param` and `jnt`
+            Estimate occupancy based on `param` and `ref_jnt`
         For M-step :
-            Update parameter using reference_jnt
+            Update parameter using `single_param` and `tar_jnt`
         EM-algorithm is performed only one time.
 
         Parameters
-        ---------
-        reference_jnt: array, shape(`T`, `reference_jnt.shape[0]`)
+        ----------
+        ref_jnt: array, shape(`T`, `ref_dim`)
             Reference joint feature vector of original and target feature vector consisting
             of static and delta components, which was already fit.
-
-        jnt: array, shape(`T`, `jnt.shape[0]`)
+        tar_jnt: array, shape(`T`, `tar_dim`)
             Joint feature vector of original and target feature vector consisting
-            of static and delta components, wichi will be fit.
+            of static and delta components, which will be modeled.
 
+        Returns
+        -------
+        param :
+            Sklean-based model parameters of the GMM
         """
 
-        raise NotImplementedError()
-        pass
+        assert ref_jnt.shape[0] == tar_jnt.shape[0]
+        single_param = sklearn.mixture.GaussianMixture(
+            n_components=self.n_mix,
+            covariance_type=self.covtype,
+            max_iter=1)
 
-    def _train_block_diag(self, jnt):
-        # perform E-step using sklearn
+        # initialize target single-path param
+        single_param._initialize_parameters(tar_jnt, np.random.mtrand._rand)
 
-        # update parameter of weigh, mean, and block diagonal covariance
+        # perform estep
+        log_prob_norm, log_resp = self.param._e_step(ref_jnt)
 
-        raise NotImplementedError()
-        pass
+        # perform mstep
+        single_param._m_step(tar_jnt, log_resp)
+
+        return single_param
 
 
 class GMMConvertor(object):
     """A GMM Convertor
     This class offers the several conversion techniques such as Maximum Likelihood
     Parameter Generation (MLPG) and Mimimum Mean Square Error (MMSE).
+    Note that the conversion is performed while regarding GMM covariance
+    as full-covariance matrix
 
     Parameters
-    ---------
+    ----------
     n_mix : int, optional
         The number of mixture components of the GMM
         Default set to 32.
-    covtype : str, optional
-        The type of covariance matrix of the GMM
-        `full` : full-covariance matrix
-        `block_diag (not implemented) : block-diagonal matrix
     gmmmode: str, optional
         The type of the GMM for opening
         `None` : Normal JD-GMM
@@ -123,7 +208,7 @@ class GMMConvertor(object):
         `intra` : Intra-speaker GMM
 
     Attributes
-    ---------
+    ----------
     param :
         Sklean-based model parameters of the GMM
     w : shape (`n_mix`)
@@ -137,7 +222,6 @@ class GMMConvertor(object):
 
     def __init__(self, n_mix=32, covtype='full', gmmmode=None):
         self.n_mix = n_mix
-        self.covtype = covtype
         self.gmmmode = gmmmode
 
     def open_from_param(self, param):
@@ -314,16 +398,14 @@ class GMMConvertor(object):
     def _set_pX(self):
         # probability density function of X
         self.pX = sklearn.mixture.GaussianMixture(
-            n_components=self.n_mix, covariance_type=self.covtype)
+            n_components=self.n_mix, covariance_type='full')
         self.pX.weights_ = self.w
         self.pX.means_ = self.meanX
         self.pX.covariances_ = self.covXX
 
         # following function is required to estimate porsterior
-        # P(X | \lambda^(X)))
         self.pX.precisions_cholesky_ = _compute_precision_cholesky(
-            self.covXX, self.covtype)
-
+            self.covXX, 'full')
         return
 
     def _transform_gmm_into_diffgmm(self):

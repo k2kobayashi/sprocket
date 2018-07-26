@@ -1,8 +1,11 @@
 import unittest
 
+import os
 import numpy as np
 from sprocket.model import GMMTrainer, GMMConvertor
 from sprocket.util import delta
+
+dirpath = os.path.dirname(os.path.realpath(__file__))
 
 
 class ModelGMMTest(unittest.TestCase):
@@ -20,5 +23,11 @@ class ModelGMMTest(unittest.TestCase):
 
         odata = gmm_cv.convert(sddata, cvtype='mlpg')
         odata = gmm_cv.convert(sddata, cvtype='mmse')
-
         assert data.shape == odata.shape
+
+        # test for singlepath
+        Ajnt = np.random.rand(100, 120)
+        Bjnt = np.random.rand(100, 120)
+        Aparam = gmm_tr.train_singlepath(jnt, Ajnt)
+        Bparam = gmm_tr.train_singlepath(jnt, Bjnt)
+        assert np.allclose(Aparam.weights_, Bparam.weights_)
