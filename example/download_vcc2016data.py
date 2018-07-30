@@ -64,8 +64,8 @@ def download(url, dest=None):
 
 if __name__ == "__main__":
     print(
-        "Warning: This script was replaced with download_corpus_data.py and"
-        " are going to be removed in the future.  Use it instead.",
+        "Warning: This script was replaced by download_corpus_data.py and"
+        " will be removed soon.",
         file=stderr)
     args = docopt(__doc__)
     is_verbose = not args["--quiet"]  # Whether prints regular messages
