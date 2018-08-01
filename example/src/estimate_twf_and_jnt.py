@@ -252,7 +252,7 @@ def main(*argv):
     jnt_dir = os.path.join(args.pair_dir, 'jnt')
     os.makedirs(jnt_dir, exist_ok=True)
     jntpath = os.path.join(jnt_dir, 'it' + str(pconf.jnt_n_iter) + '_jnt.h5')
-    jnth5 = HDF5(jntpath, mode='w')
+    jnth5 = HDF5(jntpath, mode='a')
     jnth5.save(jnt_mcep, ext='mcep')
     jnth5.save(jnt_codeap, ext='codeap')
     jnth5.close()
@@ -265,7 +265,7 @@ def main(*argv):
             f = os.path.basename(line.rstrip())
             twfpath = os.path.join(
                 twf_dir, 'it' + str(pconf.jnt_n_iter) + '_' + f + '.h5')
-            twfh5 = HDF5(twfpath, mode='w')
+            twfh5 = HDF5(twfpath, mode='a')
             twfh5.save(twf, ext='twf')
             twfh5.close()
 

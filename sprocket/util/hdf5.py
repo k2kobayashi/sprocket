@@ -14,9 +14,10 @@ class HDF5(object):
         Path of hdf5 file
 
     mode : str,
-        Open h5 as write or read mode
-        `w` : open as write
-        `r` : open as read
+        Open h5 as write and/or read mode
+        `a` : open as read/write (Default)
+        `w` : open as write only
+        `r` : open as read only
 
     Attributes
     ---------
@@ -24,7 +25,7 @@ class HDF5(object):
 
     """
 
-    def __init__(self, fpath, mode=None):
+    def __init__(self, fpath, mode='a'):
         self.fpath = fpath
         self.dirname, self.filename = os.path.split(self.fpath)
         self.flbl, _ = os.path.splitext(self.filename)
@@ -34,14 +35,19 @@ class HDF5(object):
         else:
             self.mode = mode
 
-        if self.mode == 'w':
+        # create directory if not exist
+        if self.mode == 'w' or self.mode == 'a':
             # create directory if not exist
             if not os.path.exists(self.dirname):
                 os.makedirs(self.dirname)
-            # file check
+
+        # warn overwriting
+        if self.mode == 'w':
             if os.path.exists(self.fpath):
                 print("overwrite: " + self.fpath)
-        elif self.mode == 'r':
+
+        # check file existing for reading
+        if self.mode == 'r':
             if not os.path.exists(self.fpath):
                 raise FileNotFoundError(
                     "h5 file does not exist in " + self.fpath)
@@ -64,10 +70,7 @@ class HDF5(object):
         """
 
         if ext is None:
-            raise ValueError("Please specify an extention.")
-
-        if self.mode != 'r':
-            raise ValueError("mode should be 'r'")
+            raise ValueError("Please specify an existing extention.")
 
         return self.h5[ext].value
 
@@ -84,10 +87,9 @@ class HDF5(object):
 
         """
 
-        if ext is None:
-            raise ValueError("Please specify an extention.")
-        if self.mode != 'w':
-            raise ValueError("mode should be 'w'")
+        # remove if 'ext' already exist
+        if ext in self.h5.keys():
+            del self.h5[ext]
 
         self.h5.create_dataset(ext, data=data)
         self.h5.flush()
