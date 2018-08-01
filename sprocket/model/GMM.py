@@ -118,6 +118,8 @@ class GMMTrainer(object):
         self.n_iter = n_iter
         self.covtype = covtype
 
+        self.random_state = np.random.mtrand._rand
+
         # construct GMM parameter
         if self.covtype == 'full':
             self.param = sklearn.mixture.GaussianMixture(
@@ -131,6 +133,18 @@ class GMMTrainer(object):
         else:
             raise ValueError('Covariance type should be full or block_diag')
 
+    def open_from_param(self, param):
+        """Open GMM from sklearn.GaussianMixture
+
+        Parameters
+        ---------
+        trainer: GMMTrainer
+            GMMTrainer class
+
+        """
+        self.param = param
+        return
+
     def train(self, jnt):
         """Fit GMM parameter from given joint feature vector
 
@@ -143,24 +157,29 @@ class GMMTrainer(object):
         """
         self.param.fit(jnt)
 
-    def train_singlepath(self, ref_jnt, tar_jnt):
-        """Fit GMM parameter based on single-path training
-
-        Single-path training is a technique to fit GMM parameters of
-        `ref_jnt` using joint feature vector `tar_jnt` and its fitted
-        paramter `param`. The single-path training assumes the hidden
-        variable of `tar_jnt` and `ref_jnt` is equals.
-        For E-step :
-            Estimate occupancy based on `param` and `ref_jnt`
-        For M-step :
-            Update parameter using `single_param` and `tar_jnt`
-        EM-algorithm is performed only one time.
+    def estimate_responsibility(self, ref_jnt):
+        """E-step for the single-path training
 
         Parameters
         ----------
         ref_jnt: array, shape(`T`, `ref_dim`)
             Reference joint feature vector of original and target feature vector consisting
             of static and delta components, which was already fit.
+        """
+        if self.param is None:
+            raise ValueError(
+                'Please load param before call estimate_responsibility')
+
+        # perform estep
+        _, self.log_resp = self.param._e_step(ref_jnt)
+
+    def train_singlepath(self, tar_jnt):
+        """Fit GMM parameter based on single-path training
+        M-step :
+            Update GMM parameter using `self.log_resp`, and `tar_jnt`
+
+        Parameters
+        ----------
         tar_jnt: array, shape(`T`, `tar_dim`)
             Joint feature vector of original and target feature vector consisting
             of static and delta components, which will be modeled.
@@ -171,20 +190,16 @@ class GMMTrainer(object):
             Sklean-based model parameters of the GMM
         """
 
-        assert ref_jnt.shape[0] == tar_jnt.shape[0]
         single_param = sklearn.mixture.GaussianMixture(
             n_components=self.n_mix,
             covariance_type=self.covtype,
             max_iter=1)
 
         # initialize target single-path param
-        single_param._initialize_parameters(tar_jnt, np.random.mtrand._rand)
-
-        # perform estep
-        log_prob_norm, log_resp = self.param._e_step(ref_jnt)
+        single_param._initialize_parameters(tar_jnt, self.random_state)
 
         # perform mstep
-        single_param._m_step(tar_jnt, log_resp)
+        single_param._m_step(tar_jnt, self.log_resp)
 
         return single_param
 
