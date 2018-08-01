@@ -27,7 +27,8 @@ class ModelGMMTest(unittest.TestCase):
 
         # test for singlepath
         Ajnt = np.random.rand(100, 120)
-        Bjnt = np.random.rand(100, 120)
-        Aparam = gmm_tr.train_singlepath(jnt, Ajnt)
-        Bparam = gmm_tr.train_singlepath(jnt, Bjnt)
+        Bjnt = np.random.rand(100, 140)
+        gmm_tr.estimate_responsibility(jnt)
+        Aparam = gmm_tr.train_singlepath(Ajnt)
+        Bparam = gmm_tr.train_singlepath(Bjnt)
         assert np.allclose(Aparam.weights_, Bparam.weights_)
