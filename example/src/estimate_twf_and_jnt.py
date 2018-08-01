@@ -130,20 +130,15 @@ def align_feature_vectors(odata, onpows, tdata, tnpows, pconf,
 
     Returns
     -------
-    jdata : array, shape (`T_new` `dim * 2`)
-        Joint static and delta feature vector
-    twf : array, shape (`T_new` `dim * 2`)
-        Time warping function
-    mcd : float ,
-        Mel-cepstrum distortion between arrays
-
+    jfvs : list,
+        List of joint feature vectors
+    twfs : list,
+        List of time warping functions
     """
-    it = 1
     num_files = len(odata)
     cvgmm, cvdata = None, None
     for it in range(1, itnum + 1):
         print('{}-th joint feature extraction starts.'.format(it))
-        # alignment
         twfs, jfvs = [], []
         for i in range(num_files):
             if it == 1 and given_twfs is not None:
@@ -232,7 +227,7 @@ def main(*argv):
     jnt_mcep = transform_jnt(jmceps)
 
     # create joint feature for codeap using given twfs
-    print('## Alignment codeap into target length using given twf ##')
+    print('## Alignment codeap using given twf ##')
     org_codeaps = read_feats(args.org_list_file, h5_dir, ext='codeap')
     tar_codeaps = read_feats(args.tar_list_file, h5_dir, ext='codeap')
     jcodeaps = []
