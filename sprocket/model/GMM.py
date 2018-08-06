@@ -173,7 +173,7 @@ class GMMTrainer(object):
         # perform estep
         _, self.log_resp = self.param._e_step(ref_jnt)
 
-    def train_singlepath(self, tar_jnt, covtype='full'):
+    def train_singlepath(self, tar_jnt):
         """Fit GMM parameter based on single-path training
         M-step :
             Update GMM parameter using `self.log_resp`, and `tar_jnt`
@@ -190,16 +190,27 @@ class GMMTrainer(object):
             Sklean-based model parameters of the GMM
         """
 
-        single_param = sklearn.mixture.GaussianMixture(
-            n_components=self.n_mix,
-            covariance_type=covtype,
-            max_iter=1)
+        if self.covtype == 'full':
+            single_param = sklearn.mixture.GaussianMixture(
+                n_components=self.n_mix,
+                covariance_type=covtype,
+                max_iter=1)
+        elif self.covtype == 'block_diag':
+            single_param = BlockDiagonalGaussianMixture(
+                n_mix=self.n_mix,
+                n_iter=self.n_iter)
+        else:
+            raise ValueError('Covariance type should be full or block_diag')
 
         # initialize target single-path param
         single_param._initialize_parameters(tar_jnt, self.random_state)
 
         # perform mstep
         single_param._m_step(tar_jnt, self.log_resp)
+
+        if self.covtype == 'block_diag':
+            blockdiag_mask = single_param._generate_blockdiag_mask(tar_jnt.shape[1])
+            single_param._apply_blockdiag_mask(blockdiag_mask)
 
         return single_param
 
