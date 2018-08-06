@@ -173,7 +173,7 @@ class GMMTrainer(object):
         # perform estep
         _, self.log_resp = self.param._e_step(ref_jnt)
 
-    def train_singlepath(self, tar_jnt):
+    def train_singlepath(self, tar_jnt, covtype='full'):
         """Fit GMM parameter based on single-path training
         M-step :
             Update GMM parameter using `self.log_resp`, and `tar_jnt`
@@ -192,7 +192,7 @@ class GMMTrainer(object):
 
         single_param = sklearn.mixture.GaussianMixture(
             n_components=self.n_mix,
-            covariance_type=self.covtype,
+            covariance_type=covtype,
             max_iter=1)
 
         # initialize target single-path param
