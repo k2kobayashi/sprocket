@@ -193,7 +193,7 @@ class GMMTrainer(object):
         if self.covtype == 'full':
             single_param = sklearn.mixture.GaussianMixture(
                 n_components=self.n_mix,
-                covariance_type=covtype,
+                covariance_type=self.covtype,
                 max_iter=1)
         elif self.covtype == 'block_diag':
             single_param = BlockDiagonalGaussianMixture(
