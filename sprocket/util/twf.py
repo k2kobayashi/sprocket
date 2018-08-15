@@ -3,6 +3,7 @@
 import numpy as np
 from dtw import dtw
 from fastdtw import fastdtw
+from dtw_c import dtw_c
 
 from sprocket.util import melcd
 
@@ -39,14 +40,29 @@ def estimate_twf(orgdata, tardata, distance='melcd', fast=True, otflag=None):
     else:
         raise ValueError('other distance metrics than melcd does not support.')
 
-    if fast:
-        _, path = fastdtw(orgdata, tardata, dist=distance_func)
-        twf = np.array(path).T
+    if otflag is None:
+        # use dtw or fastdtw
+        if fast:
+            _, path = fastdtw(orgdata, tardata, dist=distance_func)
+            twf = np.array(path).T
+        else:
+            _, _, _, twf = dtw(orgdata, tardata, distance_func)
     else:
-        _, _, _, twf = dtw(orgdata, tardata, distance_func)
-
-    if otflag is not None:
-        twf = modify_twf(twf, otflag=otflag)
+        # use dtw_c to align target/original feature vector
+        ldim = orgdata.shape[1] - 1
+        if otflag == 'org':
+            _, twf, _, _ = dtw_c.dtw_org_to_trg(tardata, orgdata,
+                                                0, ldim, 5.0, 100.0, 100.0)
+        else:
+            _, twf, _, _ = dtw_c.dtw_org_to_trg(orgdata, tardata,
+                                                0, ldim, 5.0, 100.0, 100.0)
+        twf[:, 1] = np.array(range(twf.shape[0]))  # replace target index by frame number
+        twf = twf.T
+        if otflag == 'org':
+            twf = twf[::-1, :]  # swap cols
+            assert twf.shape[0] == orgdata.shape[0]
+        else:
+            assert twf.shape[1] == tardata.shape[0]
 
     return twf
 

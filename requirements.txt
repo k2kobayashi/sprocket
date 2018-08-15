@@ -10,3 +10,4 @@ fastdtw
 nose
 pyyaml
 docopt
+dtw_c
