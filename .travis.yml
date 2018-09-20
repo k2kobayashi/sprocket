@@ -3,6 +3,11 @@ cache: pip
 python:
   - "3.6"
   - "3.5"
+matrix:
+  include:
+    - python: 3.7
+      dist: xenial
+      sudo: true
 before_install:
   - pip install numpy cython nose coveralls
   - pip install -Ur requirements.txt
