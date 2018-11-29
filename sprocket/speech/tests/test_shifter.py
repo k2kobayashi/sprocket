@@ -8,7 +8,7 @@ from scipy.fftpack import fft
 from sprocket.speech import Shifter
 
 dirpath = os.path.dirname(os.path.realpath(__file__))
-saveflag = False
+saveflag = True
 
 
 class ShifterTest(unittest.TestCase):
@@ -25,9 +25,9 @@ class ShifterTest(unittest.TestCase):
             transformed_x = shifter.f0transform(x, completion=completion)
             assert len(x) == len(transformed_x)
 
-        if saveflag:
-            fpath = path + str(f0rate) + '.wav'
-            wavfile.write(fpath, fs, transformed_x.astype(np.int16))
+            if saveflag:
+                fpath = path + str(f0rate) + '.wav'
+                wavfile.write(fpath, fs, transformed_x.astype(np.int16))
 
     def test_high_frequency_completion(self):
         path = dirpath + '/data/test16000.wav'

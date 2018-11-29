@@ -57,18 +57,15 @@ class WSOLA(object):
         wsolaed = np.zeros(int(wlen / self.speech_rate), dtype='d')
 
         # initialization
-        sp = self.sl
+        sp = self.sl * 2
         rp = sp + self.sl
         ep = sp + self.epstep
-        outp = 0
+        outp = sp
+
+        # allocate first frame of waveform to outp
+        wsolaed[:outp] = x[:outp]
 
         while wlen > ep + self.fl:
-            if ep - self.fl < self.sl:
-                sp += self.epstep
-                rp = sp + self.sl
-                ep += self.epstep
-                continue
-
             # copy wavform
             ref = x[rp - self.sl:rp + self.sl]
             buff = x[ep - self.fl:ep + self.fl]
@@ -79,7 +76,7 @@ class WSOLA(object):
 
             # store WSOLAed waveform using over-lap add
             spdata = x[sp:sp + self.sl] * self.win[self.sl:]
-            epdata = x[epd - self.sl: epd] * self.win[:self.sl]
+            epdata = x[epd - self.sl:epd] * self.win[:self.sl]
             if len(spdata) == len(wsolaed[outp:outp + self.sl]):
                 wsolaed[outp:outp + self.sl] = spdata + epdata
             else:
