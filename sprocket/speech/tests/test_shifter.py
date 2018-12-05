@@ -8,7 +8,7 @@ from scipy.fftpack import fft
 from sprocket.speech import Shifter
 
 dirpath = os.path.dirname(os.path.realpath(__file__))
-saveflag = True
+saveflag = False
 
 
 class ShifterTest(unittest.TestCase):
