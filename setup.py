@@ -15,8 +15,18 @@ setup(
     description="Voice conversion software",
     url='https://github.com/k2kobayashi/sprocket',
     author='Kazuhiro Kobayashi',
-    packages=find_packages(),
+    packages=find_packages(exclude=('tests')),
     long_description=(README + '\n' + CHANGES),
     license='MIT',
     install_requires=open('requirements.txt').readlines(),
+    extra_require={
+        'develop': [
+            'nose',
+            'docopt',
+        ],
+    },
+    classifier=[
+    'License :: OSI Approved :: MIT License',
+    'Topic :: Multimedia :: Sound/Audio :: Speech',
+    ]
 )
