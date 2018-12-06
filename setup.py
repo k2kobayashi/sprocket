@@ -12,7 +12,7 @@ CHANGES = open('CHANGES.md').read()
 setup(
     # package info
     name="sprocket-vc",
-    version="0.18",
+    version="0.18.1",
     description="Voice conversion software",
     url='https://github.com/k2kobayashi/sprocket',
     license='MIT',
