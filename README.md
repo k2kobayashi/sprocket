@@ -44,19 +44,13 @@ Please use NOT Python2 BUT Python3.
 
 ### Current stable version
 
-Ver. 0.18
-
-### Install requirements
-
-```
-pip install numpy # for dependency
-pip install -r requirements.txt
-```
+Ver. 0.18.1
 
 ### Install sprocket
 
 ```
-python setup.py install
+pip install numpy # for dependency
+pip install sprocket-vc
 ```
 
 ### Run example

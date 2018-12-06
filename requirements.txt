@@ -7,7 +7,5 @@ pyworld
 h5py
 dtw
 fastdtw
-nose
 pyyaml
-docopt
 dtw_c
