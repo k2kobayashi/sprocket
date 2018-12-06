@@ -26,6 +26,7 @@ setup(
     long_description=(README + '\n' + CHANGES),
 
     # requirements
+    python_requires='>=3.5',
     install_requires=open('requirements.txt').readlines(),
     extras_require={
         'develop': ['nose','docopt'],
