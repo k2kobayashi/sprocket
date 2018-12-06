@@ -20,6 +20,6 @@ class WSOLATest(unittest.TestCase):
             wsolaed_x = wsola.duration_modification(x)
             assert int(len(x) / speech_rate) == len(wsolaed_x)
 
-        if saveflag:
-            fpath = path + str(speech_rate) + '.wav'
-            wavfile.write(fpath, fs, wsolaed_x.astype(np.int16))
+            if saveflag:
+                fpath = path + str(speech_rate) + '.wav'
+                wavfile.write(fpath, fs, wsolaed_x.astype(np.int16))
