@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
-from scipy.signal import resample, firwin, lfilter
+from scipy.signal import resample, firwin, filtfilt
 from scipy.interpolate import interp1d
 
 from .wsola import WSOLA
@@ -120,7 +120,7 @@ class Shifter(object):
 
         # HPF for synthesized speech
         fil = firwin(255, self.f0rate, pass_zero=False)
-        HPFed_unvoice_anasyn = lfilter(fil, 1, unvoice_anasyn)
+        HPFed_unvoice_anasyn = filtfilt(fil, 1, unvoice_anasyn)
 
         if len(HPFed_unvoice_anasyn) > len(transformed):
             return transformed + HPFed_unvoice_anasyn[:len(transformed)]

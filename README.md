@@ -1,8 +1,8 @@
 [![Python Version](https://img.shields.io/badge/Python-3.5%2C%203.6%2C%203.7-green.svg)](https://img.shields.io/badge/Python-3.5%2C%203.6%2C%203.7-green.svg)
 [![Build Status](https://www.travis-ci.org/k2kobayashi/sprocket.svg?branch=travis)](https://www.travis-ci.org/k2kobayashi/sprocket)
 [![Coverage Status](https://coveralls.io/repos/github/k2kobayashi/sprocket/badge.svg?branch=master)](https://coveralls.io/github/k2kobayashi/sprocket?branch=master)
-[![PyPI Version](http://img.shields.io/pypi/v/{{sprocket}}.svg)](https://pypi.python.org/pypi/{{sprocket}})
-[![PyPI Downloads](http://img.shields.io/pypi/dm/{{sproket}}.svg)](https://pypi.python.org/pypi/{{sprocket}})
+[![PyPI Version](http://img.shields.io/pypi/v/{{sprocket-vc}}.svg)](https://pypi.python.org/pypi/{{sprocket-vc}})
+[![PyPI Downloads](http://img.shields.io/pypi/dm/{{sprocket-vc}}.svg)](https://pypi.python.org/pypi/{{sprocket-vc}})
 [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE)
 
 sprocket
@@ -12,7 +12,7 @@ sprocket
 Voice conversion software - Voice conversion (VC) is a technique to convert a speaker identity of a source speaker into that of a target speaker. This software enables the users to develop a traditional VC system based on a Gaussian mixture model (GMM) and a vocoder-free VC system based on a differential GMM (DIFFGMM) using a parallel dataset of the source and target speakers.
 
 ## Paper and slide
-- K. Kobayashi, T. Toda, "sprocket: Open-Source Voice Conversion Software," Proc. Odyssey, pp. 203-210, June 2018. 
+- K. Kobayashi, T. Toda, "sprocket: Open-Source Voice Conversion Software," Proc. Odyssey, pp. 203-210, June 2018.
 [[paper]](https://nuss.nagoya-u.ac.jp/s/h8YKnq6qxjjxtU3)
 
 - T. Toda, "Hands on Voice Conversion," Speech Processing Courses in Crete (SPCC), July 2018.
@@ -44,19 +44,13 @@ Please use NOT Python2 BUT Python3.
 
 ### Current stable version
 
-Ver. 0.18
-
-### Install requirements
-
-```
-pip install numpy # for dependency
-pip install -r requirements.txt
-```
+Ver. 0.18.1
 
 ### Install sprocket
 
 ```
-python setup.py install
+pip install numpy cython  # for dependency
+pip install sprocket-vc
 ```
 
 ### Run example
