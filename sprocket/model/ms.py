@@ -51,7 +51,7 @@ class MS (object):
         return np.hstack([msm, msv])
 
     def postfilter(self, data, msstats, cvmsstats, alpha=1.0, k=0.85, startdim=1):
-        """Perform postfilter based on MS statistics into data
+        """Perform postfilter based on MS statistics to data
 
         Parameters
         ---------
@@ -93,11 +93,13 @@ class MS (object):
         complex_spec = np.fft.fftn(padded_data, axes=(0, 1))
         log_powerspec = 2 * np.log(np.absolute(complex_spec))
         msed_log_powerspec = (1 - k) * log_powerspec + \
-            k * ((msstats / cvmsstats)[:, dim:] * (log_powerspec - cvmsstats[:, :dim]) + msstats[:, :dim])
+            k * ((msstats / cvmsstats)
+                 [:, dim:] * (log_powerspec - cvmsstats[:, :dim]) + msstats[:, :dim])
 
         # reconstruct
         phase_spec = np.angle(complex_spec)
-        reconst_complex_spec = np.exp(msed_log_powerspec / 2) * (np.cos(phase_spec) + np.sin(phase_spec) * 1j)
+        reconst_complex_spec = np.exp(
+            msed_log_powerspec / 2) * (np.cos(phase_spec) + np.sin(phase_spec) * 1j)
         filtered_data = np.fft.ifftn(reconst_complex_spec)[:T]
 
         if startdim == 1:
