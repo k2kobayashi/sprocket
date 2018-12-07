@@ -3,3 +3,4 @@ from .distance import melcd
 from .extfrm import extfrm
 from .hdf5 import HDF5
 from .twf import estimate_twf, align_data
+from .filter import lpf, hpf
