@@ -60,7 +60,7 @@ class WSOLA(object):
         sp = self.sl * 2
         rp = sp + self.sl
         ep = sp + self.epstep
-        outp = sp
+        outp = self.sl
 
         # allocate first frame of waveform to outp
         wsolaed[:outp] = x[:outp]
