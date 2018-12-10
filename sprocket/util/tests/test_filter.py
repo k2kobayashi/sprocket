@@ -5,7 +5,7 @@ import matplotlib
 matplotlib.use('Agg')
 
 import matplotlib.pyplot as plt
-from sprocket.util.filter import lpf, hpf
+from sprocket.util.filter import low_pass_filter, high_pass_filter
 
 saveflag = False
 
@@ -19,11 +19,11 @@ class FilterFunctionsTest(unittest.TestCase):
                         for n in range(fs * 1)])
         noise = np.random.rand(len(sin)) - 0.5
         wav = sin + noise
-        lpfed = lpf(wav, 500, n_taps=255, fs=fs)
-        hpfed = hpf(wav, 1000, n_taps=255, fs=fs)
+        lpfed = low_pass_filter(wav, 500, n_taps=255, fs=fs)
+        hpfed = high_pass_filter(wav, 1000, n_taps=255, fs=fs)
 
-        lpfed_2d = lpf(np.vstack([wav, noise]), 500, fs=fs)
-        hpfed_2d = lpf(np.vstack([wav, noise]), 1000, fs=fs)
+        lpfed_2d = low_pass_filter(np.vstack([wav, noise]).T, 500, fs=fs)
+        hpfed_2d = high_pass_filter(np.vstack([wav, noise]).T, 1000, fs=fs)
 
         if saveflag:
             plt.figure()

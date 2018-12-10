@@ -13,8 +13,6 @@ class MSTest(unittest.TestCase):
             datalist.append(np.random.rand(100 * i).reshape(100 * i // 4, 4))
         msstats = ms.estimate(datalist)
 
-        print(msstats.shape)
-
         data = np.random.rand(100 * 5).reshape(100 * 5 // 4, 4)
         odata = ms.postfilter(data, msstats, msstats, startdim=0)
         assert data.shape[0] == odata.shape[0]
