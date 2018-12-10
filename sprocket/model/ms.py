@@ -100,7 +100,7 @@ class MS (object):
         phase_spec = np.angle(complex_spec)
         reconst_complex_spec = np.exp(
             msed_log_powerspec / 2) * (np.cos(phase_spec) + np.sin(phase_spec) * 1j)
-        filtered_data = np.fft.ifftn(reconst_complex_spec)[:T]
+        filtered_data = np.fft.ifftn(reconst_complex_spec)[:T].real
 
         if startdim == 1:
             filtered_data[:, 0] = data[:, 0]
