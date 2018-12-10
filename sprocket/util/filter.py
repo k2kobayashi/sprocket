@@ -3,7 +3,7 @@
 from scipy.signal import firwin, filtfilt
 
 
-def lpf(data, cutoff, fs, n_taps=255):
+def low_pass_filter(data, cutoff, fs, n_taps=255):
     """Apply low-pass filter
 
     Parameters
@@ -23,11 +23,11 @@ def lpf(data, cutoff, fs, n_taps=255):
         Array of modified sequence.
     """
     fil = firwin(n_taps, cutoff, pass_zero=True, nyq=fs//2)
-    modified_data = filtfilt(fil, 1, data)
+    modified_data = filtfilt(fil, 1, data, axis=0)
     return modified_data
 
 
-def hpf(data, cutoff, fs, n_taps=255):
+def high_pass_filter(data, cutoff, fs, n_taps=255):
     """Apply high-pass filter
 
     Parameters
@@ -47,5 +47,5 @@ def hpf(data, cutoff, fs, n_taps=255):
         Array of modified sequence.
     """
     fil = firwin(n_taps, cutoff, pass_zero=False, nyq=fs//2)
-    modified_data = filtfilt(fil, 1, data)
+    modified_data = filtfilt(fil, 1, data, axis=0)
     return modified_data
