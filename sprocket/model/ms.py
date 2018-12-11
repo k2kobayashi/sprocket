@@ -17,12 +17,12 @@ class MS (object):
         """Estimate MS statistics from list of data
 
         Parameters
-        ---------
+        ----------
         datalist : list, shape ('num_data')
             List of several data ([T, dim]) sequence
 
         Returns
-        ---------
+        -------
         msstats : array, shape (`dim * 2`, `fftsize // 2 + 1`)
             Mean and variance of MS
         """
@@ -31,19 +31,12 @@ class MS (object):
         dim = datalist[0].shape[1]
         maxlen = np.max(list(map(lambda x: x.shape[0], datalist)))
         n_bit = len(bin(maxlen)) - 2
-        fftsize = 2 ** (n_bit + 1)
+        self.fftsize = 2 ** (n_bit + 1)
 
         mss = []
         for data in datalist:
-            # create zero padded data
-            T = data.shape[0]
-            padded_data = np.zeros((fftsize, dim))
-            padded_data[:T] += data
-
-            # calculate log power spectum of data
-            complex_spec = np.fft.fftn(padded_data, axes=(0, 1))
-            log_powerspec = 2 * np.log(np.absolute(complex_spec))
-            mss.append(log_powerspec)
+            logpowerspec = self.logpowerspec(data)
+            mss.append(logpowerspec)
 
         # calculate mean and variance in each freq. bin
         msm = np.mean(np.array(mss), axis=0)
@@ -54,7 +47,7 @@ class MS (object):
         """Perform postfilter based on MS statistics to data
 
         Parameters
-        ---------
+        ----------
         data : array, shape (`T`, `dim`)
             Array of data sequence
         msstats : array, shape (`dim * 2`, `fftsize // 2 + 1`)
@@ -75,34 +68,59 @@ class MS (object):
             Start dimension to perform MS postfilter [1 < startdim < dim]
 
         Returns
-        ---------
+        -------
         filtered_data : array, shape (`T`, `data`)
             Array of MS postfiltered data sequence
         """
 
         # get length and dimension
         T, dim = data.shape
-        fftsize = msstats.shape[0]
+        self.fftsize = msstats.shape[0]
         assert dim == msstats.shape[1] // 2
 
         # create zero padded data
-        padded_data = np.zeros((fftsize, dim))
-        padded_data[:T] += data
-
-        # calculate log power spectum of data
-        complex_spec = np.fft.fftn(padded_data, axes=(0, 1))
-        log_powerspec = 2 * np.log(np.absolute(complex_spec))
-        msed_log_powerspec = (1 - k) * log_powerspec + \
+        logpowerspec, phasespec = self.logpowerspec(data, phase=True)
+        msed_logpowerspec = (1 - k) * logpowerspec + \
             k * ((msstats / cvmsstats)
-                 [:, dim:] * (log_powerspec - cvmsstats[:, :dim]) + msstats[:, :dim])
+                 [:, dim:] * (logpowerspec - cvmsstats[:, :dim]) + msstats[:, :dim])
 
         # reconstruct
-        phase_spec = np.angle(complex_spec)
-        reconst_complex_spec = np.exp(
-            msed_log_powerspec / 2) * (np.cos(phase_spec) + np.sin(phase_spec) * 1j)
-        filtered_data = np.fft.ifftn(reconst_complex_spec)[:T].real
+        reconst_complexspec = np.exp(
+            msed_logpowerspec / 2) * (np.cos(phasespec) + np.sin(phasespec) * 1j)
+        filtered_data = np.fft.ifftn(reconst_complexspec)[:T].real
 
         if startdim == 1:
             filtered_data[:, 0] = data[:, 0]
 
         return alpha * filtered_data + (1 - alpha) * data
+
+    def logpowerspec(self, data, phase=False):
+        """Calculate log power spectrum in each dimension
+
+        Parameters
+        ----------
+        data : array, shape (`T`, `dim`)
+            Array of data sequence
+        fftsize : scalar,
+            fftsize, which assumes a value of 2^n
+
+        Returns
+        -------
+        logpowerspec : array, shape (`dim`, `fftsize // 2 + 1`)
+            log power spectrum of sequence
+        """
+
+        # create zero padded data
+        T, dim = data.shape
+        padded_data = np.zeros((self.fftsize, dim))
+        padded_data[:T] += data
+
+        # calculate log power spectum of data
+        complex_spec = np.fft.fftn(padded_data, axes=(0, 1))
+        logpowerspec = 2 * np.log(np.absolute(complex_spec))
+
+        if phase:
+            phasespec = np.angle(complex_spec)
+            return logpowerspec, phasespec
+        else:
+            return logpowerspec
