@@ -28,7 +28,6 @@ class MS (object):
         """
 
         # get max length in all data and define fft length
-        dim = datalist[0].shape[1]
         maxlen = np.max(list(map(lambda x: x.shape[0], datalist)))
         n_bit = len(bin(maxlen)) - 2
         self.fftsize = 2 ** (n_bit + 1)
@@ -81,12 +80,12 @@ class MS (object):
         # create zero padded data
         logpowerspec, phasespec = self.logpowerspec(data, phase=True)
         msed_logpowerspec = (1 - k) * logpowerspec + \
-            k * ((msstats / cvmsstats)
-                 [:, dim:] * (logpowerspec - cvmsstats[:, :dim]) + msstats[:, :dim])
+            k * (np.sqrt((msstats / cvmsstats)[:, dim:]) *
+                 (logpowerspec - cvmsstats[:, :dim]) + msstats[:, :dim])
 
         # reconstruct
-        reconst_complexspec = np.exp(
-            msed_logpowerspec / 2) * (np.cos(phasespec) + np.sin(phasespec) * 1j)
+        reconst_complexspec = np.exp(msed_logpowerspec / 2) * (np.cos(phasespec) +
+                                                               np.sin(phasespec) * 1j)
         filtered_data = np.fft.ifftn(reconst_complexspec)[:T].real
 
         if startdim == 1:
