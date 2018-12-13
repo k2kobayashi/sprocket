@@ -91,7 +91,10 @@ class MS (object):
         if startdim == 1:
             filtered_data[:, 0] = data[:, 0]
 
-        return alpha * filtered_data + (1 - alpha) * data
+        # apply morphing
+        filtered_data = alpha * filtered_data + (1 - alpha) * data
+
+        return filtered_data
 
     def logpowerspec(self, data, phase=False):
         """Calculate log power spectrum in each dimension
@@ -100,13 +103,13 @@ class MS (object):
         ----------
         data : array, shape (`T`, `dim`)
             Array of data sequence
-        fftsize : scalar,
-            fftsize, which assumes a value of 2^n
 
         Returns
         -------
         logpowerspec : array, shape (`dim`, `fftsize // 2 + 1`)
-            log power spectrum of sequence
+            Log power spectrum of sequence
+        phasespec : array, shape (`dim`, `fftsize // 2 + 1`), optional
+            Phase spectrum of sequences
         """
 
         # create zero padded data
