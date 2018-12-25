@@ -98,7 +98,6 @@ def main(*argv):
 
     # test directory
     test_dir = os.path.join(args.pair_dir, 'test')
-    os.makedirs(os.path.join(test_dir, args.org), exist_ok=True)
 
     # conversion in each evaluation file
     with open(args.eval_list_file, 'r') as fp:
@@ -110,6 +109,9 @@ def main(*argv):
             x = x.astype(np.float)
             x = low_cut_filter(x, fs, cutoff=70)
             assert fs == sconf.wav_fs
+
+            # create directory
+            os.makedirs(os.path.join(test_dir, os.path.dirname(f)), exist_ok=True)
 
             # analyze F0, mcep, and ap
             f0, spc, ap = feat.analyze(x)

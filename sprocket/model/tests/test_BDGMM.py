@@ -9,7 +9,7 @@ class BDGMMTest(unittest.TestCase):
 
     def test_BlockDiagonalGMM(self):
         jnt = np.random.rand(1000, 20)
-        gmm_tr = GMMTrainer(n_mix=32, n_iter=100, covtype='block_diag')
+        gmm_tr = GMMTrainer(n_mix=32, n_iter=10, covtype='block_diag')
         gmm_tr.train(jnt)
 
         data = np.random.rand(200, 5)
