@@ -48,7 +48,7 @@ Ver. 0.18.1
 ### Install sprocket
 
 ```
-pip install numpy cython  # for dependency
+pip install numpy==1.15.4 cython  # for dependency
 pip install sprocket-vc
 ```
 
