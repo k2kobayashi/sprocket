@@ -72,7 +72,7 @@ class HDF5(object):
         if ext is None:
             raise ValueError("Please specify an existing extention.")
 
-        return self.h5[ext].value
+        return self.h5[ext][()]
 
     def save(self, data, ext=None):
         """Write vector or array into h5 file
