@@ -2,7 +2,7 @@ wav:
   fs: 22050
   bit: 16
   fftl: 1024
-  shiftms: 5
+  shiftms: 4.988662131519274
 f0:
   minf0: 40
   maxf0: 700
