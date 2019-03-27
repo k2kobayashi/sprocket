@@ -8,3 +8,4 @@ dtw
 fastdtw
 pyyaml
 dtw_c
+docopt
