@@ -154,7 +154,7 @@ class BlockDiagonalGaussianMixture(sklearn.mixture.GaussianMixture):
         return covariances
 
     def _calculate_diag_covariances(self, resp, nk, x, y, xmeans, ymeans):
-        """Calculate diag covariance in each portion
+        """Calculate diagonal covariance in each portion
 
         Parameters
         ----------
@@ -173,7 +173,6 @@ class BlockDiagonalGaussianMixture(sklearn.mixture.GaussianMixture):
         Returns
         -------
         diag_covariances : array-like, shape (n_components, n_features)
-
         """
         avg_XY = np.dot(resp.T, x * y) / nk[:, np.newaxis]
         avg_xymeans = xmeans * ymeans

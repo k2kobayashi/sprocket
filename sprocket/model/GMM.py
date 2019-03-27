@@ -15,7 +15,7 @@ class GMMTrainer(object):
     matrix.
 
     Parameters
-    ---------
+    ----------
     n_mix : int, optional
         The number of mixture components of the GMM
         Default set to 32.
@@ -24,7 +24,7 @@ class GMMTrainer(object):
         Default set to 100.
     covtype : str, optional
         The type of covariance matrix of the GMM
-        'full': full-covariance matrix
+        'full' : full-covariance matrix
         'block_diag' : block-diagonal matrix
 
     Attributes
@@ -58,7 +58,7 @@ class GMMTrainer(object):
         """Open GMM from sklearn.GaussianMixture
 
         Parameters
-        ---------
+        ----------
         trainer: GMMTrainer
             GMMTrainer class
 
@@ -70,7 +70,7 @@ class GMMTrainer(object):
         """Fit GMM parameter from given joint feature vector
 
         Parameters
-        ---------
+        ----------
         jnt : array, shape(`T`, `dim`)
             Joint feature vector of original and target feature vector
             consisting of static and delta components
@@ -88,6 +88,7 @@ class GMMTrainer(object):
             Reference joint feature vector of original and target feature
             vector consisting of static and delta components, which was
             already fit.
+
         """
         if self.param is None:
             raise ValueError(
@@ -111,8 +112,8 @@ class GMMTrainer(object):
         -------
         param :
             Sklean-based model parameters of the GMM
-        """
 
+        """
         if self.covtype == 'full':
             single_param = sklearn.mixture.GaussianMixture(
                 n_components=self.n_mix,
@@ -178,17 +179,15 @@ class GMMConvertor(object):
             GMMTrainer class
 
         """
-
         self.param = param
         self._deploy_parameters()
-
         return
 
     def convert(self, data, cvtype='mlpg'):
         """Convert data based on conditional probability densify function
 
         Parameters
-        ---------
+        ----------
         data : array, shape(`T`, `dim`)
             Original data will be converted
         cvtype: str, optional
@@ -197,12 +196,11 @@ class GMMConvertor(object):
             `mmse` : minimum mean square error
 
         Returns
-        ---------
+        -------
         odata : array, shape(`T`, `dim`)
             Converted data
 
         """
-
         # estimate parameter sequence
         cseq, wseq, mseq, covseq = self._gmmmap(data)
 
