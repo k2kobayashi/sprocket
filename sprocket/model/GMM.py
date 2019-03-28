@@ -76,7 +76,6 @@ class GMMTrainer(object):
             consisting of static and delta components
 
         """
-        # self.param.fit(jnt)
         self.param.fit(jnt)
 
     def estimate_responsibility(self, ref_jnt):
