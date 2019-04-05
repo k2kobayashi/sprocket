@@ -20,14 +20,13 @@ Note:
 """
 
 import os
-import sys
 from pathlib import Path
 
 import docopt
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "src"))  # isort:skip
-from src import (convert, estimate_feature_statistics, estimate_twf_and_jnt,  # isort:skip # pylint: disable=C0413
-                 extract_features, train_GMM)
+from sprocket.bin import (convert, estimate_feature_statistics,
+                          estimate_twf_and_jnt,
+                          extract_features, train_GMM)
 
 
 def list_lengths_are_all_same(first_path, *remain_paths):

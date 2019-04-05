@@ -1,0 +1,10 @@
+# list and conf
+list
+conf/figure
+conf/pair
+conf/speaker
+
+# data files
+data/pair
+data/wav/*
+
