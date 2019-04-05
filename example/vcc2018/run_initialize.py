@@ -2,7 +2,7 @@
 
 """An example script to initialize audio lists and speaker configurations.
 
-Usage: initialize.py [-h] [-1] [-2] [-3] SOURCE TARGET SAMPLING_RATE
+Usage: run_initialize.py [-h] [-1] [-2] [-3] SOURCE TARGET SAMPLING_RATE
 
 Options:
     -h, --help     Show the help
@@ -22,8 +22,8 @@ from pathlib import Path
 
 from docopt import docopt
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "src"))  # isort:skip
-from src import initialize_speaker  # isort:skip # pylint: disable=C0413
+# isort:skip # pylint: disable=C0413
+from sprocket.bin import initialize_speaker
 
 
 def create_configure(dest, base, exist_ok=True):
