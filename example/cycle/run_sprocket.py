@@ -25,7 +25,7 @@ import docopt
 from pathlib import Path
 
 from sprocket.bin import (extract_features, convert, estimate_feature_statistics,
-                          estimate_twf_and_jnt)
+                          estimate_twf_and_jnt, prepare_jointfeature)
 from sprocket.util.misc import list_lengths_are_all_same
 
 
@@ -61,7 +61,7 @@ if __name__ == "__main__":
     #   between indexes of `args_execute_steps` and arguments
     # pylint: disable=invalid-name
     execute_steps = [False] \
-        + [args["--step{}".format(step_index)] for step_index in range(1, 6)]
+        + [args["--step{}".format(step_index)] for step_index in range(1, 7)]
 
     # Execute all steps if no options on steps are given
     # Keep index #0 False in case you create a hotbed for bugs.
@@ -107,8 +107,11 @@ if __name__ == "__main__":
         print("### 4. Prepare joint feature vector ###")
         # estimate GMM parameter using the joint feature vector
         prepare_jointfeature.main(
-            str(LIST_FILES["source"]["train"]),
+            str(SPEAKER_CONF_FILES["source"]),
+            str(SPEAKER_CONF_FILES["target"]),
             str(PAIR_CONF_FILE),
+            str(LIST_FILES["source"]["train"]),
+            str(LIST_FILES["target"]["train"]),
             str(PAIR_DIR))
 
     if execute_steps[5]:
