@@ -2,7 +2,7 @@
 
 """An example script to transform F0
 
-Usage: f0_transformation.py [-h] [--f0rate <f0rate>] [--ev] SOURCE TARGET
+Usage: run_f0_transformation.py [-h] [--f0rate <f0rate>] [--ev] SOURCE TARGET
 
 Options:
     -h, --help   Show the help
@@ -17,16 +17,11 @@ Note:
     that are to be executed is required.
 """
 
-import os
-import sys
 from pathlib import Path
-
 from docopt import docopt
 
 from run_sprocket import list_lengths_are_all_same
-
-sys.path.append(os.path.join(os.path.dirname(__file__), "src"))  # isort:skip
-from src.f0_transformation import main  # isort:skip # pylint: disable=C0413
+from sprocket.bin import f0_transformation  # isort:skip # pylint: disable=C0413
 
 
 LIST_SUFFIXES = {
@@ -63,16 +58,22 @@ if __name__ == "__main__":
     print("### 1. F0 transformation of original waveform ###")
     # transform F0 of waveform of original speaker
     if evlist_only:
-        main("--f0rate", f0rate, "--evlist",
-             LABELS["source"], str(SPEAKER_CONF_FILES["source"]),
-             str(SPEAKER_CONF_FILES["target"]),
-             str(LIST_FILES["source"]["train"]),
-             str(LIST_FILES["source"]["eval"]), str(LIST_FILES["target"]["train"]), str(WAV_DIR))
+        f0_transformation.main("--f0rate", f0rate, "--evlist",
+                               LABELS["source"], str(
+                                   SPEAKER_CONF_FILES["source"]),
+                               str(SPEAKER_CONF_FILES["target"]),
+                               str(LIST_FILES["source"]["train"]),
+                               str(LIST_FILES["source"]["eval"]),
+                               str(LIST_FILES["target"]["train"]),
+                               str(WAV_DIR))
     else:
-        main("--f0rate", f0rate,
-             LABELS["source"], str(SPEAKER_CONF_FILES["source"]),
-             str(SPEAKER_CONF_FILES["target"]),
-             str(LIST_FILES["source"]["train"]),
-             str(LIST_FILES["source"]["eval"]), str(LIST_FILES["target"]["train"]), str(WAV_DIR))
+        f0_transformation.main("--f0rate", f0rate,
+                               LABELS["source"], str(
+                                   SPEAKER_CONF_FILES["source"]),
+                               str(SPEAKER_CONF_FILES["target"]),
+                               str(LIST_FILES["source"]["train"]),
+                               str(LIST_FILES["source"]["eval"]),
+                               str(LIST_FILES["target"]["train"]),
+                               str(WAV_DIR))
 
     print("# F0 transformed waveforms are generated #")
