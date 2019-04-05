@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 from sprocket.model import MS
-from sprocket.util import low_pass_filter
+from sprocket.util.filter import low_pass_filter
 
 import matplotlib
 matplotlib.use('Agg')
