@@ -71,3 +71,44 @@ def transform_jnt(array_list):
         else:
             jnt = np.r_[jnt, array_list[i]]
     return jnt
+
+
+def list_lengths_are_all_same(first_path, *remain_paths):
+    """Check whether the lengths of list files are all same.
+
+    Parameters
+    ----------
+    first_path : str or path-like object
+    remain_paths : list of str or path-like object
+
+    Returns
+    -------
+    list_lengths_are_all_same : bool
+        `True` if all of the numbers of the lengths of the given files are same.
+
+    Notes
+    ----
+        The length of each file is the same as the Unix command `wc -w`.
+    """
+
+    def count_words_in_file(path):
+        """Counts the number of words in a file.
+
+        Parameters
+        ----------
+        path : str or path-like object
+            The path of the file the number of words of which you want to know.
+
+        Returns
+        -------
+        n_words : int
+            The number of words in the file whose path is `path`.
+        """
+        with open(str(path)) as handler:
+            words = len(
+                handler.read().split())  # when space in path, bug appears
+        return words
+
+    n_words_in_first_file = count_words_in_file(first_path)
+    return all((count_words_in_file(path) == n_words_in_first_file
+                for path in remain_paths))

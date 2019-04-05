@@ -20,8 +20,8 @@ Note:
 from pathlib import Path
 from docopt import docopt
 
-from run_sprocket import list_lengths_are_all_same
 from sprocket.bin import f0_transformation  # isort:skip # pylint: disable=C0413
+from sprocket.util.misc import list_lengths_are_all_same
 
 
 LIST_SUFFIXES = {
