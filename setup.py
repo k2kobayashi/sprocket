@@ -12,7 +12,7 @@ CHANGES = open('CHANGES.md').read()
 setup(
     # package info
     name="sprocket-vc",
-    version="0.18.1",
+    version="0.18.3",
     description="Voice conversion software",
     url='https://github.com/k2kobayashi/sprocket',
     license='MIT',
@@ -29,7 +29,7 @@ setup(
     python_requires='>=3.5',
     install_requires=open('requirements.txt').readlines(),
     extras_require={
-        'develop': ['nose','docopt'],
+        'develop': ['nose'],
     },
 
     classifiers=[
