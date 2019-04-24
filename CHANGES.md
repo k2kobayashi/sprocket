@@ -1,6 +1,15 @@
 Changelog
 =========
 
+0.18.3 (2019/04/24)
+------------------
+
+- Implement several functions for GMM-based VC and minor bugfix
+- #133
+- #132
+- #130
+- #127
+
 0.18 (2017/10/01)
 ------------------
 
