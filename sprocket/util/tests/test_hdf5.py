@@ -1,9 +1,12 @@
-from __future__ import division, print_function, absolute_import
+from __future__ import absolute_import, division, print_function
 
 import os
+import sys
 import unittest
+from pathlib import Path
 
 import numpy as np
+
 from sprocket.util.hdf5 import HDF5
 
 dirpath = os.path.dirname(os.path.realpath(__file__))
@@ -43,3 +46,20 @@ class hdf5FunctionsTest(unittest.TestCase):
 
         # remove files
         os.remove(path)
+
+    def test_HDF5_current_dir(self):
+        listf_current = os.path.split(listf)[-1]
+        data1d = np.random.rand(50)
+        try:
+            h5_write = HDF5(Path(listf_current) if sys.version_info >= (3,6) else listf_current, 'w')
+            h5_write.save(data1d, '1d')
+            h5_write.close()
+            h5_read = HDF5(os.curdir + os.sep + listf_current, 'r')
+            read_data1d = h5_read.read(ext='1d')
+            h5_read.close()
+            assert np.allclose(data1d, read_data1d)
+        except:
+            raise
+        finally:
+            os.remove(listf_current)
+
