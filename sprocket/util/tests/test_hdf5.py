@@ -58,7 +58,7 @@ class hdf5FunctionsTest(unittest.TestCase):
             read_data1d = h5_read.read(ext='1d')
             h5_read.close()
             assert np.allclose(data1d, read_data1d)
-        except:
+        except: # pragma: no cover
             raise
         finally:
             os.remove(listf_current)
