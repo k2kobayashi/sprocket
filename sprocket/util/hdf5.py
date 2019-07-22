@@ -30,6 +30,10 @@ class HDF5(object):
         self.dirname, self.filename = os.path.split(self.fpath)
         self.flbl, _ = os.path.splitext(self.filename)
 
+        # os.path.split(path)[0] returns "" if path doesn't contain '/'
+        if self.filename != "" and self.dirname == "":
+            self.dirname = os.path.curdir
+
         if mode is None:
             raise ValueError("Please specify the mode.")
         else:
