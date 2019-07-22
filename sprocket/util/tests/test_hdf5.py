@@ -32,6 +32,10 @@ class hdf5FunctionsTest(unittest.TestCase):
         assert np.allclose(tmp1d, data1d)
         assert np.allclose(tmp2d, data2d)
 
+        # open test with 'with' statement
+        with HDF5(path, 'r') as h5_with:
+            assert np.allclose(h5_with.read('1d'), data1d)
+
         # read/write and replace test
         h5 = HDF5(path, 'a')
         tmp1d = h5.read(ext='1d')
