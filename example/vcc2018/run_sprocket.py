@@ -20,56 +20,14 @@ Note:
 """
 
 import os
-import sys
 from pathlib import Path
 
 import docopt
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "src"))  # isort:skip
-from src import (convert, estimate_feature_statistics, estimate_twf_and_jnt,  # isort:skip # pylint: disable=C0413
-                 extract_features, train_GMM)
-
-
-def list_lengths_are_all_same(first_path, *remain_paths):
-    """Check whether the lengths of list files are all same.
-
-    Parameters
-    ----------
-    first_path : str or path-like object
-    remain_paths : list of str or path-like object
-
-    Returns
-    -------
-    list_lengths_are_all_same : bool
-        `True` if all of the numbers of the lengths of the given files are same.
-
-    Notes
-    ----
-        The length of each file is the same as the Unix command `wc -w`.
-    """
-
-    def count_words_in_file(path):
-        """Counts the number of words in a file.
-
-        Parameters
-        ----------
-        path : str or path-like object
-            The path of the file the number of words of which you want to know.
-
-        Returns
-        -------
-        n_words : int
-            The number of words in the file whose path is `path`.
-        """
-        with open(str(path)) as handler:
-            words = len(
-                handler.read().split())  # when space in path, bug appears
-        return words
-
-    n_words_in_first_file = count_words_in_file(first_path)
-    return all((count_words_in_file(path) == n_words_in_first_file
-                for path in remain_paths))
-
+from sprocket.bin import (convert, estimate_feature_statistics,
+                          estimate_twf_and_jnt,
+                          extract_features, train_GMM)
+from sprocket.util.misc import list_lengths_are_all_same
 
 USES = ("train", "eval")
 LIST_SUFFIXES = {

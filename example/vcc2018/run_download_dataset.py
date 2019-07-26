@@ -5,7 +5,7 @@
 Configuration are in the directory downloder_conf.
 
 Usage:
-    download_speech_corpus.py <config> [-h] [-q] [-f] [-m]
+    run_download_dataset.py <config> [-h] [-q] [-f] [-m]
 
 Parameters:
     <config>        The path of configuration file
