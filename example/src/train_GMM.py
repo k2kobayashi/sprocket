@@ -11,7 +11,7 @@ import os
 import sys
 
 import numpy as np
-from sklearn.externals import joblib
+import joblib
 
 from sprocket.model import GV, GMMConvertor, GMMTrainer
 from sprocket.util import HDF5, static_delta

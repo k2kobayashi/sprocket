@@ -12,7 +12,7 @@ import sys
 
 import numpy as np
 from scipy.io import wavfile
-from sklearn.externals import joblib
+import joblib
 
 from sprocket.model import GV, F0statistics, GMMConvertor
 from sprocket.speech import FeatureExtractor, Synthesizer

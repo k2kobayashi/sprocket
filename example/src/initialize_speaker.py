@@ -47,7 +47,7 @@ def create_histogram(data, figure_path, range_min=-70, range_max=20,
 
     # plot histgram
     plt.hist(data, bins=200, range=(range_min, range_max),
-             normed=True, histtype="stepfilled")
+             density=True, histtype="stepfilled")
     plt.xlabel(xlabel)
     plt.ylabel("Probability")
     plt.xticks(np.arange(range_min, range_max, step))
