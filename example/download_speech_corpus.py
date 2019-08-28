@@ -323,6 +323,8 @@ class DataArchive:
     """
     Corresponds to each recipe in `files` clause.
 
+    It corresponds to one archive file and audio files in it.
+
     Parameters
     ----------
     file_config: Dict[str, Any]
@@ -356,14 +358,27 @@ class DataArchive:
             that contains audio files are placed.
         """
         with TemporaryDirectory() as working_dir:
-            working_dir = Path(working_dir) # convert from str
+            working_dir = Path(working_dir)  # convert from str
 
-            # download archive and extract files in the working directory.
-            if self.user_option.verbose:
-                print("Downloading", self.name, "from", self.src_url, "...")
-            archive_path = DataArchive._download_file(
-                self.src_url, working_dir
-            )
+            if re.match(r"^(https?|ftp)://", self.src_url):
+                # download archive and extract files in the working directory.
+                if self.user_option.verbose:
+                    print("Downloading", self.name, "from", self.src_url, "...")
+                archive_path = DataArchive._download_file(
+                    self.src_url, working_dir
+                )
+            else:
+                if self.src_url.startswith("file:///"):
+                    # posix: file:///home/user/ -> /home/user
+                    # windows: files:///C:/Users/user/ -> C:/Users/user/
+                    archive_path = self.src_url.replace(
+                        "file://" if os.name == "posix" else "file:///", "", 1
+                    )
+                else:
+                    archive_path = self.src_url
+                if self.user_option.verbose:
+                    print("Using local file:", archive_path)
+
             if self.user_option.verbose:
                 print("Unpack:", archive_path)
             shutil.unpack_archive(str(archive_path), str(working_dir))
