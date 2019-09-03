@@ -24,9 +24,8 @@ from sprocket.model import GV, F0statistics, GMMConvertor
 from sprocket.speech import FeatureExtractor, Synthesizer
 from sprocket.util import HDF5, static_delta
 
-from misc import low_cut_filter
+from misc import convert_to_continuos_f0, low_cut_filter, low_pass_filter
 from yml import PairYML, SpeakerYML
-from feature_extract import convert_continuos_f0
 
 
 def convert_mcep0th(mcep0th, ostats, tstats):
@@ -190,7 +189,8 @@ def main():
 
     # convert F0
     cvf0 = f0stats.convert(f0, org_f0stats, tar_f0stats)
-    uv, cvcf0 = convert_continuos_f0(cvf0)
+    uv, cvcf0 = convert_to_continuos_f0(cvf0)
+    cvcf0 = low_pass_filter(cvcf0, int(1.0 / (sconf.shiftms * 0.001)), cutoff=20)
 
     # convert mcep
     cvmcep_wopow = mcepgmm.convert(static_delta(mcep[:, 1:]),
@@ -236,7 +236,8 @@ def main():
         cvf0, _, _ = feat.analyze(wav)
         cvmcep_wGV = feat.mcep(dim=sconf.mcep_dim, alpha=sconf.mcep_alpha)
         cvcodeap = feat.codeap()
-        uv, cvcf0 = convert_continuos_f0(cvf0)
+        uv, cvcf0 = convert_to_continuos_f0(cvf0)
+        cvcf0 = low_pass_filter(cvcf0, int(1.0 / (sconf.shiftms * 0.001)), cutoff=20)
         wav = synthesizer.synthesis(cvf0,
                                     cvmcep_wGV,
                                     cvcodeap,
