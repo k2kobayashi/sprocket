@@ -190,7 +190,7 @@ def main():
     # convert F0
     cvf0 = f0stats.convert(f0, org_f0stats, tar_f0stats)
     uv, cvcf0 = convert_to_continuos_f0(cvf0)
-    cvcf0 = low_pass_filter(cvcf0, int(1.0 / (sconf.shiftms * 0.001)), cutoff=20)
+    cvcf0 = low_pass_filter(cvcf0, int(1.0 / (sconf.wav_shiftms * 0.001)), cutoff=20)
 
     # convert mcep
     cvmcep_wopow = mcepgmm.convert(static_delta(mcep[:, 1:]),
@@ -237,7 +237,7 @@ def main():
         cvmcep_wGV = feat.mcep(dim=sconf.mcep_dim, alpha=sconf.mcep_alpha)
         cvcodeap = feat.codeap()
         uv, cvcf0 = convert_to_continuos_f0(cvf0)
-        cvcf0 = low_pass_filter(cvcf0, int(1.0 / (sconf.shiftms * 0.001)), cutoff=20)
+        cvcf0 = low_pass_filter(cvcf0, int(1.0 / (sconf.wav_shiftms * 0.001)), cutoff=20)
         wav = synthesizer.synthesis(cvf0,
                                     cvmcep_wGV,
                                     cvcodeap,
