@@ -52,6 +52,29 @@ def convert_mcep0th(mcep0th, ostats, tstats):
     return cvmcep0th
 
 
+def convert_codeap(codeap, ostats, tstats):
+    """Function to transform codeap
+    Parameters
+    ----------
+    codeap : array_like
+        codeap of origianl speaker
+    ostats : array_like
+        Statistics (i.e., mean and variance) of original speaker
+    ostats : array_like
+        Statistics (i.e., mean and variance) of target speaker
+    Returns
+    -------
+    cvcodeap : array_like
+        Converted codeap
+    """
+
+    mask = codeap == np.max(codeap)
+    cvcodeap = np.sqrt(tstats[1] / ostats[1]) * \
+        (codeap - ostats[0]) + tstats[0]
+    cvcodeap[mask] = codeap[mask]
+    return cvcodeap
+
+
 def load_stats(statsf):
     """Read speaker-dependent statistics file
 
@@ -65,12 +88,16 @@ def load_stats(statsf):
         Statistics for F0
     mcep0thstats : array_like
         Statistics for 0-th order mel-cepstrum
+    codeapstats : array_like
+        Statisitcs for codeap
     """
     stats_h5 = HDF5(statsf, mode='r')
     f0stats = stats_h5.read(ext='f0stats')
     mcep0thstats = stats_h5.read(ext='mcep0th')
+    codeapstats = stats_h5.read(ext='codeap')
     stats_h5.close()
-    return f0stats, mcep0thstats
+
+    return f0stats, mcep0thstats, codeapstats
 
 
 def main():
@@ -80,6 +107,10 @@ def main():
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument('--cvmcep0th', default=False, type=strtobool,
                         help='Convert 0-th order of mel-cepstrum')
+    parser.add_argument('--cvcodeap', default=False, type=strtobool,
+                        help='Convert codeap')
+    parser.add_argument('--reanalysis', default=False, type=strtobool,
+                        help='Use re-analysis feature of converted voice')
     parser.add_argument('--org_yml', type=str,
                         help='Yml file of original speaker')
     parser.add_argument('--pair_yml', type=str,
@@ -115,8 +146,8 @@ def main():
     print("GMM for mcep conversion mode: {}".format(None))
 
     # read F0 and mcep0th statistics
-    org_f0stats, org_mcep0thstats = load_stats(args.org_stats)
-    tar_f0stats, tar_mcep0thstats = load_stats(args.tar_stats)
+    org_f0stats, org_mcep0thstats, org_codeapstats = load_stats(args.org_stats)
+    tar_f0stats, tar_mcep0thstats, tar_codeapstats = load_stats(args.tar_stats)
 
     # read GV statistics
     gvstats_h5 = HDF5(args.tar_stats, mode='r')
@@ -151,8 +182,8 @@ def main():
     x = low_cut_filter(x, fs, cutoff=70)
     assert fs == sconf.wav_fs
 
-    # analyze F0, mcep, and ap
-    f0, spc, ap = feat.analyze(x)
+    # analyze F0, mcep, and codeap
+    f0, _, _ = feat.analyze(x)
     mcep = feat.mcep(dim=sconf.mcep_dim, alpha=sconf.mcep_alpha)
     mcep0th = mcep[:, 0]
     codeap = feat.codeap()
@@ -176,19 +207,48 @@ def main():
                                    alpha=pconf.GV_morph_coeff,
                                    startdim=1)
 
+    # convert codeap
+    if args.cvcodeap:
+        cvcodeap = convert_codeap(codeap,
+                                  org_codeapstats, tar_codeapstats)
+    else:
+        cvcodeap = codeap
+
     # synthesis VC w/ GV
     wav = synthesizer.synthesis(cvf0,
                                 cvmcep_wGV,
-                                codeap,
+                                cvcodeap,
                                 rmcep=mcep,
                                 alpha=sconf.mcep_alpha,
                                 )
     wav = np.clip(wav, -32768, 32767)
     wavfile.write(args.owav, sconf.wav_fs, wav.astype(np.int16))
 
+    if args.reanalysis:
+        # reanalysis converted waveform
+        f0rate = np.exp((tar_f0stats[1] / org_f0stats[1]))
+        feat = FeatureExtractor(analyzer=sconf.analyzer,
+                                fs=sconf.wav_fs,
+                                fftl=sconf.wav_fftl,
+                                shiftms=sconf.wav_shiftms,
+                                minf0=sconf.f0_minf0 * f0rate,
+                                maxf0=sconf.f0_maxf0 * f0rate)
+        cvf0, _, _ = feat.analyze(wav)
+        cvmcep_wGV = feat.mcep(dim=sconf.mcep_dim, alpha=sconf.mcep_alpha)
+        cvcodeap = feat.codeap()
+        uv, cvcf0 = convert_continuos_f0(cvf0)
+        wav = synthesizer.synthesis(cvf0,
+                                    cvmcep_wGV,
+                                    cvcodeap,
+                                    alpha=sconf.mcep_alpha,
+                                    )
+        wav = np.clip(wav, -32768, 32767)
+        wavfile.write(args.owav + 'reanalysis.wav',
+                      sconf.wav_fs, wav.astype(np.int16))
+
     # save hdf5 file for decode
     h5 = HDF5(args.cvfeats, 'w')
-    cvfeatures = np.c_[uv, cvcf0, cvmcep_wGV, codeap]
+    cvfeatures = np.c_[uv, cvcf0, cvmcep_wGV, cvcodeap]
     h5.save(cvfeatures, 'world')
     h5.close()
 
