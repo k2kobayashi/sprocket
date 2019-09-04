@@ -67,6 +67,11 @@ class FixedStrPattern:
         return "{}({})".format(self.__class__.__name__, repr(self.expected))
 
 
+class PartialMatchFixedStrPattern(FixedStrPattern):
+    def match(self, target):
+        return self.expected in target
+
+
 class RegExPattern:
     """
     Class of regular expression pattern
@@ -107,17 +112,18 @@ class GlobPattern(FixedStrPattern):
         return fnmatchcase(target, self.expected)
 
 
-def generate_pattern_from_obj(pattern_obj):
+def generate_pattern_from_obj(pattern_obj, DefaultPattern=FixedStrPattern):
     """
     Generates an appropriate pattern from object from YAML.
 
     Parameters
     ----------
     pattern_obj : Union[str, Dict[str, str]]
-        Parsed YAML object.  Only one object indicated by these expressions is allowed.
-        are allowed::
+        Parsed YAML object.
+        Only one object indicated by these expressions is allowed.
+        e.g.::
 
-            pattern -> fixed string
+            pattern -> fixed string (default; changeable by 2nd argument)
             regex: pattern
             regexp: pattern
             -> regexp
@@ -129,7 +135,7 @@ def generate_pattern_from_obj(pattern_obj):
         Generated pattern instance.
     """
     if isinstance(pattern_obj, str):
-        return FixedStrPattern(pattern_obj)
+        return DefaultPattern(pattern_obj)
     elif isinstance(pattern_obj, dict) and len(pattern_obj) == 1:
         pattern_type, pattern = next(iter(pattern_obj.items()))  # first item
         if pattern_type in {"regex", "regexp"}:
@@ -158,7 +164,7 @@ class PatternList:
         )
 
     @classmethod
-    def from_obj(cls, patterns_obj):
+    def from_obj(cls, patterns_obj, DefaultPattern=FixedStrPattern):
         """
         Constructs instance from object from YAML.
 
@@ -182,11 +188,14 @@ class PatternList:
         """
         # foo or [pattern type]: foo
         if isinstance(patterns_obj, (str, dict)):
-            return cls([generate_pattern_from_obj(patterns_obj)])
+            return cls([generate_pattern_from_obj(
+                patterns_obj,
+                DefaultPattern
+            )])
         else:  # itemized using list or something
             return cls(
                 [
-                    generate_pattern_from_obj(pattern_obj)
+                    generate_pattern_from_obj(pattern_obj, DefaultPattern)
                     for pattern_obj in patterns_obj
                 ]
             )
@@ -224,7 +233,7 @@ class ExtensionList:
             extension.lstrip(".") for extension in extensions
         ]  # remove . from .wav for example
 
-    def itemize_in_directory(self, directory):
+    def itemize_in_directory(self, directory, recurse=False):
         """
         Search for audio files with the designated extensions in the directory.
 
@@ -238,11 +247,12 @@ class ExtensionList:
         audio_paths : Generator[Path, None, None]
             paths of audio files.
         """
+        query_prefix = ("**/" if recurse else "") + "*."
         for extension in self.extensions:
-            yield from directory.glob("*." + extension)
+            yield from directory.glob(query_prefix + extension)
 
 
-class FilePathFilter:
+class BaseNameFilter:
     """
     Class to filter paths of directories.
 
@@ -301,6 +311,58 @@ class FilePathFilter:
         )
 
 
+class PosixRelativePathFilter(BaseNameFilter):
+    def filter(self, path_list, root_dir):
+        """
+        Filters list of paths of directories.
+
+        Lets paths that match any of patterns in `only` clause and
+        none of patterns in `except` clause pass.
+
+        Parameters
+        ----------
+        path_list : Iterable[Path]
+            list of paths
+
+        Returns : Generator[Path, None, None]
+            list of paths
+        """
+        yield from filter(
+            lambda path: (
+                self.only is None or self.only.match(
+                    path.relative_to(root_dir).as_posix()
+                )
+            )
+            and (
+                self.excepted is None or not self.excepted.match(
+                    path.relative_to(root_dir).as_posix()
+                )
+            ),
+            path_list,
+        )
+
+    @classmethod
+    def from_obj(cls, only, excepted):
+        """
+        Generates an instance from objects genrated by parsing YAML.
+
+        Parameters
+        ----------
+        only : Union[str, Dict[str, str],
+        Iterable[Union[str, Dict[str, str]]]]
+            parsed contents in `only` clause.
+        excepted : Union[str, Dict[str, str],
+        Iterable[Union[str, Dict[str, str]]]]
+            parsed contents in `except` claus.
+        """
+        return cls(
+            None if only is None
+            else PatternList.from_obj(only, PartialMatchFixedStrPattern),
+            None if excepted is None
+            else PatternList.from_obj(excepted, PartialMatchFixedStrPattern),
+        )
+
+
 class GlobalConfiguration:
     """
     Configuration in `config` clause in configuration file.
@@ -343,9 +405,20 @@ class DataArchive:
         self.audio_root_relative = file_config["root"].lstrip("/")
         self.global_config = global_config
         self.user_option = user_option
-        self.file_path_filter = FilePathFilter.from_obj(
+        self.file_path_filter = BaseNameFilter.from_obj(
             file_config.get("only"), file_config.get("except")
         )
+        if "each_dir" in file_config:
+            self.each_dir_filter = PosixRelativePathFilter.from_obj(
+                file_config["each_dir"].get("only"),
+                file_config["each_dir"].get("except")
+            )
+            self.recurse_subdir = (
+                lambda f: f if isinstance(f, bool) else False
+            )(file_config["each_dir"].get("recurse"))
+        else:
+            self.each_dir_filter = PosixRelativePathFilter(None, None)
+            self.recurse_subdir = False
 
     def download(self, dest_root):
         """
@@ -363,7 +436,13 @@ class DataArchive:
             if re.match(r"^(https?|ftp)://", self.src_url):
                 # download archive and extract files in the working directory.
                 if self.user_option.verbose:
-                    print("Downloading", self.name, "from", self.src_url, "...")
+                    print(
+                        "Downloading",
+                        self.name,
+                        "from",
+                        self.src_url,
+                        "..."
+                    )
                 archive_path = DataArchive._download_file(
                     self.src_url, working_dir
                 )
@@ -422,9 +501,15 @@ class DataArchive:
         if self.user_option.verbose:
             print("Move:", src.name)
         os.makedirs(str(dest), exist_ok=True)
-        for wav_file in self.global_config.extensions.itemize_in_directory(
+        for wav_file in self.each_dir_filter.filter(
+            self.global_config.extensions.itemize_in_directory(
+                src,
+                self.recurse_subdir
+            ),
             src
         ):
+            # All audio files in different directories (when recurse = True)
+            #   are stuffed in one directory (dest).
             dest_path = dest / wav_file.name
             self._move_file(wav_file, dest_path)
 
@@ -518,4 +603,3 @@ if __name__ == "__main__":
     Downloader(config_path, UserOption(is_verbose, does_by_force)).download(
         wav_root_dir
     )
-
