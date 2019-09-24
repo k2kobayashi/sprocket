@@ -1,0 +1,25 @@
+# JVS (Japanese versatile speech) corpus
+# https://sites.google.com/site/shinnosuketakamichi/research-topics/jvs_corpus
+
+# !!!IMPORTANT!!!
+# **BE SURE TO DOWNLOAD ZIP ARCHIVE FROM THE ABOVE LINK BY YOUR BROWSER BEFORE**
+# **USING THIS CONFIG!**
+
+# Put downloaded ZIP archive to the /example directory (the parent directory
+#   of this configuration)
+
+# $ cd example
+# $ ls jvs_ver1.zip
+# jvs_ver1.zip
+# $ python3 ./download_speech_corpus.py example/jvs_para100.yml
+
+config:
+  extensions:
+    - wav
+files:
+  - name: JVS Archive
+    src: ./jvs_ver1.zip
+    root: /jvs_ver1
+    each_dir:
+      only: parallel100/wav24kHz16bit/
+      recurse: yes
