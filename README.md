@@ -18,8 +18,9 @@ Voice conversion software - Voice conversion (VC) is a technique to convert a sp
 [[slide]](https://www.slideshare.net/NU_I_TODALAB/hands-on-voice-conversion)
 
 ## Conversion samples
-- Voice Conversion Challenge 2018 [[zip]](https://nuss.nagoya-u.ac.jp/index.php/s/Cs0YbTCw85p3QDK)
-
+- Voice Conversion Challenge 2018 
+	- [HUB Task](https://nuss.nagoya-u.ac.jp/s/3F8dxTcdQdXir9s) 
+	- [SPOKE Task](https://nuss.nagoya-u.ac.jp/s/ixwxa6DxYa68y4N)
 
 ## Purpose
 ### Reproduce the typical VC systems
