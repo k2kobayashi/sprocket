@@ -3,7 +3,7 @@
 import numpy as np
 import scipy.sparse
 import sklearn.mixture
-from sklearn.mixture.gaussian_mixture import _compute_precision_cholesky
+from sklearn.mixture._gaussian_mixture import _compute_precision_cholesky
 
 from sprocket.util.delta import construct_static_and_delta_matrix
 from .diagGMM import BlockDiagonalGaussianMixture
@@ -34,7 +34,7 @@ class GMMTrainer(object):
 
     """
 
-    def __init__(self, n_mix=32, n_iter=100, covtype='full'):
+    def __init__(self, n_mix=32, n_iter=100, covtype="full"):
         self.n_mix = n_mix
         self.n_iter = n_iter
         self.covtype = covtype
@@ -42,17 +42,18 @@ class GMMTrainer(object):
         self.random_state = np.random.mtrand._rand
 
         # construct GMM parameter
-        if self.covtype == 'full':
+        if self.covtype == "full":
             self.param = sklearn.mixture.GaussianMixture(
                 n_components=self.n_mix,
                 covariance_type=self.covtype,
-                max_iter=self.n_iter)
-        elif self.covtype == 'block_diag':
+                max_iter=self.n_iter,
+            )
+        elif self.covtype == "block_diag":
             self.param = BlockDiagonalGaussianMixture(
-                n_mix=self.n_mix,
-                n_iter=self.n_iter)
+                n_mix=self.n_mix, n_iter=self.n_iter
+            )
         else:
-            raise ValueError('Covariance type should be full or block_diag')
+            raise ValueError("Covariance type should be full or block_diag")
 
     def open_from_param(self, param):
         """Open GMM from sklearn.GaussianMixture
@@ -90,8 +91,7 @@ class GMMTrainer(object):
 
         """
         if self.param is None:
-            raise ValueError(
-                'Please load param before call estimate_responsibility')
+            raise ValueError("Please load param before call estimate_responsibility")
 
         # perform e-step
         _, self.log_resp = self.param._e_step(ref_jnt)
@@ -113,17 +113,16 @@ class GMMTrainer(object):
             Sklean-based model parameters of the GMM
 
         """
-        if self.covtype == 'full':
+        if self.covtype == "full":
             single_param = sklearn.mixture.GaussianMixture(
-                n_components=self.n_mix,
-                covariance_type=self.covtype,
-                max_iter=1)
-        elif self.covtype == 'block_diag':
+                n_components=self.n_mix, covariance_type=self.covtype, max_iter=1
+            )
+        elif self.covtype == "block_diag":
             single_param = BlockDiagonalGaussianMixture(
-                n_mix=self.n_mix,
-                n_iter=self.n_iter)
+                n_mix=self.n_mix, n_iter=self.n_iter
+            )
         else:
-            raise ValueError('Covariance type should be full or block_diag')
+            raise ValueError("Covariance type should be full or block_diag")
 
         # initialize target single-path param
         single_param._initialize_parameters(tar_jnt, self.random_state)
@@ -165,7 +164,7 @@ class GMMConvertor(object):
 
     """
 
-    def __init__(self, n_mix=32, covtype='full', gmmmode=None):
+    def __init__(self, n_mix=32, covtype="full", gmmmode=None):
         self.n_mix = n_mix
         self.gmmmode = gmmmode
 
@@ -182,7 +181,7 @@ class GMMConvertor(object):
         self._deploy_parameters()
         return
 
-    def convert(self, data, cvtype='mlpg'):
+    def convert(self, data, cvtype="mlpg"):
         """Convert data based on conditional probability densify function
 
         Parameters
@@ -203,14 +202,14 @@ class GMMConvertor(object):
         # estimate parameter sequence
         cseq, wseq, mseq, covseq = self._gmmmap(data)
 
-        if cvtype == 'mlpg':
+        if cvtype == "mlpg":
             # maximum likelihood parameter generation
             odata = self._mlpg(mseq, covseq)
-        elif cvtype == 'mmse':
+        elif cvtype == "mmse":
             # minimum mean square error based parameter generation
             odata = self._mmse(wseq, data)
         else:
-            raise ValueError('please choose conversion mode in `mlpg`, `mmse`')
+            raise ValueError("please choose conversion mode in `mlpg`, `mmse`")
 
         return odata
 
@@ -231,8 +230,7 @@ class GMMConvertor(object):
             m = cseq[t]
 
             # conditional mean vector sequence
-            mseq[t] = self.meanY[m] + \
-                self.A[m] @ (sddata[t] - self.meanX[m])
+            mseq[t] = self.meanY[m] + self.A[m] @ (sddata[t] - self.meanX[m])
 
             # conditional covariance sequence
             covseq[t] = self.cond_cov_inv[m]
@@ -246,12 +244,12 @@ class GMMConvertor(object):
         odata = np.zeros((T, sddim))
         for t in range(T):
             for m in range(self.n_mix):
-                odata[t] += wseq[t, m] * \
-                    (self.meanY[m] +
-                     self.A[m] @ (sddata[t] - self.meanX[m]))
+                odata[t] += wseq[t, m] * (
+                    self.meanY[m] + self.A[m] @ (sddata[t] - self.meanX[m])
+                )
 
         # retern static and throw away delta component
-        return odata[:, :sddim // 2]
+        return odata[:, : sddim // 2]
 
     def _mlpg(self, mseq, covseq):
         # parameter for sequencial data
@@ -273,8 +271,9 @@ class GMMConvertor(object):
         WDm = WD @ mseq.flatten()
 
         # estimate y = (W'DW)^-1 * W'Dm
-        odata = scipy.sparse.linalg.spsolve(
-            WDW, WDm, use_umfpack=False).reshape(T, sddim // 2)
+        odata = scipy.sparse.linalg.spsolve(WDW, WDm, use_umfpack=False).reshape(
+            T, sddim // 2
+        )
 
         # return odata
         return odata
@@ -297,12 +296,12 @@ class GMMConvertor(object):
         # change model paramter of GMM into that of gmmmode
         if self.gmmmode is None:
             pass
-        elif self.gmmmode == 'diff':
+        elif self.gmmmode == "diff":
             self._transform_gmm_into_diffgmm()
-        elif self.gmmmode == 'intra':
+        elif self.gmmmode == "intra":
             self._transform_gmm_into_intragmm()
         else:
-            raise ValueError('please choose GMM mode in [None, diff, intra]')
+            raise ValueError("please choose GMM mode in [None, diff, intra]")
 
         # estimate parameters for conversion
         self._set_Ab()
@@ -332,22 +331,23 @@ class GMMConvertor(object):
 
             # calculate conditional covariance
             # (i.e., cov^(Y|X)^-1 = (yycov - A * xycov)^-1)
-            self.cond_cov_inv[m] = np.linalg.inv(self.covYY[
-                m] - self.A[m] @ self.covXY[m])
+            self.cond_cov_inv[m] = np.linalg.inv(
+                self.covYY[m] - self.A[m] @ self.covXY[m]
+            )
 
         return
 
     def _set_pX(self):
         # probability density function of X
         self.pX = sklearn.mixture.GaussianMixture(
-            n_components=self.n_mix, covariance_type='full')
+            n_components=self.n_mix, covariance_type="full"
+        )
         self.pX.weights_ = self.w
         self.pX.means_ = self.meanX
         self.pX.covariances_ = self.covXX
 
         # following function is required to estimate porsterior
-        self.pX.precisions_cholesky_ = _compute_precision_cholesky(
-            self.covXX, 'full')
+        self.pX.precisions_cholesky_ = _compute_precision_cholesky(self.covXX, "full")
         return
 
     def _transform_gmm_into_diffgmm(self):
@@ -370,4 +370,4 @@ class GMMConvertor(object):
 
 
 def get_diagonal_precision_matrix(T, D, covseq):
-    return scipy.sparse.block_diag(covseq, format='csr')
+    return scipy.sparse.block_diag(covseq, format="csr")

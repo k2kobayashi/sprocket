@@ -2,7 +2,7 @@
 
 import numpy as np
 import sklearn.mixture
-from sklearn.mixture.gaussian_mixture import _compute_precision_cholesky
+from sklearn.mixture._gaussian_mixture import _compute_precision_cholesky
 
 
 class BlockDiagonalGaussianMixture(sklearn.mixture.GaussianMixture):
@@ -28,8 +28,9 @@ class BlockDiagonalGaussianMixture(sklearn.mixture.GaussianMixture):
     """
 
     def __init__(self, n_mix=32, n_iter=100, floor=1e-6):
-        super().__init__(n_components=n_mix, reg_covar=floor, max_iter=n_iter,
-                         covariance_type='full')
+        super().__init__(
+            n_components=n_mix, reg_covar=floor, max_iter=n_iter, covariance_type="full"
+        )
         self.n_mix = n_mix
         self.n_iter = n_iter
         self.floor = floor
@@ -58,8 +59,7 @@ class BlockDiagonalGaussianMixture(sklearn.mixture.GaussianMixture):
 
             # check convergence
             back_lower_bound = lower_bound
-            lower_bound = self._compute_lower_bound(
-                log_resp, log_prob_norm)
+            lower_bound = self._compute_lower_bound(log_resp, log_prob_norm)
 
     def _m_step(self, X, log_resp):
         """M step.
@@ -73,13 +73,18 @@ class BlockDiagonalGaussianMixture(sklearn.mixture.GaussianMixture):
             the point of each sample in X.
         """
         n_samples, _ = X.shape
-        self.weights_, self.means_, self.covariances_ = (
-            self._estimate_gaussian_parameters(X, np.exp(log_resp), self.reg_covar,
-                                               self.covariance_type))
+        (
+            self.weights_,
+            self.means_,
+            self.covariances_,
+        ) = self._estimate_gaussian_parameters(
+            X, np.exp(log_resp), self.reg_covar, self.covariance_type
+        )
         self.weights_ /= n_samples
 
         self.precisions_cholesky_ = _compute_precision_cholesky(
-            self.covariances_, self.covariance_type)
+            self.covariances_, self.covariance_type
+        )
 
     def _estimate_gaussian_parameters(self, X, resp, reg_covar, covariance_type):
         """Estimate the Gaussian distribution parameters.
@@ -116,13 +121,15 @@ class BlockDiagonalGaussianMixture(sklearn.mixture.GaussianMixture):
 
         # estimate covariance
         n_components, n_features = means.shape
-        diagcov = self._calculate_diag_covariances(resp, nk, X, X,
-                                                   means, means)
-        xycov = self._calculate_diag_covariances(resp, nk,
-                                                 X[:, :n_features // 2],
-                                                 X[:, n_features // 2:],
-                                                 means[:, :n_features // 2],
-                                                 means[:, n_features // 2:])
+        diagcov = self._calculate_diag_covariances(resp, nk, X, X, means, means)
+        xycov = self._calculate_diag_covariances(
+            resp,
+            nk,
+            X[:, : n_features // 2],
+            X[:, n_features // 2 :],
+            means[:, : n_features // 2],
+            means[:, n_features // 2 :],
+        )
         # block_diag to full
         covariances = self._block_diag_to_full(diagcov, xycov)
         return nk, means, covariances
@@ -147,10 +154,8 @@ class BlockDiagonalGaussianMixture(sklearn.mixture.GaussianMixture):
         covariances = np.empty((n_components, n_features, n_features))
         for m in range(n_components):
             covariances[m] = np.diag(diagcov[m])
-            covariances[m, n_features // 2:,
-                        :n_features // 2] = np.diag(xycov[m])
-            covariances[m, :n_features // 2,
-                        n_features // 2:] = np.diag(xycov[m])
+            covariances[m, n_features // 2 :, : n_features // 2] = np.diag(xycov[m])
+            covariances[m, : n_features // 2, n_features // 2 :] = np.diag(xycov[m])
         return covariances
 
     def _calculate_diag_covariances(self, resp, nk, x, y, xmeans, ymeans):
@@ -178,6 +183,7 @@ class BlockDiagonalGaussianMixture(sklearn.mixture.GaussianMixture):
         avg_xymeans = xmeans * ymeans
         avg_x_ymeans = ymeans * np.dot(resp.T, x) / nk[:, np.newaxis]
         avg_y_xmeans = xmeans * np.dot(resp.T, y) / nk[:, np.newaxis]
-        diag_covariances = avg_XY - \
-            (avg_x_ymeans + avg_y_xmeans) + avg_xymeans + self.floor
+        diag_covariances = (
+            avg_XY - (avg_x_ymeans + avg_y_xmeans) + avg_xymeans + self.floor
+        )
         return diag_covariances
