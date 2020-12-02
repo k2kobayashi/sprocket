@@ -23,6 +23,7 @@ setup(
     # package
     packages=find_packages(exclude=("docs", "tests")),
     long_description=(README + "\n" + CHANGES),
+    long_description_content_type='text/markdown',
     # requirements
     python_requires=">=3.5",
     install_requires=open("requirements.txt").readlines(),
