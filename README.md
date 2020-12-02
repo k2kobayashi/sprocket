@@ -18,8 +18,8 @@ Voice conversion software - Voice conversion (VC) is a technique to convert a sp
 [[slide]](https://www.slideshare.net/NU_I_TODALAB/hands-on-voice-conversion)
 
 ## Conversion samples
-- Voice Conversion Challenge 2018 
-	- [HUB Task](https://nuss.nagoya-u.ac.jp/s/3F8dxTcdQdXir9s) 
+- Voice Conversion Challenge 2018
+	- [HUB Task](https://nuss.nagoya-u.ac.jp/s/3F8dxTcdQdXir9s)
 	- [SPOKE Task](https://nuss.nagoya-u.ac.jp/s/ixwxa6DxYa68y4N)
 
 ## Purpose
@@ -40,11 +40,11 @@ For the details of the VC library, please see sprocket documents in (coming soon
 
 ## Installation & Run
 
-Please use NOT Python2 BUT Python3.
+Please use Python3.
 
 ### Current stable version
 
-Ver. 0.18.1
+Ver. 0.18.4
 
 ### Install sprocket
 
@@ -67,7 +67,7 @@ https://github.com/k2kobayashi/sprocket/issues
 
 ## COPYRIGHT
 
-Copyright (c) 2017 Kazuhiro KOBAYASHI
+Copyright (c) 2020 Kazuhiro KOBAYASHI
 
 Released under the MIT license
 
