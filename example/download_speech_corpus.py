@@ -602,7 +602,7 @@ class Downloader:
     """
     def __init__(self, config_path, user_option):
         with open(config_path) as f:
-            self.all_configs = yaml.load(f)
+            self.all_configs = yaml.safe_load(f)
         self.user_option = user_option
         self.global_config = GlobalConfiguration(
             self.all_configs.get("config", {})
