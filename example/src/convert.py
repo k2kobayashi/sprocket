@@ -106,7 +106,7 @@ def main(*argv):
             f = line.rstrip()
             wavf = os.path.join(args.wav_dir, f + '.wav')
             fs, x = wavfile.read(wavf)
-            x = x.astype(np.float)
+            x = x.astype(np.float64)
             x = low_cut_filter(x, fs, cutoff=70)
             assert fs == sconf.wav_fs
 

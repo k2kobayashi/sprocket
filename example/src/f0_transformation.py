@@ -49,7 +49,7 @@ def get_f0s_from_list(conf, list_file, wav_dir):
         f = f.rstrip()
         wavf = os.path.join(wav_dir, f + '.wav')
         fs, x = wavfile.read(wavf)
-        x = np.array(x, dtype=np.float)
+        x = np.array(x, dtype=np.float64)
         x = low_cut_filter(x, fs, cutoff=70)
         assert fs == conf.wav_fs
 
@@ -112,7 +112,7 @@ def transform_f0_from_list(speaker, f0rate, wav_fs, list_file, wav_dir):
         if not os.path.exists(transformed_wavpath):
             # transform F0 of waveform
             fs, x = wavfile.read(wavf)
-            x = np.array(x, dtype=np.float)
+            x = np.array(x, dtype=np.float64)
             x = low_cut_filter(x, fs, cutoff=70)
             assert fs == wav_fs
             transformed_x = shifter.f0transform(x, completion=completion)
