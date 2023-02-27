@@ -9,3 +9,4 @@ fastdtw
 pyyaml
 dtw_c
 docopt
+matplotlib
