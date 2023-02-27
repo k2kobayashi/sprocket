@@ -82,7 +82,7 @@ class FeatureExtractor(object):
             aperiodicity sequence
         """
 
-        self.x = np.array(x, dtype=np.float)
+        self.x = np.array(x, dtype=np.float64)
         self._f0, self._spc, self._ap = self.analyzer.analyze(self.x)
 
         # check non-negative for F0
@@ -107,7 +107,7 @@ class FeatureExtractor(object):
             F0 sequence
         """
 
-        self.x = np.array(x, dtype=np.float)
+        self.x = np.array(x, dtype=np.float64)
         self._f0 = self.analyzer.analyze_f0(self.x)
 
         # check non-negative for F0

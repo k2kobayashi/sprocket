@@ -70,7 +70,7 @@ def main(*argv):
             if (not os.path.exists(h5f)) or args.overwrite:
                 wavf = os.path.join(args.wav_dir, f + '.wav')
                 fs, x = wavfile.read(wavf)
-                x = np.array(x, dtype=np.float)
+                x = np.array(x, dtype=np.float64)
                 x = low_cut_filter(x, fs, cutoff=70)
                 assert fs == sconf.wav_fs
 

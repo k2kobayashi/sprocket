@@ -85,7 +85,7 @@ def main(*argv):
         f = f.rstrip()
         wavf = os.path.join(args.wav_dir, f + '.wav')
         fs, x = wavfile.read(wavf)
-        x = np.array(x, dtype=np.float)
+        x = np.array(x, dtype=np.float64)
         print("Extract: " + wavf)
 
         # constract FeatureExtractor class
